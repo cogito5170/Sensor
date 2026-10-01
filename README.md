@@ -15,6 +15,10 @@ NASA 식 analytical redundancy(Chow & Willsky 1984)의 *잔차 생성 → 결정
 
 표준 라이브러리만 쓴다.
 
+**센서 층(텔레메트리) 설계: [`docs/SENSOR_LAYER.md`](docs/SENSOR_LAYER.md)** -- 후보 71 개의 원천별 가용성 근거,
+레코드 꼴(`schema/telemetry.schema.json`), 수집기(`llmsensor/telemetry/`), 파생, 의존 그래프, 최소 비중복 관측 16 개,
+UNKNOWN 목록. 측정: [`eval/RESULTS_sensor_layer.md`](eval/RESULTS_sensor_layer.md).
+
 ## 센서 다섯 (진실에 가까운 순)
 
 | 센서 | 무엇을 보나 | FAULT 가 되는 때 | 못 보는 것 |

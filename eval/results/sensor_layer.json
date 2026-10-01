@@ -1,0 +1,4738 @@
+{
+ "n_records": 19406,
+ "availability": {
+  "cc_jsonl_child/model_call": {
+   "cache_creation_input_tokens": 1.0,
+   "cache_read_input_tokens": 1.0,
+   "call_index": 1.0,
+   "context_window": 0.0,
+   "first_chunk_ms": 0.0,
+   "input_tokens": 1.0,
+   "iterations": 1.0,
+   "model": 1.0,
+   "output_text_chars": 1.0,
+   "output_tokens": 1.0,
+   "server_tool_requests": 1.0,
+   "stop_reason": 1.0,
+   "stream_chunks": 0.0,
+   "stream_thinking_estimate": 0.0,
+   "t_end_ms": 1.0,
+   "t_start_ms": 1.0,
+   "thinking_duration_ms": 1.0,
+   "thinking_tokens": 1.0,
+   "time_base": 1.0,
+   "tool_calls_per_message": 1.0
+  },
+  "cc_jsonl_child/run": {
+   "api_calls": 0.0,
+   "api_duration_ms": 1.0,
+   "api_duration_without_retries_ms": 1.0,
+   "api_error_status": 0.0,
+   "autocompact_threshold": 0.0,
+   "context_window": 0.0,
+   "cost_usd": 1.0,
+   "is_error": 0.0,
+   "max_output_tokens": 0.0,
+   "model": 0.0,
+   "num_turns": 0.0,
+   "permission_denials": 0.0,
+   "rate_limit_utilization": 0.0,
+   "reported_cache_creation_input_tokens": 1.0,
+   "reported_cache_read_input_tokens": 1.0,
+   "reported_input_tokens": 1.0,
+   "reported_output_tokens": 1.0,
+   "result_subtype": 0.0,
+   "run_duration_ms": 1.0,
+   "terminal_reason": 0.0,
+   "tokens_received": 0.0,
+   "tokens_sent": 0.0,
+   "ttft_ms": 0.0
+  },
+  "cc_jsonl_child/tool_call": {
+   "call_index": 1.0,
+   "interrupted": 0.146,
+   "is_error": 1.0,
+   "reported_duration_ms": 0.0,
+   "t_issued_ms": 1.0,
+   "t_result_ms": 1.0,
+   "time_base": 1.0,
+   "tool_head": 1.0,
+   "tool_index": 1.0,
+   "tool_input_chars": 1.0,
+   "tool_name": 1.0,
+   "tool_output_chars": 1.0,
+   "tool_sig": 1.0
+  },
+  "cc_jsonl_self/model_call": {
+   "cache_creation_input_tokens": 1.0,
+   "cache_read_input_tokens": 1.0,
+   "call_index": 1.0,
+   "context_window": 0.0,
+   "first_chunk_ms": 0.0,
+   "input_tokens": 1.0,
+   "iterations": 1.0,
+   "model": 1.0,
+   "output_text_chars": 1.0,
+   "output_tokens": 1.0,
+   "server_tool_requests": 1.0,
+   "stop_reason": 1.0,
+   "stream_chunks": 0.0,
+   "stream_thinking_estimate": 0.0,
+   "t_end_ms": 1.0,
+   "t_start_ms": 1.0,
+   "thinking_duration_ms": 0.846,
+   "thinking_tokens": 1.0,
+   "time_base": 1.0,
+   "tool_calls_per_message": 1.0
+  },
+  "cc_jsonl_self/run": {
+   "api_calls": 0.0,
+   "api_duration_ms": 1.0,
+   "api_duration_without_retries_ms": 1.0,
+   "api_error_status": 0.0,
+   "autocompact_threshold": 0.0,
+   "context_window": 0.0,
+   "cost_usd": 1.0,
+   "is_error": 0.0,
+   "max_output_tokens": 0.0,
+   "model": 0.0,
+   "num_turns": 0.0,
+   "permission_denials": 0.0,
+   "rate_limit_utilization": 0.0,
+   "reported_cache_creation_input_tokens": 1.0,
+   "reported_cache_read_input_tokens": 1.0,
+   "reported_input_tokens": 1.0,
+   "reported_output_tokens": 1.0,
+   "result_subtype": 0.0,
+   "run_duration_ms": 1.0,
+   "terminal_reason": 0.0,
+   "tokens_received": 0.0,
+   "tokens_sent": 0.0,
+   "ttft_ms": 0.0
+  },
+  "cc_jsonl_self/tool_call": {
+   "call_index": 1.0,
+   "interrupted": 0.852,
+   "is_error": 0.988,
+   "reported_duration_ms": 0.049,
+   "t_issued_ms": 1.0,
+   "t_result_ms": 0.988,
+   "time_base": 1.0,
+   "tool_head": 1.0,
+   "tool_index": 1.0,
+   "tool_input_chars": 1.0,
+   "tool_name": 1.0,
+   "tool_output_chars": 0.988,
+   "tool_sig": 1.0
+  },
+  "cc_stream/model_call": {
+   "cache_creation_input_tokens": 1.0,
+   "cache_read_input_tokens": 1.0,
+   "call_index": 1.0,
+   "context_window": 1.0,
+   "first_chunk_ms": 1.0,
+   "input_tokens": 1.0,
+   "iterations": 1.0,
+   "model": 1.0,
+   "output_text_chars": 1.0,
+   "output_tokens": 1.0,
+   "server_tool_requests": 0.0,
+   "stop_reason": 1.0,
+   "stream_chunks": 1.0,
+   "stream_thinking_estimate": 0.512,
+   "t_end_ms": 1.0,
+   "t_start_ms": 1.0,
+   "thinking_duration_ms": 0.0,
+   "thinking_tokens": 1.0,
+   "time_base": 1.0,
+   "tool_calls_per_message": 1.0
+  },
+  "cc_stream/run": {
+   "api_calls": 0.0,
+   "api_duration_ms": 1.0,
+   "api_duration_without_retries_ms": 0.0,
+   "api_error_status": 0.0,
+   "autocompact_threshold": 1.0,
+   "context_window": 1.0,
+   "cost_usd": 1.0,
+   "is_error": 1.0,
+   "max_output_tokens": 1.0,
+   "model": 1.0,
+   "num_turns": 1.0,
+   "permission_denials": 1.0,
+   "rate_limit_utilization": 1.0,
+   "reported_cache_creation_input_tokens": 1.0,
+   "reported_cache_read_input_tokens": 1.0,
+   "reported_input_tokens": 1.0,
+   "reported_output_tokens": 1.0,
+   "result_subtype": 1.0,
+   "run_duration_ms": 1.0,
+   "terminal_reason": 1.0,
+   "tokens_received": 0.0,
+   "tokens_sent": 0.0,
+   "ttft_ms": 0.917
+  },
+  "cc_stream/tool_call": {
+   "call_index": 1.0,
+   "interrupted": 0.146,
+   "is_error": 1.0,
+   "reported_duration_ms": 0.0,
+   "t_issued_ms": 1.0,
+   "t_result_ms": 1.0,
+   "time_base": 1.0,
+   "tool_head": 1.0,
+   "tool_index": 1.0,
+   "tool_input_chars": 1.0,
+   "tool_name": 1.0,
+   "tool_output_chars": 1.0,
+   "tool_sig": 1.0
+  },
+  "sweagent/model_call": {
+   "cache_creation_input_tokens": 0.0,
+   "cache_read_input_tokens": 0.0,
+   "call_index": 1.0,
+   "context_window": 0.0,
+   "first_chunk_ms": 0.0,
+   "input_tokens": 0.0,
+   "iterations": 0.0,
+   "model": 0.0,
+   "output_text_chars": 1.0,
+   "output_tokens": 0.0,
+   "server_tool_requests": 0.0,
+   "stop_reason": 0.0,
+   "stream_chunks": 0.0,
+   "stream_thinking_estimate": 0.0,
+   "t_end_ms": 0.0,
+   "t_start_ms": 0.0,
+   "thinking_duration_ms": 0.0,
+   "thinking_tokens": 0.0,
+   "time_base": 0.0,
+   "tool_calls_per_message": 1.0
+  },
+  "sweagent/run": {
+   "api_calls": 1.0,
+   "api_duration_ms": 0.0,
+   "api_duration_without_retries_ms": 0.0,
+   "api_error_status": 0.0,
+   "autocompact_threshold": 0.0,
+   "context_window": 0.0,
+   "cost_usd": 1.0,
+   "is_error": 0.0,
+   "max_output_tokens": 0.0,
+   "model": 0.0,
+   "num_turns": 0.0,
+   "permission_denials": 0.0,
+   "rate_limit_utilization": 0.0,
+   "reported_cache_creation_input_tokens": 0.0,
+   "reported_cache_read_input_tokens": 0.0,
+   "reported_input_tokens": 0.0,
+   "reported_output_tokens": 0.0,
+   "result_subtype": 0.0,
+   "run_duration_ms": 0.0,
+   "terminal_reason": 1.0,
+   "tokens_received": 1.0,
+   "tokens_sent": 1.0,
+   "ttft_ms": 0.0
+  },
+  "sweagent/tool_call": {
+   "call_index": 1.0,
+   "interrupted": 0.0,
+   "is_error": 0.0,
+   "reported_duration_ms": 0.0,
+   "t_issued_ms": 0.0,
+   "t_result_ms": 0.0,
+   "time_base": 0.0,
+   "tool_head": 1.0,
+   "tool_index": 1.0,
+   "tool_input_chars": 1.0,
+   "tool_name": 1.0,
+   "tool_output_chars": 1.0,
+   "tool_sig": 1.0
+  }
+ },
+ "record_counts": {
+  "cc_jsonl_self/model_call": 78,
+  "cc_jsonl_self/tool_call": 81,
+  "cc_jsonl_self/run": 1,
+  "cc_stream/model_call": 41,
+  "cc_stream/tool_call": 48,
+  "cc_stream/run": 12,
+  "cc_jsonl_child/model_call": 41,
+  "cc_jsonl_child/tool_call": 48,
+  "cc_jsonl_child/run": 12,
+  "sweagent/model_call": 9378,
+  "sweagent/tool_call": 9378,
+  "sweagent/run": 288
+ },
+ "cross_check": [
+  {
+   "run": "cc_stream:t01_create_test",
+   "calls": [
+    4,
+    4
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 4,
+   "vs_result_usage": {
+    "input_tokens": [
+     34,
+     34
+    ],
+    "output_tokens": [
+     1115,
+     1115
+    ],
+    "cache_read_input_tokens": [
+     90809,
+     90809
+    ],
+    "cache_creation_input_tokens": [
+     31097,
+     31097
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t02_fix_bug",
+   "calls": [
+    6,
+    6
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 6,
+   "vs_result_usage": {
+    "input_tokens": [
+     50,
+     50
+    ],
+    "output_tokens": [
+     1714,
+     1714
+    ],
+    "cache_read_input_tokens": [
+     177791,
+     177791
+    ],
+    "cache_creation_input_tokens": [
+     6800,
+     6800
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t03_search",
+   "calls": [
+    3,
+    3
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 3,
+   "vs_result_usage": {
+    "input_tokens": [
+     26,
+     26
+    ],
+    "output_tokens": [
+     371,
+     371
+    ],
+    "cache_read_input_tokens": [
+     84927,
+     84927
+    ],
+    "cache_creation_input_tokens": [
+     4771,
+     4771
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t04_impossible",
+   "calls": [
+    3,
+    3
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 3,
+   "vs_result_usage": {
+    "input_tokens": [
+     26,
+     26
+    ],
+    "output_tokens": [
+     317,
+     317
+    ],
+    "cache_read_input_tokens": [
+     84921,
+     84921
+    ],
+    "cache_creation_input_tokens": [
+     4758,
+     4758
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t05_long_write",
+   "calls": [
+    2,
+    2
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 2,
+   "vs_result_usage": {
+    "input_tokens": [
+     18,
+     18
+    ],
+    "output_tokens": [
+     1557,
+     1557
+    ],
+    "cache_read_input_tokens": [
+     55030,
+     55030
+    ],
+    "cache_creation_input_tokens": [
+     5754,
+     5754
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t06_csv_mean",
+   "calls": [
+    4,
+    4
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 4,
+   "vs_result_usage": {
+    "input_tokens": [
+     34,
+     34
+    ],
+    "output_tokens": [
+     787,
+     787
+    ],
+    "cache_read_input_tokens": [
+     118670,
+     118670
+    ],
+    "cache_creation_input_tokens": [
+     6892,
+     6892
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t07_flaky_retry",
+   "calls": [
+    4,
+    4
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 4,
+   "vs_result_usage": {
+    "input_tokens": [
+     34,
+     34
+    ],
+    "output_tokens": [
+     482,
+     482
+    ],
+    "cache_read_input_tokens": [
+     115093,
+     115093
+    ],
+    "cache_creation_input_tokens": [
+     4916,
+     4916
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t08_max_turns",
+   "calls": [
+    3,
+    3
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 3,
+   "vs_result_usage": {
+    "input_tokens": [
+     26,
+     26
+    ],
+    "output_tokens": [
+     1562,
+     1562
+    ],
+    "cache_read_input_tokens": [
+     84945,
+     84945
+    ],
+    "cache_creation_input_tokens": [
+     5422,
+     5422
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t09_big_read",
+   "calls": [
+    3,
+    3
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 3,
+   "vs_result_usage": {
+    "input_tokens": [
+     26,
+     26
+    ],
+    "output_tokens": [
+     1352,
+     1352
+    ],
+    "cache_read_input_tokens": [
+     112557,
+     112557
+    ],
+    "cache_creation_input_tokens": [
+     38943,
+     38943
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t10_rename",
+   "calls": [
+    5,
+    5
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 5,
+   "vs_result_usage": {
+    "input_tokens": [
+     42,
+     42
+    ],
+    "output_tokens": [
+     2138,
+     2138
+    ],
+    "cache_read_input_tokens": [
+     148290,
+     148290
+    ],
+    "cache_creation_input_tokens": [
+     7425,
+     7425
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t11_timeout",
+   "calls": [
+    2,
+    2
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 2,
+   "vs_result_usage": {
+    "input_tokens": [
+     18,
+     18
+    ],
+    "output_tokens": [
+     615,
+     615
+    ],
+    "cache_read_input_tokens": [
+     55030,
+     55030
+    ],
+    "cache_creation_input_tokens": [
+     4785,
+     4785
+    ]
+   }
+  },
+  {
+   "run": "cc_stream:t12_bad_args",
+   "calls": [
+    2,
+    2
+   ],
+   "stream_vs_jsonl_equal": {
+    "input_tokens": true,
+    "output_tokens": true,
+    "cache_read_input_tokens": true,
+    "cache_creation_input_tokens": true
+   },
+   "per_call_equal": 2,
+   "vs_result_usage": {
+    "input_tokens": [
+     18,
+     18
+    ],
+    "output_tokens": [
+     170,
+     170
+    ],
+    "cache_read_input_tokens": [
+     55042,
+     55042
+    ],
+    "cache_creation_input_tokens": [
+     4515,
+     4515
+    ]
+   }
+  }
+ ],
+ "call_rows": {
+  "cc_jsonl_self": 78,
+  "cc_stream": 41
+ },
+ "call_matrix": {
+  "step_index|input_tokens": {
+   "rho": -0.8030357347280175,
+   "n": 119,
+   "nmi": 0.47337976396963594
+  },
+  "step_index|cache_read_input_tokens": {
+   "rho": 0.9918815570857411,
+   "n": 119,
+   "nmi": 0.9206344796332249
+  },
+  "step_index|cache_creation_input_tokens": {
+   "rho": 0.10407296032284055,
+   "n": 119,
+   "nmi": 0.15166394024222737
+  },
+  "step_index|output_tokens": {
+   "rho": 0.4975806620663018,
+   "n": 119,
+   "nmi": 0.21400057731048286
+  },
+  "step_index|thinking_tokens": {
+   "rho": 0.21695832813920413,
+   "n": 119,
+   "nmi": 0.1583148024330768
+  },
+  "step_index|tool_calls_per_message": {
+   "rho": 0.03587654829110282,
+   "n": 119,
+   "nmi": 0.15072643243837397
+  },
+  "step_index|tool_errors": {
+   "rho": -0.17916690928807555,
+   "n": 118,
+   "nmi": 0.09914510569933332
+  },
+  "step_index|tool_output_chars": {
+   "rho": 0.265346224464462,
+   "n": 118,
+   "nmi": 0.09226225935470846
+  },
+  "step_index|tool_latency_ms": {
+   "rho": 0.4778629280298216,
+   "n": 105,
+   "nmi": 0.19350393345527664
+  },
+  "step_index|call_span_ms": {
+   "rho": 0.183830083756604,
+   "n": 119,
+   "nmi": 0.13703824223317226
+  },
+  "step_index|inter_call_gap_ms": {
+   "rho": 0.5580465939610025,
+   "n": 106,
+   "nmi": 0.233594834633351
+  },
+  "step_index|output_text_chars": {
+   "rho": -0.06870479481132163,
+   "n": 119,
+   "nmi": 0.09143877388666573
+  },
+  "step_index|context_tokens": {
+   "rho": 0.9850889650627277,
+   "n": 119,
+   "nmi": 0.8725703757781721
+  },
+  "step_index|context_growth": {
+   "rho": 0.3810775859655358,
+   "n": 106,
+   "nmi": 0.1387074780325442
+  },
+  "step_index|cumulative_output_tokens": {
+   "rho": 0.9851550960862065,
+   "n": 119,
+   "nmi": 0.8597216219451643
+  },
+  "step_index|cache_hit_ratio": {
+   "rho": 0.5217486841531953,
+   "n": 119,
+   "nmi": 0.13688672397121707
+  },
+  "step_index|thinking_ratio": {
+   "rho": -0.27297903323196315,
+   "n": 119,
+   "nmi": 0.09173211679137765
+  },
+  "step_index|output_tokens_per_sec": {
+   "rho": 0.5831812128033265,
+   "n": 110,
+   "nmi": 0.17680985148204728
+  },
+  "input_tokens|cache_read_input_tokens": {
+   "rho": -0.8246626382791895,
+   "n": 119,
+   "nmi": 0.48683509872491126
+  },
+  "input_tokens|cache_creation_input_tokens": {
+   "rho": -0.24872672837660587,
+   "n": 119,
+   "nmi": 0.33949705379952316
+  },
+  "input_tokens|output_tokens": {
+   "rho": -0.6114350341625135,
+   "n": 119,
+   "nmi": 0.20364391092443834
+  },
+  "input_tokens|thinking_tokens": {
+   "rho": -0.30402655246897314,
+   "n": 119,
+   "nmi": 0.16989118988990387
+  },
+  "input_tokens|tool_calls_per_message": {
+   "rho": -0.12892212594581165,
+   "n": 119,
+   "nmi": 0.22499339654011458
+  },
+  "input_tokens|tool_errors": {
+   "rho": 0.25128353287284105,
+   "n": 118,
+   "nmi": 0.10229751219985533
+  },
+  "input_tokens|tool_output_chars": {
+   "rho": -0.3409089371940581,
+   "n": 118,
+   "nmi": 0.1220871921192992
+  },
+  "input_tokens|tool_latency_ms": {
+   "rho": -0.663405205490311,
+   "n": 105,
+   "nmi": 0.30906163959807503
+  },
+  "input_tokens|call_span_ms": {
+   "rho": -0.21057639640508546,
+   "n": 119,
+   "nmi": 0.10532194916284215
+  },
+  "input_tokens|inter_call_gap_ms": {
+   "rho": -0.7210008666672879,
+   "n": 106,
+   "nmi": 0.44284889194523924
+  },
+  "input_tokens|output_text_chars": {
+   "rho": 0.14111870942591198,
+   "n": 119,
+   "nmi": 0.10387311834153617
+  },
+  "input_tokens|context_tokens": {
+   "rho": -0.8384254602999683,
+   "n": 119,
+   "nmi": 0.5044202940289344
+  },
+  "input_tokens|context_growth": {
+   "rho": -0.5882136996026699,
+   "n": 106,
+   "nmi": 0.259151190645443
+  },
+  "input_tokens|cumulative_output_tokens": {
+   "rho": -0.8151317931548021,
+   "n": 119,
+   "nmi": 0.4591234601700791
+  },
+  "input_tokens|cache_hit_ratio": {
+   "rho": -0.35997317118539635,
+   "n": 119,
+   "nmi": 0.18370413683895
+  },
+  "input_tokens|thinking_ratio": {
+   "rho": 0.23165071368609147,
+   "n": 119,
+   "nmi": 0.15254591146426041
+  },
+  "input_tokens|output_tokens_per_sec": {
+   "rho": -0.7464493780172325,
+   "n": 110,
+   "nmi": 0.31183846542774807
+  },
+  "cache_read_input_tokens|cache_creation_input_tokens": {
+   "rho": 0.12659743895958137,
+   "n": 119,
+   "nmi": 0.166675165638679
+  },
+  "cache_read_input_tokens|output_tokens": {
+   "rho": 0.5117224276853685,
+   "n": 119,
+   "nmi": 0.20044213946387213
+  },
+  "cache_read_input_tokens|thinking_tokens": {
+   "rho": 0.22203808036553468,
+   "n": 119,
+   "nmi": 0.14468035724081457
+  },
+  "cache_read_input_tokens|tool_calls_per_message": {
+   "rho": 0.05379572468506832,
+   "n": 119,
+   "nmi": 0.15271707979441435
+  },
+  "cache_read_input_tokens|tool_errors": {
+   "rho": -0.17789079075473455,
+   "n": 118,
+   "nmi": 0.10538979932666627
+  },
+  "cache_read_input_tokens|tool_output_chars": {
+   "rho": 0.2767009288685985,
+   "n": 118,
+   "nmi": 0.08803813770937491
+  },
+  "cache_read_input_tokens|tool_latency_ms": {
+   "rho": 0.4900562761353175,
+   "n": 105,
+   "nmi": 0.19362302264709727
+  },
+  "cache_read_input_tokens|call_span_ms": {
+   "rho": 0.1896803006737124,
+   "n": 119,
+   "nmi": 0.13746830273791344
+  },
+  "cache_read_input_tokens|inter_call_gap_ms": {
+   "rho": 0.567603107651418,
+   "n": 106,
+   "nmi": 0.2500718228081227
+  },
+  "cache_read_input_tokens|output_text_chars": {
+   "rho": -0.08519951432093095,
+   "n": 119,
+   "nmi": 0.08550865538681568
+  },
+  "cache_read_input_tokens|context_tokens": {
+   "rho": 0.9880363897257447,
+   "n": 119,
+   "nmi": 0.8446307539191763
+  },
+  "cache_read_input_tokens|context_growth": {
+   "rho": 0.4094966029904416,
+   "n": 106,
+   "nmi": 0.15752622790414714
+  },
+  "cache_read_input_tokens|cumulative_output_tokens": {
+   "rho": 0.9839346495968208,
+   "n": 119,
+   "nmi": 0.8295715538469683
+  },
+  "cache_read_input_tokens|cache_hit_ratio": {
+   "rho": 0.5124526400249713,
+   "n": 119,
+   "nmi": 0.14038518703223563
+  },
+  "cache_read_input_tokens|thinking_ratio": {
+   "rho": -0.2792960412850853,
+   "n": 119,
+   "nmi": 0.09514427505408683
+  },
+  "cache_read_input_tokens|output_tokens_per_sec": {
+   "rho": 0.606539487541485,
+   "n": 110,
+   "nmi": 0.19463590556610347
+  },
+  "cache_creation_input_tokens|output_tokens": {
+   "rho": 0.3593190283250594,
+   "n": 119,
+   "nmi": 0.13301963517807894
+  },
+  "cache_creation_input_tokens|thinking_tokens": {
+   "rho": 0.42079570800950566,
+   "n": 119,
+   "nmi": 0.12512630200405256
+  },
+  "cache_creation_input_tokens|tool_calls_per_message": {
+   "rho": 0.1267994492225501,
+   "n": 119,
+   "nmi": 0.1709346741087975
+  },
+  "cache_creation_input_tokens|tool_errors": {
+   "rho": -0.008294412020108293,
+   "n": 118,
+   "nmi": 0.06627932729695758
+  },
+  "cache_creation_input_tokens|tool_output_chars": {
+   "rho": 0.2733588445047121,
+   "n": 118,
+   "nmi": 0.10500247248459164
+  },
+  "cache_creation_input_tokens|tool_latency_ms": {
+   "rho": 0.0975704577668714,
+   "n": 105,
+   "nmi": 0.097629883931584
+  },
+  "cache_creation_input_tokens|call_span_ms": {
+   "rho": 0.27229034236416894,
+   "n": 119,
+   "nmi": 0.0740339750453214
+  },
+  "cache_creation_input_tokens|inter_call_gap_ms": {
+   "rho": 0.41244930347381414,
+   "n": 106,
+   "nmi": 0.12264542784345624
+  },
+  "cache_creation_input_tokens|output_text_chars": {
+   "rho": -0.13296262731621847,
+   "n": 119,
+   "nmi": 0.1066442767463857
+  },
+  "cache_creation_input_tokens|context_tokens": {
+   "rho": 0.18692470667829864,
+   "n": 119,
+   "nmi": 0.18547643541936165
+  },
+  "cache_creation_input_tokens|context_growth": {
+   "rho": 0.9998967173790886,
+   "n": 106,
+   "nmi": 1.0
+  },
+  "cache_creation_input_tokens|cumulative_output_tokens": {
+   "rho": 0.1726977344618211,
+   "n": 119,
+   "nmi": 0.1542764481655078
+  },
+  "cache_creation_input_tokens|cache_hit_ratio": {
+   "rho": -0.7246354621040825,
+   "n": 119,
+   "nmi": 0.27700133726043347
+  },
+  "cache_creation_input_tokens|thinking_ratio": {
+   "rho": 0.15069410087797058,
+   "n": 119,
+   "nmi": 0.06701521862179563
+  },
+  "cache_creation_input_tokens|output_tokens_per_sec": {
+   "rho": 0.21434770359208716,
+   "n": 110,
+   "nmi": 0.09054601406919353
+  },
+  "output_tokens|thinking_tokens": {
+   "rho": 0.6438727206639343,
+   "n": 119,
+   "nmi": 0.23674522529889697
+  },
+  "output_tokens|tool_calls_per_message": {
+   "rho": 0.20120234300633225,
+   "n": 119,
+   "nmi": 0.0954310559644263
+  },
+  "output_tokens|tool_errors": {
+   "rho": -0.19978049972063458,
+   "n": 118,
+   "nmi": 0.0540686670586731
+  },
+  "output_tokens|tool_output_chars": {
+   "rho": 0.145013717402029,
+   "n": 118,
+   "nmi": 0.07566260588691018
+  },
+  "output_tokens|tool_latency_ms": {
+   "rho": 0.33975927350725343,
+   "n": 105,
+   "nmi": 0.11798972160146055
+  },
+  "output_tokens|call_span_ms": {
+   "rho": 0.7611997596920622,
+   "n": 119,
+   "nmi": 0.4254453502762888
+  },
+  "output_tokens|inter_call_gap_ms": {
+   "rho": 0.6330416207250937,
+   "n": 106,
+   "nmi": 0.15783911405269324
+  },
+  "output_tokens|output_text_chars": {
+   "rho": -0.045714057859001095,
+   "n": 119,
+   "nmi": 0.060368596753682224
+  },
+  "output_tokens|context_tokens": {
+   "rho": 0.5259156654854339,
+   "n": 119,
+   "nmi": 0.2108620423595093
+  },
+  "output_tokens|context_growth": {
+   "rho": 0.4905344300015384,
+   "n": 106,
+   "nmi": 0.15848913457606337
+  },
+  "output_tokens|cumulative_output_tokens": {
+   "rho": 0.5571889694258125,
+   "n": 119,
+   "nmi": 0.22801540830780365
+  },
+  "output_tokens|cache_hit_ratio": {
+   "rho": 0.029234351966115388,
+   "n": 119,
+   "nmi": 0.05931122247391616
+  },
+  "output_tokens|thinking_ratio": {
+   "rho": -0.1410007887169984,
+   "n": 119,
+   "nmi": 0.06445979251075235
+  },
+  "output_tokens|output_tokens_per_sec": {
+   "rho": 0.38634155582856733,
+   "n": 110,
+   "nmi": 0.1486898722587936
+  },
+  "thinking_tokens|tool_calls_per_message": {
+   "rho": -0.01281303513220947,
+   "n": 119,
+   "nmi": 0.07589988069810785
+  },
+  "thinking_tokens|tool_errors": {
+   "rho": -0.17253936700747266,
+   "n": 118,
+   "nmi": 0.06627932729695758
+  },
+  "thinking_tokens|tool_output_chars": {
+   "rho": -0.029186084372582192,
+   "n": 118,
+   "nmi": 0.06233362349234975
+  },
+  "thinking_tokens|tool_latency_ms": {
+   "rho": 0.243651929839694,
+   "n": 105,
+   "nmi": 0.12011201851855516
+  },
+  "thinking_tokens|call_span_ms": {
+   "rho": 0.5293855898711601,
+   "n": 119,
+   "nmi": 0.13295614221179147
+  },
+  "thinking_tokens|inter_call_gap_ms": {
+   "rho": 0.5863002484408064,
+   "n": 106,
+   "nmi": 0.2948496818270648
+  },
+  "thinking_tokens|output_text_chars": {
+   "rho": -0.03593695052076487,
+   "n": 119,
+   "nmi": 0.057415532846988186
+  },
+  "thinking_tokens|context_tokens": {
+   "rho": 0.24789583284464742,
+   "n": 119,
+   "nmi": 0.1330763519173893
+  },
+  "thinking_tokens|context_growth": {
+   "rho": 0.4267798585107556,
+   "n": 106,
+   "nmi": 0.13861176853155233
+  },
+  "thinking_tokens|cumulative_output_tokens": {
+   "rho": 0.2647573683173763,
+   "n": 119,
+   "nmi": 0.13337985389003765
+  },
+  "thinking_tokens|cache_hit_ratio": {
+   "rho": -0.19707080102783203,
+   "n": 119,
+   "nmi": 0.08349284265462169
+  },
+  "thinking_tokens|thinking_ratio": {
+   "rho": 0.5787244964752237,
+   "n": 119,
+   "nmi": 0.17966588886588822
+  },
+  "thinking_tokens|output_tokens_per_sec": {
+   "rho": 0.4869864344689632,
+   "n": 110,
+   "nmi": 0.11705037914551947
+  },
+  "tool_calls_per_message|tool_errors": {
+   "rho": 0.10655253387832435,
+   "n": 118,
+   "nmi": 0.022421005905779015
+  },
+  "tool_calls_per_message|tool_output_chars": {
+   "rho": 0.5304282982531877,
+   "n": 118,
+   "nmi": 0.24501035810365687
+  },
+  "tool_calls_per_message|tool_latency_ms": {
+   "rho": -0.15654438507975307,
+   "n": 105,
+   "nmi": 0.07317014427579135
+  },
+  "tool_calls_per_message|call_span_ms": {
+   "rho": 0.1393999682759826,
+   "n": 119,
+   "nmi": 0.06879175118049285
+  },
+  "tool_calls_per_message|inter_call_gap_ms": {
+   "rho": -0.020489090560936025,
+   "n": 106,
+   "nmi": 0.16417361607245645
+  },
+  "tool_calls_per_message|output_text_chars": {
+   "rho": -0.3673854579688641,
+   "n": 119,
+   "nmi": 0.22350153877577236
+  },
+  "tool_calls_per_message|context_tokens": {
+   "rho": 0.05760882141625143,
+   "n": 119,
+   "nmi": 0.131018000620153
+  },
+  "tool_calls_per_message|context_growth": {
+   "rho": 0.1299034403336841,
+   "n": 106,
+   "nmi": 0.19344127438892977
+  },
+  "tool_calls_per_message|cumulative_output_tokens": {
+   "rho": 0.09042050117373081,
+   "n": 119,
+   "nmi": 0.15885255410243077
+  },
+  "tool_calls_per_message|cache_hit_ratio": {
+   "rho": -0.08909405952434715,
+   "n": 119,
+   "nmi": 0.025658315295179677
+  },
+  "tool_calls_per_message|thinking_ratio": {
+   "rho": -0.3053852974627157,
+   "n": 119,
+   "nmi": 0.08540379197412214
+  },
+  "tool_calls_per_message|output_tokens_per_sec": {
+   "rho": 0.24931865523418192,
+   "n": 110,
+   "nmi": 0.14352366625693097
+  },
+  "tool_errors|tool_output_chars": {
+   "rho": -0.015759402796360605,
+   "n": 118,
+   "nmi": 0.06814437437987249
+  },
+  "tool_errors|tool_latency_ms": {
+   "rho": -0.1101958391304001,
+   "n": 105,
+   "nmi": 0.0373187381988072
+  },
+  "tool_errors|call_span_ms": {
+   "rho": -0.12125148690241612,
+   "n": 118,
+   "nmi": 0.025928323102586776
+  },
+  "tool_errors|inter_call_gap_ms": {
+   "rho": -0.07024546274769665,
+   "n": 105,
+   "nmi": 0.06248606627356784
+  },
+  "tool_errors|output_text_chars": {
+   "rho": -0.10604274122312116,
+   "n": 118,
+   "nmi": 0.03561637485477526
+  },
+  "tool_errors|context_tokens": {
+   "rho": -0.18669342773393832,
+   "n": 118,
+   "nmi": 0.10538979932666627
+  },
+  "tool_errors|context_growth": {
+   "rho": -0.16578044018614,
+   "n": 105,
+   "nmi": 0.06248606627356784
+  },
+  "tool_errors|cumulative_output_tokens": {
+   "rho": -0.18303757503689763,
+   "n": 118,
+   "nmi": 0.10538979932666627
+  },
+  "tool_errors|cache_hit_ratio": {
+   "rho": -0.06851032628766156,
+   "n": 118,
+   "nmi": 0.06753197702602416
+  },
+  "tool_errors|thinking_ratio": {
+   "rho": 0.007655847958915974,
+   "n": 118,
+   "nmi": 0.03390842034183157
+  },
+  "tool_errors|output_tokens_per_sec": {
+   "rho": -0.18834955684438456,
+   "n": 109,
+   "nmi": 0.057909904498493044
+  },
+  "tool_output_chars|tool_latency_ms": {
+   "rho": 0.40106078025970826,
+   "n": 105,
+   "nmi": 0.09501538038101272
+  },
+  "tool_output_chars|call_span_ms": {
+   "rho": -0.09919236796746733,
+   "n": 118,
+   "nmi": 0.08590733347788297
+  },
+  "tool_output_chars|inter_call_gap_ms": {
+   "rho": 0.20889551924600497,
+   "n": 105,
+   "nmi": 0.09540511689891897
+  },
+  "tool_output_chars|output_text_chars": {
+   "rho": -0.2634185881153231,
+   "n": 118,
+   "nmi": 0.1153562214278322
+  },
+  "tool_output_chars|context_tokens": {
+   "rho": 0.31420773279505343,
+   "n": 118,
+   "nmi": 0.07902214099568738
+  },
+  "tool_output_chars|context_growth": {
+   "rho": 0.3186372321206182,
+   "n": 105,
+   "nmi": 0.12193499433648006
+  },
+  "tool_output_chars|cumulative_output_tokens": {
+   "rho": 0.3171939135522932,
+   "n": 118,
+   "nmi": 0.07241740803507023
+  },
+  "tool_output_chars|cache_hit_ratio": {
+   "rho": -0.025358706116869162,
+   "n": 118,
+   "nmi": 0.08291415237475615
+  },
+  "tool_output_chars|thinking_ratio": {
+   "rho": -0.15334247467832193,
+   "n": 118,
+   "nmi": 0.05619512115190405
+  },
+  "tool_output_chars|output_tokens_per_sec": {
+   "rho": 0.35329587401021334,
+   "n": 109,
+   "nmi": 0.09134252450027297
+  },
+  "tool_latency_ms|call_span_ms": {
+   "rho": 0.07398132152693435,
+   "n": 105,
+   "nmi": 0.09457114666339439
+  },
+  "tool_latency_ms|inter_call_gap_ms": {
+   "rho": 0.4934593555334456,
+   "n": 92,
+   "nmi": 0.22924863076909638
+  },
+  "tool_latency_ms|output_text_chars": {
+   "rho": -0.01969035878470642,
+   "n": 105,
+   "nmi": 0.045327994402354015
+  },
+  "tool_latency_ms|context_tokens": {
+   "rho": 0.4986704126913118,
+   "n": 105,
+   "nmi": 0.2093291282227386
+  },
+  "tool_latency_ms|context_growth": {
+   "rho": 0.22555301678964956,
+   "n": 92,
+   "nmi": 0.11914892969385836
+  },
+  "tool_latency_ms|cumulative_output_tokens": {
+   "rho": 0.4967875201849574,
+   "n": 105,
+   "nmi": 0.20296488133134052
+  },
+  "tool_latency_ms|cache_hit_ratio": {
+   "rho": 0.2996366313134995,
+   "n": 105,
+   "nmi": 0.07851395643341934
+  },
+  "tool_latency_ms|thinking_ratio": {
+   "rho": -0.003659679435758492,
+   "n": 105,
+   "nmi": 0.0886221134559694
+  },
+  "tool_latency_ms|output_tokens_per_sec": {
+   "rho": 0.4603364080303852,
+   "n": 96,
+   "nmi": 0.1369383041785694
+  },
+  "call_span_ms|inter_call_gap_ms": {
+   "rho": 0.22213431782828597,
+   "n": 106,
+   "nmi": 0.07088685456053136
+  },
+  "call_span_ms|output_text_chars": {
+   "rho": 0.20655789305657296,
+   "n": 119,
+   "nmi": 0.05677935673873931
+  },
+  "call_span_ms|context_tokens": {
+   "rho": 0.19154312980115062,
+   "n": 119,
+   "nmi": 0.12343552100491154
+  },
+  "call_span_ms|context_growth": {
+   "rho": 0.32102891963374863,
+   "n": 106,
+   "nmi": 0.09601397204148784
+  },
+  "call_span_ms|cumulative_output_tokens": {
+   "rho": 0.23314339160415767,
+   "n": 119,
+   "nmi": 0.13193032136857774
+  },
+  "call_span_ms|cache_hit_ratio": {
+   "rho": -0.13932384475356002,
+   "n": 119,
+   "nmi": 0.09963602792628885
+  },
+  "call_span_ms|thinking_ratio": {
+   "rho": -0.1654201050835909,
+   "n": 119,
+   "nmi": 0.13185169623914322
+  },
+  "call_span_ms|output_tokens_per_sec": {
+   "rho": -0.0874377296395645,
+   "n": 110,
+   "nmi": 0.13071855986744002
+  },
+  "inter_call_gap_ms|output_text_chars": {
+   "rho": -0.1390648755367448,
+   "n": 106,
+   "nmi": 0.09332154923030488
+  },
+  "inter_call_gap_ms|context_tokens": {
+   "rho": 0.5845126835781042,
+   "n": 106,
+   "nmi": 0.2515929566387841
+  },
+  "inter_call_gap_ms|context_growth": {
+   "rho": 0.4105156825860888,
+   "n": 106,
+   "nmi": 0.12264542784345624
+  },
+  "inter_call_gap_ms|cumulative_output_tokens": {
+   "rho": 0.5813789455122553,
+   "n": 106,
+   "nmi": 0.2254273879502753
+  },
+  "inter_call_gap_ms|cache_hit_ratio": {
+   "rho": 0.08188528100360229,
+   "n": 106,
+   "nmi": 0.059522527350385705
+  },
+  "inter_call_gap_ms|thinking_ratio": {
+   "rho": 0.17220764576982767,
+   "n": 106,
+   "nmi": 0.13033157012642493
+  },
+  "inter_call_gap_ms|output_tokens_per_sec": {
+   "rho": 0.6580054702293289,
+   "n": 97,
+   "nmi": 0.2118223147368923
+  },
+  "output_text_chars|context_tokens": {
+   "rho": -0.08387952420336252,
+   "n": 119,
+   "nmi": 0.07152458987514229
+  },
+  "output_text_chars|context_growth": {
+   "rho": -0.13996981318599366,
+   "n": 106,
+   "nmi": 0.1014956702169482
+  },
+  "output_text_chars|cumulative_output_tokens": {
+   "rho": -0.08278219627878601,
+   "n": 119,
+   "nmi": 0.07570054967713831
+  },
+  "output_text_chars|cache_hit_ratio": {
+   "rho": 0.04100397861689759,
+   "n": 119,
+   "nmi": 0.03139503762296985
+  },
+  "output_text_chars|thinking_ratio": {
+   "rho": 0.03752567810993082,
+   "n": 119,
+   "nmi": 0.05197391766009463
+  },
+  "output_text_chars|output_tokens_per_sec": {
+   "rho": -0.2944817532535204,
+   "n": 110,
+   "nmi": 0.09174814577862622
+  },
+  "context_tokens|context_growth": {
+   "rho": 0.4587159198843683,
+   "n": 106,
+   "nmi": 0.18206636881640853
+  },
+  "context_tokens|cumulative_output_tokens": {
+   "rho": 0.9878666489019181,
+   "n": 119,
+   "nmi": 0.8870692310231925
+  },
+  "context_tokens|cache_hit_ratio": {
+   "rho": 0.4604376235155874,
+   "n": 119,
+   "nmi": 0.15505991503160862
+  },
+  "context_tokens|thinking_ratio": {
+   "rho": -0.2578782593454195,
+   "n": 119,
+   "nmi": 0.09906456379805909
+  },
+  "context_tokens|output_tokens_per_sec": {
+   "rho": 0.6268492533506063,
+   "n": 110,
+   "nmi": 0.20062711059095314
+  },
+  "context_growth|cumulative_output_tokens": {
+   "rho": 0.4296607543675732,
+   "n": 106,
+   "nmi": 0.1863260902312399
+  },
+  "context_growth|cache_hit_ratio": {
+   "rho": -0.6652610153458782,
+   "n": 106,
+   "nmi": 0.259850621556674
+  },
+  "context_growth|thinking_ratio": {
+   "rho": 0.053261686164884345,
+   "n": 106,
+   "nmi": 0.05942804173362704
+  },
+  "context_growth|output_tokens_per_sec": {
+   "rho": 0.38099746541030555,
+   "n": 97,
+   "nmi": 0.10725155648451927
+  },
+  "cumulative_output_tokens|cache_hit_ratio": {
+   "rho": 0.4567267548140195,
+   "n": 119,
+   "nmi": 0.1681927199812562
+  },
+  "cumulative_output_tokens|thinking_ratio": {
+   "rho": -0.2750296940048051,
+   "n": 119,
+   "nmi": 0.11324879776938893
+  },
+  "cumulative_output_tokens|output_tokens_per_sec": {
+   "rho": 0.6013524784166986,
+   "n": 110,
+   "nmi": 0.19065011035791604
+  },
+  "cache_hit_ratio|thinking_ratio": {
+   "rho": -0.27239582385232824,
+   "n": 119,
+   "nmi": 0.07637999270740617
+  },
+  "cache_hit_ratio|output_tokens_per_sec": {
+   "rho": 0.24029754862050345,
+   "n": 110,
+   "nmi": 0.07338439747245232
+  },
+  "thinking_ratio|output_tokens_per_sec": {
+   "rho": 0.22912543449692277,
+   "n": 110,
+   "nmi": 0.2167634780075392
+  }
+ },
+ "call_matrix_by_source": {
+  "cc_jsonl_self": {
+   "step_index|input_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "step_index|cache_read_input_tokens": {
+    "rho": 0.9907876350912845,
+    "n": 78,
+    "nmi": 0.9403866080126858
+   },
+   "step_index|cache_creation_input_tokens": {
+    "rho": -0.1259120626209234,
+    "n": 78,
+    "nmi": 0.10011268856498971
+   },
+   "step_index|output_tokens": {
+    "rho": -0.007410404917257076,
+    "n": 78,
+    "nmi": 0.1258735527730955
+   },
+   "step_index|thinking_tokens": {
+    "rho": -0.03386379139551426,
+    "n": 78,
+    "nmi": 0.09649487475446276
+   },
+   "step_index|tool_calls_per_message": {
+    "rho": -0.11500482849878009,
+    "n": 78,
+    "nmi": 0.09060412257490838
+   },
+   "step_index|tool_errors": {
+    "rho": 0.12842146750144767,
+    "n": 77,
+    "nmi": 0.09985831717383892
+   },
+   "step_index|tool_output_chars": {
+    "rho": 0.03701926303037892,
+    "n": 77,
+    "nmi": 0.14573746095280446
+   },
+   "step_index|tool_latency_ms": {
+    "rho": -0.08608880575470772,
+    "n": 75,
+    "nmi": 0.10428477357761291
+   },
+   "step_index|call_span_ms": {
+    "rho": -0.00391045304392006,
+    "n": 78,
+    "nmi": 0.07912306498685323
+   },
+   "step_index|inter_call_gap_ms": {
+    "rho": 0.07042957042957043,
+    "n": 77,
+    "nmi": 0.09623511264534555
+   },
+   "step_index|output_text_chars": {
+    "rho": -0.005154796065831663,
+    "n": 78,
+    "nmi": 0.10137324818534092
+   },
+   "step_index|context_tokens": {
+    "rho": 1.0,
+    "n": 78,
+    "nmi": 1.0
+   },
+   "step_index|context_growth": {
+    "rho": -0.09230243440769756,
+    "n": 77,
+    "nmi": 0.08820220766743554
+   },
+   "step_index|cumulative_output_tokens": {
+    "rho": 1.0,
+    "n": 78,
+    "nmi": 1.0
+   },
+   "step_index|cache_hit_ratio": {
+    "rho": 0.4628156653473109,
+    "n": 78,
+    "nmi": 0.1376141899673694
+   },
+   "step_index|thinking_ratio": {
+    "rho": -0.1613841707705618,
+    "n": 78,
+    "nmi": 0.0827408787973801
+   },
+   "step_index|output_tokens_per_sec": {
+    "rho": -0.031896236755571794,
+    "n": 69,
+    "nmi": 0.08810221684944941
+   },
+   "input_tokens|cache_read_input_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|cache_creation_input_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|output_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|thinking_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|tool_calls_per_message": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|tool_errors": {
+    "rho": null,
+    "n": 77,
+    "nmi": null
+   },
+   "input_tokens|tool_output_chars": {
+    "rho": null,
+    "n": 77,
+    "nmi": null
+   },
+   "input_tokens|tool_latency_ms": {
+    "rho": null,
+    "n": 75,
+    "nmi": null
+   },
+   "input_tokens|call_span_ms": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 77,
+    "nmi": null
+   },
+   "input_tokens|output_text_chars": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|context_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|context_growth": {
+    "rho": null,
+    "n": 77,
+    "nmi": null
+   },
+   "input_tokens|cumulative_output_tokens": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|cache_hit_ratio": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|thinking_ratio": {
+    "rho": null,
+    "n": 78,
+    "nmi": null
+   },
+   "input_tokens|output_tokens_per_sec": {
+    "rho": null,
+    "n": 69,
+    "nmi": null
+   },
+   "cache_read_input_tokens|cache_creation_input_tokens": {
+    "rho": -0.15058454573920887,
+    "n": 78,
+    "nmi": 0.10777237533944962
+   },
+   "cache_read_input_tokens|output_tokens": {
+    "rho": -0.006854035598126324,
+    "n": 78,
+    "nmi": 0.11226222947435428
+   },
+   "cache_read_input_tokens|thinking_tokens": {
+    "rho": -0.05115707229866304,
+    "n": 78,
+    "nmi": 0.12298815368590896
+   },
+   "cache_read_input_tokens|tool_calls_per_message": {
+    "rho": -0.11384388337782098,
+    "n": 78,
+    "nmi": 0.09060412257490838
+   },
+   "cache_read_input_tokens|tool_errors": {
+    "rho": 0.12842231154381034,
+    "n": 77,
+    "nmi": 0.09985831717383892
+   },
+   "cache_read_input_tokens|tool_output_chars": {
+    "rho": 0.013413817571581287,
+    "n": 77,
+    "nmi": 0.17178209399398128
+   },
+   "cache_read_input_tokens|tool_latency_ms": {
+    "rho": -0.0988776511756924,
+    "n": 75,
+    "nmi": 0.08679711428088512
+   },
+   "cache_read_input_tokens|call_span_ms": {
+    "rho": 0.010845564557108282,
+    "n": 78,
+    "nmi": 0.08329245517081223
+   },
+   "cache_read_input_tokens|inter_call_gap_ms": {
+    "rho": 0.055904989123855345,
+    "n": 77,
+    "nmi": 0.09623511264534555
+   },
+   "cache_read_input_tokens|output_text_chars": {
+    "rho": 0.008086005739356293,
+    "n": 78,
+    "nmi": 0.10137324818534092
+   },
+   "cache_read_input_tokens|context_tokens": {
+    "rho": 0.9907876350912845,
+    "n": 78,
+    "nmi": 0.9403866080126858
+   },
+   "cache_read_input_tokens|context_growth": {
+    "rho": -0.11587173268911001,
+    "n": 77,
+    "nmi": 0.08982750847650325
+   },
+   "cache_read_input_tokens|cumulative_output_tokens": {
+    "rho": 0.9907876350912845,
+    "n": 78,
+    "nmi": 0.9403866080126858
+   },
+   "cache_read_input_tokens|cache_hit_ratio": {
+    "rho": 0.4813824238037004,
+    "n": 78,
+    "nmi": 0.1376141899673694
+   },
+   "cache_read_input_tokens|thinking_ratio": {
+    "rho": -0.18368191277958648,
+    "n": 78,
+    "nmi": 0.09795665714383946
+   },
+   "cache_read_input_tokens|output_tokens_per_sec": {
+    "rho": -0.05760008769045264,
+    "n": 69,
+    "nmi": 0.10286477653483089
+   },
+   "cache_creation_input_tokens|output_tokens": {
+    "rho": 0.135992311399629,
+    "n": 78,
+    "nmi": 0.06460153567216745
+   },
+   "cache_creation_input_tokens|thinking_tokens": {
+    "rho": 0.23401868861127548,
+    "n": 78,
+    "nmi": 0.07641545719227086
+   },
+   "cache_creation_input_tokens|tool_calls_per_message": {
+    "rho": 0.04280288488804636,
+    "n": 78,
+    "nmi": 0.09323810721434903
+   },
+   "cache_creation_input_tokens|tool_errors": {
+    "rho": -0.22793379335881014,
+    "n": 77,
+    "nmi": 0.0957812165516023
+   },
+   "cache_creation_input_tokens|tool_output_chars": {
+    "rho": 0.04859189232584373,
+    "n": 77,
+    "nmi": 0.0727887394669599
+   },
+   "cache_creation_input_tokens|tool_latency_ms": {
+    "rho": -0.18129574179506774,
+    "n": 75,
+    "nmi": 0.034430201347082544
+   },
+   "cache_creation_input_tokens|call_span_ms": {
+    "rho": 0.16197374922049465,
+    "n": 78,
+    "nmi": 0.05446535352561161
+   },
+   "cache_creation_input_tokens|inter_call_gap_ms": {
+    "rho": -0.031810294968189705,
+    "n": 77,
+    "nmi": 0.08630721681466809
+   },
+   "cache_creation_input_tokens|output_text_chars": {
+    "rho": -0.18623686178458482,
+    "n": 78,
+    "nmi": 0.05539534584412372
+   },
+   "cache_creation_input_tokens|context_tokens": {
+    "rho": -0.1259120626209234,
+    "n": 78,
+    "nmi": 0.10011268856498967
+   },
+   "cache_creation_input_tokens|context_growth": {
+    "rho": 0.9998948420001051,
+    "n": 77,
+    "nmi": 1.0
+   },
+   "cache_creation_input_tokens|cumulative_output_tokens": {
+    "rho": -0.1259120626209234,
+    "n": 78,
+    "nmi": 0.10011268856498967
+   },
+   "cache_creation_input_tokens|cache_hit_ratio": {
+    "rho": -0.9207374903577435,
+    "n": 78,
+    "nmi": 0.5145116711081196
+   },
+   "cache_creation_input_tokens|thinking_ratio": {
+    "rho": 0.24979771404772258,
+    "n": 78,
+    "nmi": 0.1101061980532041
+   },
+   "cache_creation_input_tokens|output_tokens_per_sec": {
+    "rho": -0.018523931311655098,
+    "n": 69,
+    "nmi": 0.08888698647987875
+   },
+   "output_tokens|thinking_tokens": {
+    "rho": 0.6080736811182077,
+    "n": 78,
+    "nmi": 0.17020177808143844
+   },
+   "output_tokens|tool_calls_per_message": {
+    "rho": -0.19733660288647592,
+    "n": 78,
+    "nmi": 0.0906041225749084
+   },
+   "output_tokens|tool_errors": {
+    "rho": -0.14263938902392956,
+    "n": 77,
+    "nmi": 0.054885169212679795
+   },
+   "output_tokens|tool_output_chars": {
+    "rho": -0.4015755151970706,
+    "n": 77,
+    "nmi": 0.1742002526241915
+   },
+   "output_tokens|tool_latency_ms": {
+    "rho": -0.2040015078609464,
+    "n": 75,
+    "nmi": 0.1470357008749111
+   },
+   "output_tokens|call_span_ms": {
+    "rho": 0.7981348247262701,
+    "n": 78,
+    "nmi": 0.3900685313281749
+   },
+   "output_tokens|inter_call_gap_ms": {
+    "rho": 0.4489385475248193,
+    "n": 77,
+    "nmi": 0.15869719561259696
+   },
+   "output_tokens|output_text_chars": {
+    "rho": 0.05699948121599159,
+    "n": 78,
+    "nmi": 0.047123291094367865
+   },
+   "output_tokens|context_tokens": {
+    "rho": -0.007410404917257076,
+    "n": 78,
+    "nmi": 0.12587355277309553
+   },
+   "output_tokens|context_growth": {
+    "rho": 0.15764705883714925,
+    "n": 77,
+    "nmi": 0.07074922229208443
+   },
+   "output_tokens|cumulative_output_tokens": {
+    "rho": -0.007410404917257076,
+    "n": 78,
+    "nmi": 0.12587355277309553
+   },
+   "output_tokens|cache_hit_ratio": {
+    "rho": -0.1377500695625961,
+    "n": 78,
+    "nmi": 0.07664656961475733
+   },
+   "output_tokens|thinking_ratio": {
+    "rho": 0.061620420225447725,
+    "n": 78,
+    "nmi": 0.11139018914997653
+   },
+   "output_tokens|output_tokens_per_sec": {
+    "rho": -0.3388808710991327,
+    "n": 69,
+    "nmi": 0.09649937591198664
+   },
+   "thinking_tokens|tool_calls_per_message": {
+    "rho": -0.10368271936594448,
+    "n": 78,
+    "nmi": 0.09323810721434898
+   },
+   "thinking_tokens|tool_errors": {
+    "rho": -0.2392191796736351,
+    "n": 77,
+    "nmi": 0.09578121655160228
+   },
+   "thinking_tokens|tool_output_chars": {
+    "rho": -0.25457063866856017,
+    "n": 77,
+    "nmi": 0.11276606622165254
+   },
+   "thinking_tokens|tool_latency_ms": {
+    "rho": -0.06553406770114874,
+    "n": 75,
+    "nmi": 0.053786583222596426
+   },
+   "thinking_tokens|call_span_ms": {
+    "rho": 0.42290259615746806,
+    "n": 78,
+    "nmi": 0.09997001590664818
+   },
+   "thinking_tokens|inter_call_gap_ms": {
+    "rho": 0.6440991054293491,
+    "n": 77,
+    "nmi": 0.28391528441337605
+   },
+   "thinking_tokens|output_text_chars": {
+    "rho": -0.09311605573556661,
+    "n": 78,
+    "nmi": 0.08951030856800818
+   },
+   "thinking_tokens|context_tokens": {
+    "rho": -0.03386379139551426,
+    "n": 78,
+    "nmi": 0.09649487475446276
+   },
+   "thinking_tokens|context_growth": {
+    "rho": 0.23175030073895878,
+    "n": 77,
+    "nmi": 0.09567636995742992
+   },
+   "thinking_tokens|cumulative_output_tokens": {
+    "rho": -0.03386379139551426,
+    "n": 78,
+    "nmi": 0.09649487475446276
+   },
+   "thinking_tokens|cache_hit_ratio": {
+    "rho": -0.21785325732782013,
+    "n": 78,
+    "nmi": 0.0737078493976885
+   },
+   "thinking_tokens|thinking_ratio": {
+    "rho": 0.7525098046617178,
+    "n": 78,
+    "nmi": 0.35930948657497963
+   },
+   "thinking_tokens|output_tokens_per_sec": {
+    "rho": 0.3854501618009334,
+    "n": 69,
+    "nmi": 0.11188543000200002
+   },
+   "tool_calls_per_message|tool_errors": {
+    "rho": 0.3224554711112218,
+    "n": 77,
+    "nmi": 0.14715457518904082
+   },
+   "tool_calls_per_message|tool_output_chars": {
+    "rho": 0.38530612556099514,
+    "n": 77,
+    "nmi": 0.12061749527145091
+   },
+   "tool_calls_per_message|tool_latency_ms": {
+    "rho": 0.07047393124142565,
+    "n": 75,
+    "nmi": 0.040365732881509304
+   },
+   "tool_calls_per_message|call_span_ms": {
+    "rho": -0.13154670223338769,
+    "n": 78,
+    "nmi": 0.09323810721434915
+   },
+   "tool_calls_per_message|inter_call_gap_ms": {
+    "rho": -0.3089298794088914,
+    "n": 77,
+    "nmi": 0.1586752721364357
+   },
+   "tool_calls_per_message|output_text_chars": {
+    "rho": -0.21983076297913356,
+    "n": 78,
+    "nmi": 0.10161097079162613
+   },
+   "tool_calls_per_message|context_tokens": {
+    "rho": -0.11500482849878009,
+    "n": 78,
+    "nmi": 0.09060412257490848
+   },
+   "tool_calls_per_message|context_growth": {
+    "rho": 0.042501709848941915,
+    "n": 77,
+    "nmi": 0.09398527374035787
+   },
+   "tool_calls_per_message|cumulative_output_tokens": {
+    "rho": -0.11500482849878009,
+    "n": 78,
+    "nmi": 0.09060412257490848
+   },
+   "tool_calls_per_message|cache_hit_ratio": {
+    "rho": -0.0704743393494208,
+    "n": 78,
+    "nmi": 0.0668174788106607
+   },
+   "tool_calls_per_message|thinking_ratio": {
+    "rho": -0.02561788895330165,
+    "n": 78,
+    "nmi": 0.06545500065915184
+   },
+   "tool_calls_per_message|output_tokens_per_sec": {
+    "rho": -0.013494207821980731,
+    "n": 69,
+    "nmi": 0.14548312814254102
+   },
+   "tool_errors|tool_output_chars": {
+    "rho": 0.19071510512762513,
+    "n": 77,
+    "nmi": 0.05685331276807509
+   },
+   "tool_errors|tool_latency_ms": {
+    "rho": -0.1392433302501663,
+    "n": 75,
+    "nmi": 0.056164954862422026
+   },
+   "tool_errors|call_span_ms": {
+    "rho": -0.13826234623149958,
+    "n": 77,
+    "nmi": 0.052917025657284816
+   },
+   "tool_errors|inter_call_gap_ms": {
+    "rho": -0.12911213711648512,
+    "n": 76,
+    "nmi": 0.05453362385507588
+   },
+   "tool_errors|output_text_chars": {
+    "rho": -0.12237014509294494,
+    "n": 77,
+    "nmi": 0.03743568344761753
+   },
+   "tool_errors|context_tokens": {
+    "rho": 0.12842146750144767,
+    "n": 77,
+    "nmi": 0.09985831717383914
+   },
+   "tool_errors|context_growth": {
+    "rho": -0.22874391608266167,
+    "n": 76,
+    "nmi": 0.09575468265295951
+   },
+   "tool_errors|cumulative_output_tokens": {
+    "rho": 0.12842146750144767,
+    "n": 77,
+    "nmi": 0.09985831717383914
+   },
+   "tool_errors|cache_hit_ratio": {
+    "rho": 0.24272229816023985,
+    "n": 77,
+    "nmi": 0.09985831717383914
+   },
+   "tool_errors|thinking_ratio": {
+    "rho": -0.23921286690582672,
+    "n": 77,
+    "nmi": 0.09578121655160246
+   },
+   "tool_errors|output_tokens_per_sec": {
+    "rho": 0.015560777168438416,
+    "n": 68,
+    "nmi": 0.07063435227796572
+   },
+   "tool_output_chars|tool_latency_ms": {
+    "rho": 0.40930990735015543,
+    "n": 75,
+    "nmi": 0.09924390224020738
+   },
+   "tool_output_chars|call_span_ms": {
+    "rho": -0.48057753606328324,
+    "n": 77,
+    "nmi": 0.1623079996958944
+   },
+   "tool_output_chars|inter_call_gap_ms": {
+    "rho": -0.10762425034376673,
+    "n": 76,
+    "nmi": 0.07894970884704143
+   },
+   "tool_output_chars|output_text_chars": {
+    "rho": -0.2022805498912149,
+    "n": 77,
+    "nmi": 0.06599546974384593
+   },
+   "tool_output_chars|context_tokens": {
+    "rho": 0.03701926303037892,
+    "n": 77,
+    "nmi": 0.14573746095280446
+   },
+   "tool_output_chars|context_growth": {
+    "rho": 0.03341289154782338,
+    "n": 76,
+    "nmi": 0.080081783945992
+   },
+   "tool_output_chars|cumulative_output_tokens": {
+    "rho": 0.03701926303037892,
+    "n": 77,
+    "nmi": 0.14573746095280446
+   },
+   "tool_output_chars|cache_hit_ratio": {
+    "rho": -0.01721428607700391,
+    "n": 77,
+    "nmi": 0.05477701140369307
+   },
+   "tool_output_chars|thinking_ratio": {
+    "rho": 0.01938116699355588,
+    "n": 77,
+    "nmi": 0.07934086995791009
+   },
+   "tool_output_chars|output_tokens_per_sec": {
+    "rho": 0.1790888384256465,
+    "n": 68,
+    "nmi": 0.11008216809867105
+   },
+   "tool_latency_ms|call_span_ms": {
+    "rho": -0.19863474264266967,
+    "n": 75,
+    "nmi": 0.15528023458142462
+   },
+   "tool_latency_ms|inter_call_gap_ms": {
+    "rho": 0.0760760909024255,
+    "n": 74,
+    "nmi": 0.07544740667025163
+   },
+   "tool_latency_ms|output_text_chars": {
+    "rho": 0.02465728501780418,
+    "n": 75,
+    "nmi": 0.055122737974418336
+   },
+   "tool_latency_ms|context_tokens": {
+    "rho": -0.08608880575470772,
+    "n": 75,
+    "nmi": 0.10428477357761291
+   },
+   "tool_latency_ms|context_growth": {
+    "rho": -0.18573999067514513,
+    "n": 74,
+    "nmi": 0.037665905942005695
+   },
+   "tool_latency_ms|cumulative_output_tokens": {
+    "rho": -0.08608880575470772,
+    "n": 75,
+    "nmi": 0.10428477357761291
+   },
+   "tool_latency_ms|cache_hit_ratio": {
+    "rho": 0.12981600153956752,
+    "n": 75,
+    "nmi": 0.05363824932130242
+   },
+   "tool_latency_ms|thinking_ratio": {
+    "rho": 0.07612282563396833,
+    "n": 75,
+    "nmi": 0.060788126187734444
+   },
+   "tool_latency_ms|output_tokens_per_sec": {
+    "rho": 0.0800125247886442,
+    "n": 66,
+    "nmi": 0.11867540467500355
+   },
+   "call_span_ms|inter_call_gap_ms": {
+    "rho": 0.07306358832468754,
+    "n": 77,
+    "nmi": 0.08722924861371217
+   },
+   "call_span_ms|output_text_chars": {
+    "rho": 0.2785270783978397,
+    "n": 78,
+    "nmi": 0.050896322784466375
+   },
+   "call_span_ms|context_tokens": {
+    "rho": -0.00391045304392006,
+    "n": 78,
+    "nmi": 0.07912306498685322
+   },
+   "call_span_ms|context_growth": {
+    "rho": 0.1870922493974984,
+    "n": 77,
+    "nmi": 0.06963173691625307
+   },
+   "call_span_ms|cumulative_output_tokens": {
+    "rho": -0.00391045304392006,
+    "n": 78,
+    "nmi": 0.07912306498685322
+   },
+   "call_span_ms|cache_hit_ratio": {
+    "rho": -0.16366954439164447,
+    "n": 78,
+    "nmi": 0.06212504030007154
+   },
+   "call_span_ms|thinking_ratio": {
+    "rho": -0.08872158672417443,
+    "n": 78,
+    "nmi": 0.21226946500185634
+   },
+   "call_span_ms|output_tokens_per_sec": {
+    "rho": -0.7440263061746438,
+    "n": 69,
+    "nmi": 0.24809196289481156
+   },
+   "inter_call_gap_ms|output_text_chars": {
+    "rho": -0.07058473059995132,
+    "n": 77,
+    "nmi": 0.10107544008111535
+   },
+   "inter_call_gap_ms|context_tokens": {
+    "rho": 0.07042957042957043,
+    "n": 77,
+    "nmi": 0.09623511264534555
+   },
+   "inter_call_gap_ms|context_growth": {
+    "rho": -0.03459698196540302,
+    "n": 77,
+    "nmi": 0.08630721681466809
+   },
+   "inter_call_gap_ms|cumulative_output_tokens": {
+    "rho": 0.07042957042957043,
+    "n": 77,
+    "nmi": 0.09623511264534555
+   },
+   "inter_call_gap_ms|cache_hit_ratio": {
+    "rho": 0.048582995951417005,
+    "n": 77,
+    "nmi": 0.06392740175743444
+   },
+   "inter_call_gap_ms|thinking_ratio": {
+    "rho": 0.4308147710475022,
+    "n": 77,
+    "nmi": 0.11160899567903836
+   },
+   "inter_call_gap_ms|output_tokens_per_sec": {
+    "rho": 0.4327976485857159,
+    "n": 68,
+    "nmi": 0.16145026083306582
+   },
+   "output_text_chars|context_tokens": {
+    "rho": -0.005154796065831663,
+    "n": 78,
+    "nmi": 0.10137324818534091
+   },
+   "output_text_chars|context_growth": {
+    "rho": -0.1730970882827196,
+    "n": 77,
+    "nmi": 0.050333872954346257
+   },
+   "output_text_chars|cumulative_output_tokens": {
+    "rho": -0.005154796065831663,
+    "n": 78,
+    "nmi": 0.10137324818534091
+   },
+   "output_text_chars|cache_hit_ratio": {
+    "rho": 0.16864991050115916,
+    "n": 78,
+    "nmi": 0.0788527335461839
+   },
+   "output_text_chars|thinking_ratio": {
+    "rho": -0.10028852378964286,
+    "n": 78,
+    "nmi": 0.07024094009004661
+   },
+   "output_text_chars|output_tokens_per_sec": {
+    "rho": -0.24662346447156863,
+    "n": 69,
+    "nmi": 0.12345426389769712
+   },
+   "context_tokens|context_growth": {
+    "rho": -0.09230243440769756,
+    "n": 77,
+    "nmi": 0.08820220766743554
+   },
+   "context_tokens|cumulative_output_tokens": {
+    "rho": 1.0,
+    "n": 78,
+    "nmi": 1.0
+   },
+   "context_tokens|cache_hit_ratio": {
+    "rho": 0.4628156653473109,
+    "n": 78,
+    "nmi": 0.1376141899673694
+   },
+   "context_tokens|thinking_ratio": {
+    "rho": -0.1613841707705618,
+    "n": 78,
+    "nmi": 0.0827408787973801
+   },
+   "context_tokens|output_tokens_per_sec": {
+    "rho": -0.031896236755571794,
+    "n": 69,
+    "nmi": 0.08810221684944941
+   },
+   "context_growth|cumulative_output_tokens": {
+    "rho": -0.09230243440769756,
+    "n": 77,
+    "nmi": 0.08820220766743554
+   },
+   "context_growth|cache_hit_ratio": {
+    "rho": -0.9175824175824175,
+    "n": 77,
+    "nmi": 0.4916064456380416
+   },
+   "context_growth|thinking_ratio": {
+    "rho": 0.22868885456056845,
+    "n": 77,
+    "nmi": 0.10728049385185444
+   },
+   "context_growth|output_tokens_per_sec": {
+    "rho": -0.043516433179371684,
+    "n": 68,
+    "nmi": 0.07027227908522239
+   },
+   "cumulative_output_tokens|cache_hit_ratio": {
+    "rho": 0.4628156653473109,
+    "n": 78,
+    "nmi": 0.1376141899673694
+   },
+   "cumulative_output_tokens|thinking_ratio": {
+    "rho": -0.1613841707705618,
+    "n": 78,
+    "nmi": 0.0827408787973801
+   },
+   "cumulative_output_tokens|output_tokens_per_sec": {
+    "rho": -0.031896236755571794,
+    "n": 69,
+    "nmi": 0.08810221684944941
+   },
+   "cache_hit_ratio|thinking_ratio": {
+    "rho": -0.26601340904625614,
+    "n": 78,
+    "nmi": 0.06807667682435288
+   },
+   "cache_hit_ratio|output_tokens_per_sec": {
+    "rho": 0.02970405553525758,
+    "n": 69,
+    "nmi": 0.07333965716406787
+   },
+   "thinking_ratio|output_tokens_per_sec": {
+    "rho": 0.8463224822047329,
+    "n": 69,
+    "nmi": 0.4108242763841614
+   }
+  },
+  "cc_stream": {
+   "step_index|input_tokens": {
+    "rho": -0.8139902369679105,
+    "n": 41,
+    "nmi": 0.6640542692836137
+   },
+   "step_index|cache_read_input_tokens": {
+    "rho": 0.953099355177598,
+    "n": 41,
+    "nmi": 0.7347276529542639
+   },
+   "step_index|cache_creation_input_tokens": {
+    "rho": -0.5741602154973762,
+    "n": 41,
+    "nmi": 0.30286657035501596
+   },
+   "step_index|output_tokens": {
+    "rho": -0.14153614505466997,
+    "n": 41,
+    "nmi": 0.08933203165688934
+   },
+   "step_index|thinking_tokens": {
+    "rho": -0.3592011867517488,
+    "n": 41,
+    "nmi": 0.21808060334209595
+   },
+   "step_index|tool_calls_per_message": {
+    "rho": -0.25977991470285733,
+    "n": 41,
+    "nmi": 0.21934683040091008
+   },
+   "step_index|tool_errors": {
+    "rho": -0.393530766780117,
+    "n": 41,
+    "nmi": 0.14102297674866832
+   },
+   "step_index|tool_output_chars": {
+    "rho": -0.29878793828746386,
+    "n": 41,
+    "nmi": 0.23297385023505532
+   },
+   "step_index|tool_latency_ms": {
+    "rho": 0.20710906837258367,
+    "n": 30,
+    "nmi": 0.17063166639273505
+   },
+   "step_index|call_span_ms": {
+    "rho": -0.1399559260163282,
+    "n": 41,
+    "nmi": 0.08073722912742266
+   },
+   "step_index|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "step_index|output_text_chars": {
+    "rho": 0.3413088800944922,
+    "n": 41,
+    "nmi": 0.2109123520698606
+   },
+   "step_index|context_tokens": {
+    "rho": 0.8356901036908693,
+    "n": 41,
+    "nmi": 0.44779375750640665
+   },
+   "step_index|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "step_index|cumulative_output_tokens": {
+    "rho": 0.7255041768944108,
+    "n": 41,
+    "nmi": 0.2838006618984602
+   },
+   "step_index|cache_hit_ratio": {
+    "rho": 0.6212122043261333,
+    "n": 41,
+    "nmi": 0.36350080030171245
+   },
+   "step_index|thinking_ratio": {
+    "rho": -0.18214058495055566,
+    "n": 41,
+    "nmi": 0.200174114847596
+   },
+   "step_index|output_tokens_per_sec": {
+    "rho": 0.15659593007353945,
+    "n": 41,
+    "nmi": 0.1785400554453381
+   },
+   "input_tokens|cache_read_input_tokens": {
+    "rho": -0.7961479896988718,
+    "n": 41,
+    "nmi": 0.6184916472511669
+   },
+   "input_tokens|cache_creation_input_tokens": {
+    "rho": 0.6887863708460781,
+    "n": 41,
+    "nmi": 0.3905432882448619
+   },
+   "input_tokens|output_tokens": {
+    "rho": 0.11553284199944742,
+    "n": 41,
+    "nmi": 0.031421991868409306
+   },
+   "input_tokens|thinking_tokens": {
+    "rho": 0.46217163211182805,
+    "n": 41,
+    "nmi": 0.18601603045589046
+   },
+   "input_tokens|tool_calls_per_message": {
+    "rho": 0.15393993714501486,
+    "n": 41,
+    "nmi": 0.2626342910609673
+   },
+   "input_tokens|tool_errors": {
+    "rho": 0.41553486128733297,
+    "n": 41,
+    "nmi": 0.1655997708957454
+   },
+   "input_tokens|tool_output_chars": {
+    "rho": 0.2287883220378195,
+    "n": 41,
+    "nmi": 0.16879888772145646
+   },
+   "input_tokens|tool_latency_ms": {
+    "rho": -0.04716666306365782,
+    "n": 30,
+    "nmi": 0.10653679966189783
+   },
+   "input_tokens|call_span_ms": {
+    "rho": 0.14950657761037964,
+    "n": 41,
+    "nmi": 0.0448078085069179
+   },
+   "input_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "input_tokens|output_text_chars": {
+    "rho": -0.14012856712915644,
+    "n": 41,
+    "nmi": 0.109652676964865
+   },
+   "input_tokens|context_tokens": {
+    "rho": -0.7884791350474841,
+    "n": 41,
+    "nmi": 0.482185595311117
+   },
+   "input_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "input_tokens|cumulative_output_tokens": {
+    "rho": -0.5980263104415185,
+    "n": 41,
+    "nmi": 0.27504896830830927
+   },
+   "input_tokens|cache_hit_ratio": {
+    "rho": -0.7386327529467811,
+    "n": 41,
+    "nmi": 0.4151881112225537
+   },
+   "input_tokens|thinking_ratio": {
+    "rho": 0.3216656669799077,
+    "n": 41,
+    "nmi": 0.21554251855398315
+   },
+   "input_tokens|output_tokens_per_sec": {
+    "rho": -0.2990131552207593,
+    "n": 41,
+    "nmi": 0.06261008846401653
+   },
+   "cache_read_input_tokens|cache_creation_input_tokens": {
+    "rho": -0.520921892831841,
+    "n": 41,
+    "nmi": 0.36822466071792426
+   },
+   "cache_read_input_tokens|output_tokens": {
+    "rho": -0.08261155836253653,
+    "n": 41,
+    "nmi": 0.10852181503363663
+   },
+   "cache_read_input_tokens|thinking_tokens": {
+    "rho": -0.3399335080224258,
+    "n": 41,
+    "nmi": 0.24968956067467096
+   },
+   "cache_read_input_tokens|tool_calls_per_message": {
+    "rho": -0.2586691788570761,
+    "n": 41,
+    "nmi": 0.24886663410142965
+   },
+   "cache_read_input_tokens|tool_errors": {
+    "rho": -0.362637556431374,
+    "n": 41,
+    "nmi": 0.1495470845999655
+   },
+   "cache_read_input_tokens|tool_output_chars": {
+    "rho": -0.3147185573322204,
+    "n": 41,
+    "nmi": 0.25167666544348555
+   },
+   "cache_read_input_tokens|tool_latency_ms": {
+    "rho": 0.2190226988257476,
+    "n": 30,
+    "nmi": 0.3002348016510402
+   },
+   "cache_read_input_tokens|call_span_ms": {
+    "rho": -0.09430855522429636,
+    "n": 41,
+    "nmi": 0.09251163688966337
+   },
+   "cache_read_input_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "cache_read_input_tokens|output_text_chars": {
+    "rho": 0.2872522479024395,
+    "n": 41,
+    "nmi": 0.20917940985477873
+   },
+   "cache_read_input_tokens|context_tokens": {
+    "rho": 0.8506337733117242,
+    "n": 41,
+    "nmi": 0.5450100961854097
+   },
+   "cache_read_input_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "cache_read_input_tokens|cumulative_output_tokens": {
+    "rho": 0.7217419655411635,
+    "n": 41,
+    "nmi": 0.3602195716459376
+   },
+   "cache_read_input_tokens|cache_hit_ratio": {
+    "rho": 0.5907887818366522,
+    "n": 41,
+    "nmi": 0.3760911076806779
+   },
+   "cache_read_input_tokens|thinking_ratio": {
+    "rho": -0.18483421131179725,
+    "n": 41,
+    "nmi": 0.19855510759284056
+   },
+   "cache_read_input_tokens|output_tokens_per_sec": {
+    "rho": 0.1953031647368824,
+    "n": 41,
+    "nmi": 0.17973835637354293
+   },
+   "cache_creation_input_tokens|output_tokens": {
+    "rho": 0.4859283858742391,
+    "n": 41,
+    "nmi": 0.34975201504137293
+   },
+   "cache_creation_input_tokens|thinking_tokens": {
+    "rho": 0.6141512745519407,
+    "n": 41,
+    "nmi": 0.24663044370611986
+   },
+   "cache_creation_input_tokens|tool_calls_per_message": {
+    "rho": 0.1798966464521245,
+    "n": 41,
+    "nmi": 0.199426927080591
+   },
+   "cache_creation_input_tokens|tool_errors": {
+    "rho": 0.23627925577637926,
+    "n": 41,
+    "nmi": 0.10078689446866673
+   },
+   "cache_creation_input_tokens|tool_output_chars": {
+    "rho": 0.36483752026570987,
+    "n": 41,
+    "nmi": 0.2339150767523654
+   },
+   "cache_creation_input_tokens|tool_latency_ms": {
+    "rho": -0.10773513076037182,
+    "n": 30,
+    "nmi": 0.21028072565428865
+   },
+   "cache_creation_input_tokens|call_span_ms": {
+    "rho": 0.5049009050289958,
+    "n": 41,
+    "nmi": 0.3077044266468095
+   },
+   "cache_creation_input_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "cache_creation_input_tokens|output_text_chars": {
+    "rho": 0.19789110442779315,
+    "n": 41,
+    "nmi": 0.2759111132201847
+   },
+   "cache_creation_input_tokens|context_tokens": {
+    "rho": -0.2285838779956427,
+    "n": 41,
+    "nmi": 0.40207714860221977
+   },
+   "cache_creation_input_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "cache_creation_input_tokens|cumulative_output_tokens": {
+    "rho": -0.14532781873828557,
+    "n": 41,
+    "nmi": 0.24934637915305663
+   },
+   "cache_creation_input_tokens|cache_hit_ratio": {
+    "rho": -0.9879738562091503,
+    "n": 41,
+    "nmi": 0.7327183886258226
+   },
+   "cache_creation_input_tokens|thinking_ratio": {
+    "rho": 0.17817469383680695,
+    "n": 41,
+    "nmi": 0.16935462152812414
+   },
+   "cache_creation_input_tokens|output_tokens_per_sec": {
+    "rho": -0.21293836270765584,
+    "n": 41,
+    "nmi": 0.15111293236493795
+   },
+   "output_tokens|thinking_tokens": {
+    "rho": 0.6308590370692827,
+    "n": 41,
+    "nmi": 0.2938761469500188
+   },
+   "output_tokens|tool_calls_per_message": {
+    "rho": 0.4640189283736838,
+    "n": 41,
+    "nmi": 0.26034239251741664
+   },
+   "output_tokens|tool_errors": {
+    "rho": -0.06929650492454563,
+    "n": 41,
+    "nmi": 0.048516113978673586
+   },
+   "output_tokens|tool_output_chars": {
+    "rho": 0.5104283799016583,
+    "n": 41,
+    "nmi": 0.263130720220448
+   },
+   "output_tokens|tool_latency_ms": {
+    "rho": -0.004004894896291738,
+    "n": 30,
+    "nmi": 0.19550910956717574
+   },
+   "output_tokens|call_span_ms": {
+    "rho": 0.9878479037202537,
+    "n": 41,
+    "nmi": 0.9085777041056933
+   },
+   "output_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "output_tokens|output_text_chars": {
+    "rho": 0.16220111686257685,
+    "n": 41,
+    "nmi": 0.10939816547648125
+   },
+   "output_tokens|context_tokens": {
+    "rho": 0.0888734003212702,
+    "n": 41,
+    "nmi": 0.17213672656221962
+   },
+   "output_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "output_tokens|cumulative_output_tokens": {
+    "rho": 0.4839060939299832,
+    "n": 41,
+    "nmi": 0.18522522101570896
+   },
+   "output_tokens|cache_hit_ratio": {
+    "rho": -0.4556940036080815,
+    "n": 41,
+    "nmi": 0.33883614867526685
+   },
+   "output_tokens|thinking_ratio": {
+    "rho": -0.2500108892131506,
+    "n": 41,
+    "nmi": 0.1431776326211455
+   },
+   "output_tokens|output_tokens_per_sec": {
+    "rho": -0.08606646639114733,
+    "n": 41,
+    "nmi": 0.262434873606546
+   },
+   "thinking_tokens|tool_calls_per_message": {
+    "rho": -0.013863563608504496,
+    "n": 41,
+    "nmi": 0.038006401643185785
+   },
+   "thinking_tokens|tool_errors": {
+    "rho": 0.1291547383332515,
+    "n": 41,
+    "nmi": 0.04856228589514002
+   },
+   "thinking_tokens|tool_output_chars": {
+    "rho": 0.10180420404224984,
+    "n": 41,
+    "nmi": 0.17027702612570675
+   },
+   "thinking_tokens|tool_latency_ms": {
+    "rho": -0.02246941045606229,
+    "n": 30,
+    "nmi": 0.0876996412082049
+   },
+   "thinking_tokens|call_span_ms": {
+    "rho": 0.6870235716630845,
+    "n": 41,
+    "nmi": 0.34390660290753045
+   },
+   "thinking_tokens|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "thinking_tokens|output_text_chars": {
+    "rho": 0.38483457040838676,
+    "n": 41,
+    "nmi": 0.18438441214576018
+   },
+   "thinking_tokens|context_tokens": {
+    "rho": -0.18760892368194218,
+    "n": 41,
+    "nmi": 0.1834990372094388
+   },
+   "thinking_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "thinking_tokens|cumulative_output_tokens": {
+    "rho": 0.10079714334443174,
+    "n": 41,
+    "nmi": 0.305654525888104
+   },
+   "thinking_tokens|cache_hit_ratio": {
+    "rho": -0.5873997930979898,
+    "n": 41,
+    "nmi": 0.2565996982281301
+   },
+   "thinking_tokens|thinking_ratio": {
+    "rho": 0.5249814916106704,
+    "n": 41,
+    "nmi": 0.19659998774860812
+   },
+   "thinking_tokens|output_tokens_per_sec": {
+    "rho": -0.45755107765337555,
+    "n": 41,
+    "nmi": 0.11242477908636683
+   },
+   "tool_calls_per_message|tool_errors": {
+    "rho": 0.08918533184691829,
+    "n": 41,
+    "nmi": 0.1201762493280718
+   },
+   "tool_calls_per_message|tool_output_chars": {
+    "rho": 0.829153259921086,
+    "n": 41,
+    "nmi": 0.5742519822364134
+   },
+   "tool_calls_per_message|tool_latency_ms": {
+    "rho": 0.09702472457049081,
+    "n": 30,
+    "nmi": 0.16085841155523922
+   },
+   "tool_calls_per_message|call_span_ms": {
+    "rho": 0.4183190653905241,
+    "n": 41,
+    "nmi": 0.26034239251741664
+   },
+   "tool_calls_per_message|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_calls_per_message|output_text_chars": {
+    "rho": -0.4973028011458718,
+    "n": 41,
+    "nmi": 0.35368092599793266
+   },
+   "tool_calls_per_message|context_tokens": {
+    "rho": -0.2524276585982087,
+    "n": 41,
+    "nmi": 0.20645615293496838
+   },
+   "tool_calls_per_message|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_calls_per_message|cumulative_output_tokens": {
+    "rho": -0.019140070444755113,
+    "n": 41,
+    "nmi": 0.12738186784893119
+   },
+   "tool_calls_per_message|cache_hit_ratio": {
+    "rho": -0.22390866198566672,
+    "n": 41,
+    "nmi": 0.21797954352928134
+   },
+   "tool_calls_per_message|thinking_ratio": {
+    "rho": -0.6645748170921156,
+    "n": 41,
+    "nmi": 0.3363654339704936
+   },
+   "tool_calls_per_message|output_tokens_per_sec": {
+    "rho": 0.5075078472568056,
+    "n": 41,
+    "nmi": 0.20521325638689233
+   },
+   "tool_errors|tool_output_chars": {
+    "rho": 0.006362345045082145,
+    "n": 41,
+    "nmi": 0.19136748710227397
+   },
+   "tool_errors|tool_latency_ms": {
+    "rho": 0.24284190602878447,
+    "n": 30,
+    "nmi": 0.15466633634056223
+   },
+   "tool_errors|call_span_ms": {
+    "rho": -0.05039526306789696,
+    "n": 41,
+    "nmi": 0.04851611397867358
+   },
+   "tool_errors|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_errors|output_text_chars": {
+    "rho": -0.15262534483097379,
+    "n": 41,
+    "nmi": 0.04893753825989756
+   },
+   "tool_errors|context_tokens": {
+    "rho": -0.40640031993537235,
+    "n": 41,
+    "nmi": 0.1896870435975975
+   },
+   "tool_errors|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_errors|cumulative_output_tokens": {
+    "rho": -0.38426388089271435,
+    "n": 41,
+    "nmi": 0.15713979734403177
+   },
+   "tool_errors|cache_hit_ratio": {
+    "rho": -0.2614823763925264,
+    "n": 41,
+    "nmi": 0.1015347880720506
+   },
+   "tool_errors|thinking_ratio": {
+    "rho": 0.17638342073763938,
+    "n": 41,
+    "nmi": 0.12260190914456481
+   },
+   "tool_errors|output_tokens_per_sec": {
+    "rho": -0.11338934190276817,
+    "n": 41,
+    "nmi": 0.09230103589165195
+   },
+   "tool_output_chars|tool_latency_ms": {
+    "rho": -0.0569902175181924,
+    "n": 30,
+    "nmi": 0.18151903872149697
+   },
+   "tool_output_chars|call_span_ms": {
+    "rho": 0.4719156388920445,
+    "n": 41,
+    "nmi": 0.26313072022044787
+   },
+   "tool_output_chars|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_output_chars|output_text_chars": {
+    "rho": -0.32254953426552524,
+    "n": 41,
+    "nmi": 0.33753625692416556
+   },
+   "tool_output_chars|context_tokens": {
+    "rho": -0.19623436328811697,
+    "n": 41,
+    "nmi": 0.22204365060718476
+   },
+   "tool_output_chars|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "tool_output_chars|cumulative_output_tokens": {
+    "rho": 0.012756854518893822,
+    "n": 41,
+    "nmi": 0.1810972933969601
+   },
+   "tool_output_chars|cache_hit_ratio": {
+    "rho": -0.40672431709312856,
+    "n": 41,
+    "nmi": 0.22656127309262988
+   },
+   "tool_output_chars|thinking_ratio": {
+    "rho": -0.5178403151600623,
+    "n": 41,
+    "nmi": 0.28478452121569814
+   },
+   "tool_output_chars|output_tokens_per_sec": {
+    "rho": 0.2660464004492063,
+    "n": 41,
+    "nmi": 0.223517382703894
+   },
+   "tool_latency_ms|call_span_ms": {
+    "rho": -0.026028921023359287,
+    "n": 30,
+    "nmi": 0.25293265064362813
+   },
+   "tool_latency_ms|inter_call_gap_ms": {
+    "rho": null,
+    "n": 18,
+    "nmi": null
+   },
+   "tool_latency_ms|output_text_chars": {
+    "rho": -0.10697729371966598,
+    "n": 30,
+    "nmi": 0.10398179168079483
+   },
+   "tool_latency_ms|context_tokens": {
+    "rho": 0.0690039060655274,
+    "n": 30,
+    "nmi": 0.224220880105402
+   },
+   "tool_latency_ms|context_growth": {
+    "rho": null,
+    "n": 18,
+    "nmi": null
+   },
+   "tool_latency_ms|cumulative_output_tokens": {
+    "rho": 0.1946607341490545,
+    "n": 30,
+    "nmi": 0.1955091095671758
+   },
+   "tool_latency_ms|cache_hit_ratio": {
+    "rho": 0.10773513076037182,
+    "n": 30,
+    "nmi": 0.18151903872149697
+   },
+   "tool_latency_ms|thinking_ratio": {
+    "rho": -0.0389321468298109,
+    "n": 30,
+    "nmi": 0.24589503684969422
+   },
+   "tool_latency_ms|output_tokens_per_sec": {
+    "rho": 0.04827586206896552,
+    "n": 30,
+    "nmi": 0.22422088010540198
+   },
+   "call_span_ms|inter_call_gap_ms": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "call_span_ms|output_text_chars": {
+    "rho": 0.22371283722623425,
+    "n": 41,
+    "nmi": 0.1009363254556651
+   },
+   "call_span_ms|context_tokens": {
+    "rho": 0.07187976646228153,
+    "n": 41,
+    "nmi": 0.17728992127191653
+   },
+   "call_span_ms|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "call_span_ms|cumulative_output_tokens": {
+    "rho": 0.4754355400696864,
+    "n": 41,
+    "nmi": 0.1983137154691983
+   },
+   "call_span_ms|cache_hit_ratio": {
+    "rho": -0.4752777285475706,
+    "n": 41,
+    "nmi": 0.31261205588754304
+   },
+   "call_span_ms|thinking_ratio": {
+    "rho": -0.18449477351916377,
+    "n": 41,
+    "nmi": 0.1511129323649379
+   },
+   "call_span_ms|output_tokens_per_sec": {
+    "rho": -0.1911149825783972,
+    "n": 41,
+    "nmi": 0.30343268645560706
+   },
+   "inter_call_gap_ms|output_text_chars": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|context_tokens": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|cumulative_output_tokens": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|cache_hit_ratio": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|thinking_ratio": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "inter_call_gap_ms|output_tokens_per_sec": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "output_text_chars|context_tokens": {
+    "rho": 0.4510264345583066,
+    "n": 41,
+    "nmi": 0.18623587025680313
+   },
+   "output_text_chars|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "output_text_chars|cumulative_output_tokens": {
+    "rho": 0.35312680689424053,
+    "n": 41,
+    "nmi": 0.2439110299215537
+   },
+   "output_text_chars|cache_hit_ratio": {
+    "rho": -0.15109071159670817,
+    "n": 41,
+    "nmi": 0.23613213003486058
+   },
+   "output_text_chars|thinking_ratio": {
+    "rho": 0.3609401416347794,
+    "n": 41,
+    "nmi": 0.21303037915989217
+   },
+   "output_text_chars|output_tokens_per_sec": {
+    "rho": -0.4353015343378392,
+    "n": 41,
+    "nmi": 0.21487765594452587
+   },
+   "context_tokens|context_growth": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "context_tokens|cumulative_output_tokens": {
+    "rho": 0.7817033511510181,
+    "n": 41,
+    "nmi": 0.39824526802262195
+   },
+   "context_tokens|cache_hit_ratio": {
+    "rho": 0.30091503267973857,
+    "n": 41,
+    "nmi": 0.37124547742489744
+   },
+   "context_tokens|thinking_ratio": {
+    "rho": -0.1699847568095894,
+    "n": 41,
+    "nmi": 0.1562661270746348
+   },
+   "context_tokens|output_tokens_per_sec": {
+    "rho": 0.13156175437338802,
+    "n": 41,
+    "nmi": 0.19831371546919827
+   },
+   "context_growth|cumulative_output_tokens": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "context_growth|cache_hit_ratio": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "context_growth|thinking_ratio": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "context_growth|output_tokens_per_sec": {
+    "rho": null,
+    "n": 29,
+    "nmi": null
+   },
+   "cumulative_output_tokens|cache_hit_ratio": {
+    "rho": 0.19464169488089325,
+    "n": 41,
+    "nmi": 0.2489865291118928
+   },
+   "cumulative_output_tokens|thinking_ratio": {
+    "rho": -0.27752613240418117,
+    "n": 41,
+    "nmi": 0.2114022099226876
+   },
+   "cumulative_output_tokens|output_tokens_per_sec": {
+    "rho": 0.018815331010452963,
+    "n": 41,
+    "nmi": 0.05630035079792301
+   },
+   "cache_hit_ratio|thinking_ratio": {
+    "rho": -0.15587018448608686,
+    "n": 41,
+    "nmi": 0.17890373917276534
+   },
+   "cache_hit_ratio|output_tokens_per_sec": {
+    "rho": 0.22112829973487336,
+    "n": 41,
+    "nmi": 0.17163794250229072
+   },
+   "thinking_ratio|output_tokens_per_sec": {
+    "rho": -0.5297909407665505,
+    "n": 41,
+    "nmi": 0.19831371546919827
+   }
+  }
+ },
+ "call_source_dependent": [
+  "cache_read_input_tokens|context_tokens",
+  "cache_read_input_tokens|cumulative_output_tokens",
+  "context_tokens|cumulative_output_tokens",
+  "step_index|context_tokens",
+  "step_index|cumulative_output_tokens"
+ ],
+ "clock": {
+  "input_tokens": -0.8030357347280175,
+  "cache_read_input_tokens": 0.9918815570857411,
+  "cache_creation_input_tokens": 0.10407296032284055,
+  "output_tokens": 0.4975806620663018,
+  "thinking_tokens": 0.21695832813920413,
+  "tool_calls_per_message": 0.03587654829110282,
+  "tool_errors": -0.17916690928807555,
+  "tool_output_chars": 0.265346224464462,
+  "tool_latency_ms": 0.4778629280298216,
+  "call_span_ms": 0.183830083756604,
+  "inter_call_gap_ms": 0.5580465939610025,
+  "output_text_chars": -0.06870479481132163,
+  "context_tokens": 0.9850889650627277,
+  "context_growth": 0.3810775859655358,
+  "cumulative_output_tokens": 0.9851550960862065,
+  "cache_hit_ratio": 0.5217486841531953,
+  "thinking_ratio": -0.27297903323196315,
+  "output_tokens_per_sec": 0.5831812128033265
+ },
+ "call_matrix_diff": {
+  "input_tokens|cache_read_input_tokens": {
+   "rho": -0.2783050187388881,
+   "n": 106,
+   "nmi": 0.23630259370603415
+  },
+  "input_tokens|cache_creation_input_tokens": {
+   "rho": 0.35809605909230996,
+   "n": 106,
+   "nmi": 0.14926115062429726
+  },
+  "input_tokens|output_tokens": {
+   "rho": 0.001946164429027491,
+   "n": 106,
+   "nmi": 0.08500027646773924
+  },
+  "input_tokens|thinking_tokens": {
+   "rho": 0.11433888839267134,
+   "n": 106,
+   "nmi": 0.15204869765342785
+  },
+  "input_tokens|tool_calls_per_message": {
+   "rho": -0.014857900790873476,
+   "n": 106,
+   "nmi": 0.020556164418111665
+  },
+  "input_tokens|tool_errors": {
+   "rho": 0.27702304005736356,
+   "n": 105,
+   "nmi": 0.09120785112562313
+  },
+  "input_tokens|tool_output_chars": {
+   "rho": 0.03999976630944881,
+   "n": 105,
+   "nmi": 0.06219643774654845
+  },
+  "input_tokens|tool_latency_ms": {
+   "rho": 0.08910313082980377,
+   "n": 90,
+   "nmi": 0.13959576955188974
+  },
+  "input_tokens|call_span_ms": {
+   "rho": 0.05935801508533847,
+   "n": 106,
+   "nmi": 0.06272076261329108
+  },
+  "input_tokens|inter_call_gap_ms": {
+   "rho": null,
+   "n": 93,
+   "nmi": null
+  },
+  "input_tokens|output_text_chars": {
+   "rho": 0.013358775966487445,
+   "n": 106,
+   "nmi": 0.02510509734294787
+  },
+  "input_tokens|context_tokens": {
+   "rho": 0.31576597405110846,
+   "n": 106,
+   "nmi": 0.10474513044650421
+  },
+  "input_tokens|context_growth": {
+   "rho": null,
+   "n": 93,
+   "nmi": null
+  },
+  "input_tokens|cumulative_output_tokens": {
+   "rho": 0.3590709552905885,
+   "n": 106,
+   "nmi": 0.09655016620341204
+  },
+  "input_tokens|cache_hit_ratio": {
+   "rho": -0.4271830921715343,
+   "n": 106,
+   "nmi": 0.23570647294357844
+  },
+  "input_tokens|thinking_ratio": {
+   "rho": 0.192670763827795,
+   "n": 106,
+   "nmi": 0.08009555519060323
+  },
+  "input_tokens|output_tokens_per_sec": {
+   "rho": -0.05890469048107843,
+   "n": 89,
+   "nmi": 0.11163335521985257
+  },
+  "cache_read_input_tokens|cache_creation_input_tokens": {
+   "rho": -0.6056836531537348,
+   "n": 106,
+   "nmi": 0.24438557703325747
+  },
+  "cache_read_input_tokens|output_tokens": {
+   "rho": -0.09873918356305768,
+   "n": 106,
+   "nmi": 0.10373436803416303
+  },
+  "cache_read_input_tokens|thinking_tokens": {
+   "rho": -0.23013963658788408,
+   "n": 106,
+   "nmi": 0.07588754817148191
+  },
+  "cache_read_input_tokens|tool_calls_per_message": {
+   "rho": 0.17995183600165127,
+   "n": 106,
+   "nmi": 0.07791654312216922
+  },
+  "cache_read_input_tokens|tool_errors": {
+   "rho": 0.04723710711063604,
+   "n": 105,
+   "nmi": 0.07462400830937459
+  },
+  "cache_read_input_tokens|tool_output_chars": {
+   "rho": -0.08395041250866564,
+   "n": 105,
+   "nmi": 0.04084269001906738
+  },
+  "cache_read_input_tokens|tool_latency_ms": {
+   "rho": 0.044474992591617,
+   "n": 90,
+   "nmi": 0.06754889657364842
+  },
+  "cache_read_input_tokens|call_span_ms": {
+   "rho": -0.10820601313316613,
+   "n": 106,
+   "nmi": 0.06016341943324865
+  },
+  "cache_read_input_tokens|inter_call_gap_ms": {
+   "rho": -0.09302915460595028,
+   "n": 93,
+   "nmi": 0.1523855127553955
+  },
+  "cache_read_input_tokens|output_text_chars": {
+   "rho": -0.029592954497795244,
+   "n": 106,
+   "nmi": 0.04867903470610057
+  },
+  "cache_read_input_tokens|context_tokens": {
+   "rho": 0.3061864552104739,
+   "n": 106,
+   "nmi": 0.10466852529612923
+  },
+  "cache_read_input_tokens|context_growth": {
+   "rho": -0.5899300970748232,
+   "n": 93,
+   "nmi": 0.25267373172444757
+  },
+  "cache_read_input_tokens|cumulative_output_tokens": {
+   "rho": 0.1728809631178321,
+   "n": 106,
+   "nmi": 0.07742751860320989
+  },
+  "cache_read_input_tokens|cache_hit_ratio": {
+   "rho": 0.6333052032797403,
+   "n": 106,
+   "nmi": 0.18814755451115298
+  },
+  "cache_read_input_tokens|thinking_ratio": {
+   "rho": -0.17883233745025745,
+   "n": 106,
+   "nmi": 0.07298381505518488
+  },
+  "cache_read_input_tokens|output_tokens_per_sec": {
+   "rho": 0.0631184695084506,
+   "n": 89,
+   "nmi": 0.057362959417056554
+  },
+  "cache_creation_input_tokens|output_tokens": {
+   "rho": -0.2539398641736346,
+   "n": 106,
+   "nmi": 0.11394149678154937
+  },
+  "cache_creation_input_tokens|thinking_tokens": {
+   "rho": -0.034446622096558875,
+   "n": 106,
+   "nmi": 0.09300917417331267
+  },
+  "cache_creation_input_tokens|tool_calls_per_message": {
+   "rho": 0.05847169663162764,
+   "n": 106,
+   "nmi": 0.03737994061645989
+  },
+  "cache_creation_input_tokens|tool_errors": {
+   "rho": 0.02998084656061158,
+   "n": 105,
+   "nmi": 0.07462400830937459
+  },
+  "cache_creation_input_tokens|tool_output_chars": {
+   "rho": 0.08572776332105571,
+   "n": 105,
+   "nmi": 0.058400655241076106
+  },
+  "cache_creation_input_tokens|tool_latency_ms": {
+   "rho": -0.03944157025473075,
+   "n": 90,
+   "nmi": 0.08923697394153603
+  },
+  "cache_creation_input_tokens|call_span_ms": {
+   "rho": -0.090742830657527,
+   "n": 106,
+   "nmi": 0.08555438189542051
+  },
+  "cache_creation_input_tokens|inter_call_gap_ms": {
+   "rho": -0.2007266325041124,
+   "n": 93,
+   "nmi": 0.1179891419354871
+  },
+  "cache_creation_input_tokens|output_text_chars": {
+   "rho": -0.10214513071768401,
+   "n": 106,
+   "nmi": 0.046593025745784465
+  },
+  "cache_creation_input_tokens|context_tokens": {
+   "rho": 0.4459917323116575,
+   "n": 106,
+   "nmi": 0.2221640871401848
+  },
+  "cache_creation_input_tokens|context_growth": {
+   "rho": 0.9997911102490264,
+   "n": 93,
+   "nmi": 1.0
+  },
+  "cache_creation_input_tokens|cumulative_output_tokens": {
+   "rho": 0.1604603943954828,
+   "n": 106,
+   "nmi": 0.05978637233160106
+  },
+  "cache_creation_input_tokens|cache_hit_ratio": {
+   "rho": -0.923086999467591,
+   "n": 106,
+   "nmi": 0.518042836849252
+  },
+  "cache_creation_input_tokens|thinking_ratio": {
+   "rho": 0.07245942357951987,
+   "n": 106,
+   "nmi": 0.05435813309019172
+  },
+  "cache_creation_input_tokens|output_tokens_per_sec": {
+   "rho": -0.06416438612752244,
+   "n": 89,
+   "nmi": 0.06324849653368951
+  },
+  "output_tokens|thinking_tokens": {
+   "rho": 0.4627069457708534,
+   "n": 106,
+   "nmi": 0.21259055002425004
+  },
+  "output_tokens|tool_calls_per_message": {
+   "rho": 0.09587142592952028,
+   "n": 106,
+   "nmi": 0.09876503748038537
+  },
+  "output_tokens|tool_errors": {
+   "rho": 0.01237548830367318,
+   "n": 105,
+   "nmi": 0.07600351092671988
+  },
+  "output_tokens|tool_output_chars": {
+   "rho": 0.02356490458027278,
+   "n": 105,
+   "nmi": 0.07819050074131442
+  },
+  "output_tokens|tool_latency_ms": {
+   "rho": -0.06824738958525756,
+   "n": 90,
+   "nmi": 0.07048313449541563
+  },
+  "output_tokens|call_span_ms": {
+   "rho": 0.7383479859939038,
+   "n": 106,
+   "nmi": 0.3973431746145136
+  },
+  "output_tokens|inter_call_gap_ms": {
+   "rho": 0.44758437527975886,
+   "n": 93,
+   "nmi": 0.17675545401713863
+  },
+  "output_tokens|output_text_chars": {
+   "rho": -0.03293814199018964,
+   "n": 106,
+   "nmi": 0.02897920016275621
+  },
+  "output_tokens|context_tokens": {
+   "rho": -0.3166594872657534,
+   "n": 106,
+   "nmi": 0.21535550776505147
+  },
+  "output_tokens|context_growth": {
+   "rho": -0.29940392263017707,
+   "n": 93,
+   "nmi": 0.11664282838362881
+  },
+  "output_tokens|cumulative_output_tokens": {
+   "rho": 0.349773028438327,
+   "n": 106,
+   "nmi": 0.3846096837270504
+  },
+  "output_tokens|cache_hit_ratio": {
+   "rho": 0.20988487795047484,
+   "n": 106,
+   "nmi": 0.07065175898926605
+  },
+  "output_tokens|thinking_ratio": {
+   "rho": 0.051470014031485656,
+   "n": 106,
+   "nmi": 0.04499628075794095
+  },
+  "output_tokens|output_tokens_per_sec": {
+   "rho": -0.0970207694926796,
+   "n": 89,
+   "nmi": 0.04685685243365589
+  },
+  "thinking_tokens|tool_calls_per_message": {
+   "rho": -0.08727027123809522,
+   "n": 106,
+   "nmi": 0.07643361499289089
+  },
+  "thinking_tokens|tool_errors": {
+   "rho": -0.04856722073299546,
+   "n": 105,
+   "nmi": 0.09462892057831891
+  },
+  "thinking_tokens|tool_output_chars": {
+   "rho": -0.14226249412070088,
+   "n": 105,
+   "nmi": 0.06344203225356584
+  },
+  "thinking_tokens|tool_latency_ms": {
+   "rho": -0.15735664545027753,
+   "n": 90,
+   "nmi": 0.03573650902770741
+  },
+  "thinking_tokens|call_span_ms": {
+   "rho": 0.19581120708396454,
+   "n": 106,
+   "nmi": 0.12414470535468906
+  },
+  "thinking_tokens|inter_call_gap_ms": {
+   "rho": 0.7184938994024294,
+   "n": 93,
+   "nmi": 0.4273231663025905
+  },
+  "thinking_tokens|output_text_chars": {
+   "rho": 0.09019059675025717,
+   "n": 106,
+   "nmi": 0.05297317300259756
+  },
+  "thinking_tokens|context_tokens": {
+   "rho": -0.18836516251119487,
+   "n": 106,
+   "nmi": 0.14686107797696177
+  },
+  "thinking_tokens|context_growth": {
+   "rho": -0.069732655433136,
+   "n": 93,
+   "nmi": 0.0786302194569264
+  },
+  "thinking_tokens|cumulative_output_tokens": {
+   "rho": 0.13529826682960922,
+   "n": 106,
+   "nmi": 0.19817370458394232
+  },
+  "thinking_tokens|cache_hit_ratio": {
+   "rho": -0.017628802613837435,
+   "n": 106,
+   "nmi": 0.06049718099899737
+  },
+  "thinking_tokens|thinking_ratio": {
+   "rho": 0.7504931190655862,
+   "n": 106,
+   "nmi": 0.20433297311621576
+  },
+  "thinking_tokens|output_tokens_per_sec": {
+   "rho": 0.4921261853996338,
+   "n": 89,
+   "nmi": 0.17404425943691543
+  },
+  "tool_calls_per_message|tool_errors": {
+   "rho": 0.19593531011697332,
+   "n": 105,
+   "nmi": 0.04742104081319609
+  },
+  "tool_calls_per_message|tool_output_chars": {
+   "rho": 0.394665858965237,
+   "n": 105,
+   "nmi": 0.16669853531320886
+  },
+  "tool_calls_per_message|tool_latency_ms": {
+   "rho": 0.07234419828833463,
+   "n": 90,
+   "nmi": 0.04172817084303252
+  },
+  "tool_calls_per_message|call_span_ms": {
+   "rho": 0.16511933279683774,
+   "n": 106,
+   "nmi": 0.1221189688741531
+  },
+  "tool_calls_per_message|inter_call_gap_ms": {
+   "rho": -0.08069976373632394,
+   "n": 93,
+   "nmi": 0.13628805565140087
+  },
+  "tool_calls_per_message|output_text_chars": {
+   "rho": -0.4095724832639875,
+   "n": 106,
+   "nmi": 0.11063949422694626
+  },
+  "tool_calls_per_message|context_tokens": {
+   "rho": 0.17691640556639907,
+   "n": 106,
+   "nmi": 0.11958414748769594
+  },
+  "tool_calls_per_message|context_growth": {
+   "rho": 0.0442255066315669,
+   "n": 93,
+   "nmi": 0.04476655362638793
+  },
+  "tool_calls_per_message|cumulative_output_tokens": {
+   "rho": 0.27999795638727915,
+   "n": 106,
+   "nmi": 0.12414095747541798
+  },
+  "tool_calls_per_message|cache_hit_ratio": {
+   "rho": -0.023526360940142536,
+   "n": 106,
+   "nmi": 0.034421203850843615
+  },
+  "tool_calls_per_message|thinking_ratio": {
+   "rho": -0.29625763379240694,
+   "n": 106,
+   "nmi": 0.08336302204449393
+  },
+  "tool_calls_per_message|output_tokens_per_sec": {
+   "rho": -0.016930425445137055,
+   "n": 89,
+   "nmi": 0.12593417728422537
+  },
+  "tool_errors|tool_output_chars": {
+   "rho": 0.16786327844901763,
+   "n": 105,
+   "nmi": 0.07395195847160055
+  },
+  "tool_errors|tool_latency_ms": {
+   "rho": 0.009378212954348939,
+   "n": 90,
+   "nmi": 0.07279166097381054
+  },
+  "tool_errors|call_span_ms": {
+   "rho": 0.07247212185120087,
+   "n": 105,
+   "nmi": 0.10311321299924385
+  },
+  "tool_errors|inter_call_gap_ms": {
+   "rho": -0.01932084597319269,
+   "n": 92,
+   "nmi": 0.08380683104109063
+  },
+  "tool_errors|output_text_chars": {
+   "rho": -0.05950326592080052,
+   "n": 105,
+   "nmi": 0.054482056029369924
+  },
+  "tool_errors|context_tokens": {
+   "rho": 0.13586022097971726,
+   "n": 105,
+   "nmi": 0.12559649055420377
+  },
+  "tool_errors|context_growth": {
+   "rho": -0.1457018780261842,
+   "n": 92,
+   "nmi": 0.08284983372012357
+  },
+  "tool_errors|cumulative_output_tokens": {
+   "rho": 0.20993464010338314,
+   "n": 105,
+   "nmi": 0.0883456712510057
+  },
+  "tool_errors|cache_hit_ratio": {
+   "rho": -0.08482506828182547,
+   "n": 105,
+   "nmi": 0.0746240083093746
+  },
+  "tool_errors|thinking_ratio": {
+   "rho": -0.007923488912289799,
+   "n": 105,
+   "nmi": 0.10311321299924385
+  },
+  "tool_errors|output_tokens_per_sec": {
+   "rho": -0.11435680614308473,
+   "n": 89,
+   "nmi": 0.09557509663617025
+  },
+  "tool_output_chars|tool_latency_ms": {
+   "rho": 0.34440520612977354,
+   "n": 90,
+   "nmi": 0.11738031390496376
+  },
+  "tool_output_chars|call_span_ms": {
+   "rho": -0.05020371774305805,
+   "n": 105,
+   "nmi": 0.06926236707508926
+  },
+  "tool_output_chars|inter_call_gap_ms": {
+   "rho": -0.037198441787527486,
+   "n": 92,
+   "nmi": 0.0639489603283393
+  },
+  "tool_output_chars|output_text_chars": {
+   "rho": -0.3047612693633193,
+   "n": 105,
+   "nmi": 0.1399448122539361
+  },
+  "tool_output_chars|context_tokens": {
+   "rho": -0.11551031943879696,
+   "n": 105,
+   "nmi": 0.15400475743592063
+  },
+  "tool_output_chars|context_growth": {
+   "rho": 0.09577497351569474,
+   "n": 92,
+   "nmi": 0.054976995933914204
+  },
+  "tool_output_chars|cumulative_output_tokens": {
+   "rho": 0.1134740192663273,
+   "n": 105,
+   "nmi": 0.0676522445994062
+  },
+  "tool_output_chars|cache_hit_ratio": {
+   "rho": -0.028629337438813587,
+   "n": 105,
+   "nmi": 0.05476337499875568
+  },
+  "tool_output_chars|thinking_ratio": {
+   "rho": -0.2564517258776943,
+   "n": 105,
+   "nmi": 0.1135097859541164
+  },
+  "tool_output_chars|output_tokens_per_sec": {
+   "rho": -0.10346970406944674,
+   "n": 89,
+   "nmi": 0.13067858519149989
+  },
+  "tool_latency_ms|call_span_ms": {
+   "rho": -0.039149027242490045,
+   "n": 90,
+   "nmi": 0.0647686970193503
+  },
+  "tool_latency_ms|inter_call_gap_ms": {
+   "rho": -0.11582346357127844,
+   "n": 80,
+   "nmi": 0.10757901738299992
+  },
+  "tool_latency_ms|output_text_chars": {
+   "rho": -0.05901459700044499,
+   "n": 90,
+   "nmi": 0.11572949645995202
+  },
+  "tool_latency_ms|context_tokens": {
+   "rho": -0.062156077524819664,
+   "n": 90,
+   "nmi": 0.08113310774673166
+  },
+  "tool_latency_ms|context_growth": {
+   "rho": -0.11635811694029403,
+   "n": 80,
+   "nmi": 0.08233084138317247
+  },
+  "tool_latency_ms|cumulative_output_tokens": {
+   "rho": -0.030901570187361692,
+   "n": 90,
+   "nmi": 0.06481568439630665
+  },
+  "tool_latency_ms|cache_hit_ratio": {
+   "rho": 0.08656248328049312,
+   "n": 90,
+   "nmi": 0.10768611214114329
+  },
+  "tool_latency_ms|thinking_ratio": {
+   "rho": -0.07814197754436798,
+   "n": 90,
+   "nmi": 0.09734005018378189
+  },
+  "tool_latency_ms|output_tokens_per_sec": {
+   "rho": -0.18150911457866334,
+   "n": 75,
+   "nmi": 0.1646716940729329
+  },
+  "call_span_ms|inter_call_gap_ms": {
+   "rho": 0.011996060994897199,
+   "n": 93,
+   "nmi": 0.1047206367832008
+  },
+  "call_span_ms|output_text_chars": {
+   "rho": 0.14002680957129773,
+   "n": 106,
+   "nmi": 0.06640851930839113
+  },
+  "call_span_ms|context_tokens": {
+   "rho": -0.1635744856656465,
+   "n": 106,
+   "nmi": 0.12792823271892262
+  },
+  "call_span_ms|context_growth": {
+   "rho": -0.11940198294909385,
+   "n": 93,
+   "nmi": 0.11437290382869304
+  },
+  "call_span_ms|cumulative_output_tokens": {
+   "rho": 0.3502466206351639,
+   "n": 106,
+   "nmi": 0.255166847620375
+  },
+  "call_span_ms|cache_hit_ratio": {
+   "rho": 0.06687155200644886,
+   "n": 106,
+   "nmi": 0.0896321882465009
+  },
+  "call_span_ms|thinking_ratio": {
+   "rho": -0.1938388136107458,
+   "n": 106,
+   "nmi": 0.03878519790328637
+  },
+  "call_span_ms|output_tokens_per_sec": {
+   "rho": -0.5437180796731359,
+   "n": 89,
+   "nmi": 0.13052279133296604
+  },
+  "inter_call_gap_ms|output_text_chars": {
+   "rho": -0.07796100877609635,
+   "n": 93,
+   "nmi": 0.06819976673150838
+  },
+  "inter_call_gap_ms|context_tokens": {
+   "rho": -0.30475067888156127,
+   "n": 93,
+   "nmi": 0.18894639725538953
+  },
+  "inter_call_gap_ms|context_growth": {
+   "rho": -0.19895108286700625,
+   "n": 93,
+   "nmi": 0.11798914193548714
+  },
+  "inter_call_gap_ms|cumulative_output_tokens": {
+   "rho": 0.09799840350011227,
+   "n": 93,
+   "nmi": 0.1566812702076205
+  },
+  "inter_call_gap_ms|cache_hit_ratio": {
+   "rho": 0.14999552385783774,
+   "n": 93,
+   "nmi": 0.06464386701566006
+  },
+  "inter_call_gap_ms|thinking_ratio": {
+   "rho": 0.5004644014850903,
+   "n": 93,
+   "nmi": 0.15461148508796088
+  },
+  "inter_call_gap_ms|output_tokens_per_sec": {
+   "rho": 0.5214764183185235,
+   "n": 76,
+   "nmi": 0.21018857619331544
+  },
+  "output_text_chars|context_tokens": {
+   "rho": -0.1763954917423089,
+   "n": 106,
+   "nmi": 0.033310289743812345
+  },
+  "output_text_chars|context_growth": {
+   "rho": -0.16243074990512524,
+   "n": 93,
+   "nmi": 0.07882140823879552
+  },
+  "output_text_chars|cumulative_output_tokens": {
+   "rho": -0.15312880815776614,
+   "n": 106,
+   "nmi": 0.06126129877505039
+  },
+  "output_text_chars|cache_hit_ratio": {
+   "rho": 0.10423495081512028,
+   "n": 106,
+   "nmi": 0.03741007496137861
+  },
+  "output_text_chars|thinking_ratio": {
+   "rho": 0.14169226156712397,
+   "n": 106,
+   "nmi": 0.05780404368955848
+  },
+  "output_text_chars|output_tokens_per_sec": {
+   "rho": -0.20213388540466917,
+   "n": 89,
+   "nmi": 0.06227386823521264
+  },
+  "context_tokens|context_growth": {
+   "rho": 0.3459785292875462,
+   "n": 93,
+   "nmi": 0.23402711554120934
+  },
+  "context_tokens|cumulative_output_tokens": {
+   "rho": 0.4905344300015384,
+   "n": 106,
+   "nmi": 0.15848913457606337
+  },
+  "context_tokens|cache_hit_ratio": {
+   "rho": -0.4188941705788805,
+   "n": 106,
+   "nmi": 0.14475778596733616
+  },
+  "context_tokens|thinking_ratio": {
+   "rho": 0.02713065032949759,
+   "n": 106,
+   "nmi": 0.048328230292634625
+  },
+  "context_tokens|output_tokens_per_sec": {
+   "rho": 0.07484710098425375,
+   "n": 89,
+   "nmi": 0.11313024078800449
+  },
+  "context_growth|cumulative_output_tokens": {
+   "rho": 0.06094358484654064,
+   "n": 93,
+   "nmi": 0.09792204369752928
+  },
+  "context_growth|cache_hit_ratio": {
+   "rho": -0.9501055631666259,
+   "n": 93,
+   "nmi": 0.5625014953973612
+  },
+  "context_growth|thinking_ratio": {
+   "rho": 0.040919857508164646,
+   "n": 93,
+   "nmi": 0.04065038217345857
+  },
+  "context_growth|output_tokens_per_sec": {
+   "rho": -0.055557454255940754,
+   "n": 76,
+   "nmi": 0.08181906291039699
+  },
+  "cumulative_output_tokens|cache_hit_ratio": {
+   "rho": -0.22207947281247142,
+   "n": 106,
+   "nmi": 0.06117379201878856
+  },
+  "cumulative_output_tokens|thinking_ratio": {
+   "rho": 0.04386280906502394,
+   "n": 106,
+   "nmi": 0.045430826679488716
+  },
+  "cumulative_output_tokens|output_tokens_per_sec": {
+   "rho": -0.016939269740098947,
+   "n": 89,
+   "nmi": 0.08251653610465227
+  },
+  "cache_hit_ratio|thinking_ratio": {
+   "rho": -0.11931410261292515,
+   "n": 106,
+   "nmi": 0.022361441166470503
+  },
+  "cache_hit_ratio|output_tokens_per_sec": {
+   "rho": -0.005549880830779707,
+   "n": 89,
+   "nmi": 0.06000080348502847
+  },
+  "thinking_ratio|output_tokens_per_sec": {
+   "rho": 0.6560435818862785,
+   "n": 89,
+   "nmi": 0.254980759074407
+  }
+ },
+ "call_clusters": [
+  [
+   "cache_read_input_tokens",
+   "step_index"
+  ],
+  [
+   "input_tokens"
+  ],
+  [
+   "cache_creation_input_tokens",
+   "context_growth"
+  ],
+  [
+   "output_tokens"
+  ],
+  [
+   "thinking_tokens"
+  ],
+  [
+   "tool_calls_per_message"
+  ],
+  [
+   "tool_errors"
+  ],
+  [
+   "tool_output_chars"
+  ],
+  [
+   "tool_latency_ms"
+  ],
+  [
+   "call_span_ms"
+  ],
+  [
+   "inter_call_gap_ms"
+  ],
+  [
+   "output_text_chars"
+  ],
+  [
+   "context_tokens"
+  ],
+  [
+   "cumulative_output_tokens"
+  ],
+  [
+   "cache_hit_ratio"
+  ],
+  [
+   "thinking_ratio"
+  ],
+  [
+   "output_tokens_per_sec"
+  ]
+ ],
+ "call_nonmonotone": [],
+ "run_rows": 288,
+ "run_matrix": {
+  "tokens_sent|tokens_received": {
+   "rho": 0.9179247685785213,
+   "n": 288,
+   "nmi": 0.47820612037815585
+  },
+  "tokens_sent|model_calls": {
+   "rho": 0.9579917487947285,
+   "n": 288,
+   "nmi": 0.6346966704527012
+  },
+  "tokens_sent|tool_call_count": {
+   "rho": 0.9579917487947285,
+   "n": 288,
+   "nmi": 0.6346966704527012
+  },
+  "tokens_sent|tool_error_rate": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tokens_sent|identical_call_repeats": {
+   "rho": 0.7413115317821307,
+   "n": 288,
+   "nmi": 0.23585644501886444
+  },
+  "tokens_sent|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tokens_sent|action_diversity": {
+   "rho": -0.6052738320339452,
+   "n": 288,
+   "nmi": 0.14907614847211212
+  },
+  "tokens_sent|tool_type_entropy": {
+   "rho": -0.04814032352101265,
+   "n": 288,
+   "nmi": 0.035447969202047354
+  },
+  "tokens_sent|cost_usd": {
+   "rho": 0.9968808900891777,
+   "n": 288,
+   "nmi": 0.9190952641082715
+  },
+  "tokens_sent|mean_tool_output_chars": {
+   "rho": 0.4610093678791459,
+   "n": 288,
+   "nmi": 0.080237441383475
+  },
+  "tokens_received|model_calls": {
+   "rho": 0.9323307301160513,
+   "n": 288,
+   "nmi": 0.4789242602232702
+  },
+  "tokens_received|tool_call_count": {
+   "rho": 0.9323307301160513,
+   "n": 288,
+   "nmi": 0.4789242602232702
+  },
+  "tokens_received|tool_error_rate": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tokens_received|identical_call_repeats": {
+   "rho": 0.7925755132387721,
+   "n": 288,
+   "nmi": 0.26695935138353055
+  },
+  "tokens_received|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tokens_received|action_diversity": {
+   "rho": -0.6491891059108376,
+   "n": 288,
+   "nmi": 0.1628703561360907
+  },
+  "tokens_received|tool_type_entropy": {
+   "rho": -0.1359575058619523,
+   "n": 288,
+   "nmi": 0.0436573384551367
+  },
+  "tokens_received|cost_usd": {
+   "rho": 0.9321496550592421,
+   "n": 288,
+   "nmi": 0.49702733362813606
+  },
+  "tokens_received|mean_tool_output_chars": {
+   "rho": 0.35042581975267545,
+   "n": 288,
+   "nmi": 0.06202443211558203
+  },
+  "model_calls|tool_call_count": {
+   "rho": 1.0,
+   "n": 288,
+   "nmi": 1.0
+  },
+  "model_calls|tool_error_rate": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "model_calls|identical_call_repeats": {
+   "rho": 0.763747663322252,
+   "n": 288,
+   "nmi": 0.2532569870027616
+  },
+  "model_calls|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "model_calls|action_diversity": {
+   "rho": -0.619420863023267,
+   "n": 288,
+   "nmi": 0.1537323037506569
+  },
+  "model_calls|tool_type_entropy": {
+   "rho": -0.020972775750282762,
+   "n": 288,
+   "nmi": 0.034339201013603514
+  },
+  "model_calls|cost_usd": {
+   "rho": 0.9590927076656598,
+   "n": 288,
+   "nmi": 0.6328559770958889
+  },
+  "model_calls|mean_tool_output_chars": {
+   "rho": 0.29765460720571324,
+   "n": 288,
+   "nmi": 0.04861201223145921
+  },
+  "tool_call_count|tool_error_rate": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_call_count|identical_call_repeats": {
+   "rho": 0.763747663322252,
+   "n": 288,
+   "nmi": 0.2532569870027616
+  },
+  "tool_call_count|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_call_count|action_diversity": {
+   "rho": -0.619420863023267,
+   "n": 288,
+   "nmi": 0.1537323037506569
+  },
+  "tool_call_count|tool_type_entropy": {
+   "rho": -0.020972775750282762,
+   "n": 288,
+   "nmi": 0.034339201013603514
+  },
+  "tool_call_count|cost_usd": {
+   "rho": 0.9590927076656598,
+   "n": 288,
+   "nmi": 0.6328559770958889
+  },
+  "tool_call_count|mean_tool_output_chars": {
+   "rho": 0.29765460720571324,
+   "n": 288,
+   "nmi": 0.04861201223145921
+  },
+  "tool_error_rate|identical_call_repeats": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_error_rate|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_error_rate|action_diversity": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_error_rate|tool_type_entropy": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_error_rate|cost_usd": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "tool_error_rate|mean_tool_output_chars": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "identical_call_repeats|retry_count": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "identical_call_repeats|action_diversity": {
+   "rho": -0.867016419215223,
+   "n": 288,
+   "nmi": 0.413171215379286
+  },
+  "identical_call_repeats|tool_type_entropy": {
+   "rho": -0.3305835271601492,
+   "n": 288,
+   "nmi": 0.062300686902014554
+  },
+  "identical_call_repeats|cost_usd": {
+   "rho": 0.7502673891589857,
+   "n": 288,
+   "nmi": 0.24898903344932308
+  },
+  "identical_call_repeats|mean_tool_output_chars": {
+   "rho": 0.2217759244046491,
+   "n": 288,
+   "nmi": 0.02987355420448345
+  },
+  "retry_count|action_diversity": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "retry_count|tool_type_entropy": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "retry_count|cost_usd": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "retry_count|mean_tool_output_chars": {
+   "rho": null,
+   "n": 0,
+   "nmi": null
+  },
+  "action_diversity|tool_type_entropy": {
+   "rho": 0.3870294403327158,
+   "n": 288,
+   "nmi": 0.0681677182423822
+  },
+  "action_diversity|cost_usd": {
+   "rho": -0.6116813215772477,
+   "n": 288,
+   "nmi": 0.15255728583412023
+  },
+  "action_diversity|mean_tool_output_chars": {
+   "rho": -0.18593083057982235,
+   "n": 288,
+   "nmi": 0.02800830856792664
+  },
+  "tool_type_entropy|cost_usd": {
+   "rho": -0.05709905188244602,
+   "n": 288,
+   "nmi": 0.03734287664065563
+  },
+  "tool_type_entropy|mean_tool_output_chars": {
+   "rho": -0.0969334559413262,
+   "n": 288,
+   "nmi": 0.04013341665906861
+  },
+  "cost_usd|mean_tool_output_chars": {
+   "rho": 0.4528501501030828,
+   "n": 288,
+   "nmi": 0.07858015091472706
+  }
+ },
+ "run_clusters": [
+  [
+   "cost_usd",
+   "model_calls",
+   "tokens_received",
+   "tokens_sent",
+   "tool_call_count"
+  ],
+  [
+   "tool_error_rate"
+  ],
+  [
+   "identical_call_repeats"
+  ],
+  [
+   "retry_count"
+  ],
+  [
+   "action_diversity"
+  ],
+  [
+   "tool_type_entropy"
+  ],
+  [
+   "mean_tool_output_chars"
+  ]
+ ],
+ "run_summaries_claude": [
+  {
+   "run_id": "cc_jsonl_self:self_sna",
+   "source": "cc_jsonl",
+   "tokens_sent": 17931390,
+   "tokens_received": 161384,
+   "model_calls": 78,
+   "tool_call_count": 81,
+   "tool_error_rate": null,
+   "identical_call_repeats": 1,
+   "retry_count": null,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 0.7671718178599841,
+   "cost_usd": 3.4320814,
+   "mean_tool_output_chars": 1662.469135802469
+  },
+  {
+   "run_id": "cc_stream:t01_create_test",
+   "source": "cc_stream",
+   "tokens_sent": 121940,
+   "tokens_received": 1115,
+   "model_calls": 4,
+   "tool_call_count": 3,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 0.9182958340544896,
+   "cost_usd": 0.0768839,
+   "mean_tool_output_chars": 249.33333333333334
+  },
+  {
+   "run_id": "cc_stream:t02_fix_bug",
+   "source": "cc_stream",
+   "tokens_sent": 184641,
+   "tokens_received": 1714,
+   "model_calls": 6,
+   "tool_call_count": 7,
+   "tool_error_rate": 0.14285714285714285,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 1.8423709931771084,
+   "cost_usd": 0.0399991,
+   "mean_tool_output_chars": 173.42857142857142
+  },
+  {
+   "run_id": "cc_stream:t03_search",
+   "source": "cc_stream",
+   "tokens_sent": 89724,
+   "tokens_received": 371,
+   "model_calls": 3,
+   "tool_call_count": 2,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.0199157,
+   "mean_tool_output_chars": 25.0
+  },
+  {
+   "run_id": "cc_stream:t04_impossible",
+   "source": "cc_stream",
+   "tokens_sent": 89705,
+   "tokens_received": 317,
+   "model_calls": 3,
+   "tool_call_count": 2,
+   "tool_error_rate": 0.5,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.0196191,
+   "mean_tool_output_chars": 81.0
+  },
+  {
+   "run_id": "cc_stream:t05_long_write",
+   "source": "cc_stream",
+   "tokens_sent": 60802,
+   "tokens_received": 1557,
+   "model_calls": 2,
+   "tool_call_count": 1,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.024814,
+   "mean_tool_output_chars": 202.0
+  },
+  {
+   "run_id": "cc_stream:t06_csv_mean",
+   "source": "cc_stream",
+   "tokens_sent": 125596,
+   "tokens_received": 787,
+   "model_calls": 4,
+   "tool_call_count": 3,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 1.584962500721156,
+   "cost_usd": 0.02962,
+   "mean_tool_output_chars": 863.6666666666666
+  },
+  {
+   "run_id": "cc_stream:t07_flaky_retry",
+   "source": "cc_stream",
+   "tokens_sent": 120043,
+   "tokens_received": 482,
+   "model_calls": 4,
+   "tool_call_count": 3,
+   "tool_error_rate": 0.6666666666666666,
+   "identical_call_repeats": 1,
+   "retry_count": 2,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.023785300000000002,
+   "mean_tool_output_chars": 23.0
+  },
+  {
+   "run_id": "cc_stream:t08_max_turns",
+   "source": "cc_stream",
+   "tokens_sent": 90393,
+   "tokens_received": 1562,
+   "model_calls": 3,
+   "tool_call_count": 11,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 1.3485878960124222,
+   "cost_usd": 0.027174499999999997,
+   "mean_tool_output_chars": 137.63636363636363
+  },
+  {
+   "run_id": "cc_stream:t09_big_read",
+   "source": "cc_stream",
+   "tokens_sent": 151526,
+   "tokens_received": 1352,
+   "model_calls": 3,
+   "tool_call_count": 2,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.0959277,
+   "mean_tool_output_chars": 37683.0
+  },
+  {
+   "run_id": "cc_stream:t10_rename",
+   "source": "cc_stream",
+   "tokens_sent": 155757,
+   "tokens_received": 2138,
+   "model_calls": 5,
+   "tool_call_count": 12,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": 1.4833557549816874,
+   "cost_usd": 0.040410999999999996,
+   "mean_tool_output_chars": 116.5
+  },
+  {
+   "run_id": "cc_stream:t11_timeout",
+   "source": "cc_stream",
+   "tokens_sent": 59833,
+   "tokens_received": 615,
+   "model_calls": 2,
+   "tool_call_count": 1,
+   "tool_error_rate": 1.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.018166,
+   "mean_tool_output_chars": 43.0
+  },
+  {
+   "run_id": "cc_stream:t12_bad_args",
+   "source": "cc_stream",
+   "tokens_sent": 59575,
+   "tokens_received": 170,
+   "model_calls": 2,
+   "tool_call_count": 1,
+   "tool_error_rate": 0.0,
+   "identical_call_repeats": 1,
+   "retry_count": 0,
+   "action_diversity": 1.0,
+   "tool_type_entropy": -0.0,
+   "cost_usd": 0.015402200000000001,
+   "mean_tool_output_chars": 31.0
+  }
+ ],
+ "call_representatives": [
+  {
+   "members": [
+    "cache_read_input_tokens",
+    "step_index"
+   ],
+   "representative": "cache_read_input_tokens"
+  },
+  {
+   "members": [
+    "input_tokens"
+   ],
+   "representative": "input_tokens"
+  },
+  {
+   "members": [
+    "cache_creation_input_tokens",
+    "context_growth"
+   ],
+   "representative": "cache_creation_input_tokens"
+  },
+  {
+   "members": [
+    "output_tokens"
+   ],
+   "representative": "output_tokens"
+  },
+  {
+   "members": [
+    "thinking_tokens"
+   ],
+   "representative": "thinking_tokens"
+  },
+  {
+   "members": [
+    "tool_calls_per_message"
+   ],
+   "representative": "tool_calls_per_message"
+  },
+  {
+   "members": [
+    "tool_errors"
+   ],
+   "representative": "tool_errors"
+  },
+  {
+   "members": [
+    "tool_output_chars"
+   ],
+   "representative": "tool_output_chars"
+  },
+  {
+   "members": [
+    "tool_latency_ms"
+   ],
+   "representative": "tool_latency_ms"
+  },
+  {
+   "members": [
+    "call_span_ms"
+   ],
+   "representative": "call_span_ms"
+  },
+  {
+   "members": [
+    "inter_call_gap_ms"
+   ],
+   "representative": "inter_call_gap_ms"
+  },
+  {
+   "members": [
+    "output_text_chars"
+   ],
+   "representative": "output_text_chars"
+  },
+  {
+   "members": [
+    "context_tokens"
+   ],
+   "representative": "context_tokens"
+  },
+  {
+   "members": [
+    "cumulative_output_tokens"
+   ],
+   "representative": "cumulative_output_tokens"
+  },
+  {
+   "members": [
+    "cache_hit_ratio"
+   ],
+   "representative": "cache_hit_ratio"
+  },
+  {
+   "members": [
+    "thinking_ratio"
+   ],
+   "representative": "thinking_ratio"
+  },
+  {
+   "members": [
+    "output_tokens_per_sec"
+   ],
+   "representative": "output_tokens_per_sec"
+  }
+ ],
+ "run_representatives": [
+  {
+   "members": [
+    "cost_usd",
+    "model_calls",
+    "tokens_received",
+    "tokens_sent",
+    "tool_call_count"
+   ],
+   "representative": "cost_usd"
+  },
+  {
+   "members": [
+    "tool_error_rate"
+   ],
+   "representative": null,
+   "note": "n<30 -- 안 잼"
+  },
+  {
+   "members": [
+    "identical_call_repeats"
+   ],
+   "representative": "identical_call_repeats"
+  },
+  {
+   "members": [
+    "retry_count"
+   ],
+   "representative": null,
+   "note": "n<30 -- 안 잼"
+  },
+  {
+   "members": [
+    "action_diversity"
+   ],
+   "representative": "action_diversity"
+  },
+  {
+   "members": [
+    "tool_type_entropy"
+   ],
+   "representative": "tool_type_entropy"
+  },
+  {
+   "members": [
+    "mean_tool_output_chars"
+   ],
+   "representative": "mean_tool_output_chars"
+  }
+ ]
+}
