@@ -1,0 +1,9 @@
+"""센서 층 -- LLM 실행에서 바깥에서 볼 수 있는 값을 원천에서 꺼내 하나의 텔레메트리 꼴로.
+
+    catalog.py   후보 센서 목록 · 형(직접/파생) · 원천별 가용성 근거
+    schema.py    텔레메트리 레코드 꼴(model_call · tool_call · run) -- JSON Schema
+    collect.py   원천 -> 레코드: Claude Code JSONL · claude -p stream-json(도착 시각 찍은 것) · SWE-agent .traj
+    derive.py    레코드 -> 파생 텔레메트리(레코드만 본다. 원천을 다시 열지 않는다)
+
+**Telemetry ≠ State.** 여기에는 해석(압박 · 혼란 · 수렴 안 함)이 없다. 관측값과 그 산술만 있다.
+"""
