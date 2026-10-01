@@ -47,26 +47,41 @@ class OutcomeModel:
         return {"Q": 1 / (1 + math.exp(-lo)), "prior": p0, "log_lr": contrib, "calibrated": self.calibrated,
                 "evidence": sum(r.status != UNKNOWN for r in readings)}
 
-    def calibrate(self, examples, alpha: float = 1.0) -> "OutcomeModel":
-        """examples: (readings, success: bool) 의 목록. LR = P(status | 성공) / P(status | 실패), Laplace alpha.
+    def calibrate(self, examples, alpha: float = 10.0) -> "OutcomeModel":
+        """examples: (readings, success: bool) 의 목록. LR = P(status | 성공) / P(status | 실패).
+
+        m-추정으로 다듬는다: P(st | 부류) = (c + alpha·m) / (n + alpha), m = 두 부류를 합친 그 상태의 비율.
+        드문 상태의 LR 은 1 쪽으로 준다(얼마나 주는지는 부류 크기에 달렸고 상한은 없다). **한 번도 안 나온 상태는
+        LR = 1** 이다(증거 없음).
+        (첫 판은 Laplace 였다 -- 안 나온 상태의 LR 이 1 이 아니라 '부류 크기의 비' 가 되는 버그. 2026-10-01
+        SWE-bench Lite 분석에서 늘 UNKNOWN 인 센서가 LR 2.7 을 받는 것으로 드러났다.)
         한쪽 라벨만 있으면 LR 을 못 잰다 -- ValueError."""
         pos = [r for r, y in examples if y]
         neg = [r for r, y in examples if not y]
         if not pos or not neg:
             raise ValueError("성공 · 실패 라벨이 둘 다 있어야 LR 을 잰다")
         sensors = {x.sensor for rs, _ in examples for x in rs}
-        sts = (OK, SUSPECT, FAULT, UNKNOWN)
+
+        def counts(group, s):
+            c = {st: 0 for st in (OK, SUSPECT, FAULT, UNKNOWN)}
+            for rs in group:
+                for x in rs:
+                    if x.sensor == s:
+                        c[x.status] += 1
+            return c
+
         for s in sensors:
-            def dist(group):
-                cnt = {st: alpha for st in sts}
-                for rs in group:
-                    for x in rs:
-                        if x.sensor == s:
-                            cnt[x.status] += 1
-                tot = sum(cnt.values())
-                return {st: c / tot for st, c in cnt.items()}
-            dp, dn = dist(pos), dist(neg)
-            self.lr[s] = {st: dp[st] / dn[st] for st in (OK, SUSPECT, FAULT)}
+            cp, cn = counts(pos, s), counts(neg, s)
+            npos, nneg = sum(cp.values()), sum(cn.values())
+            lr = {}
+            for st in (OK, SUSPECT, FAULT):
+                tot = cp[st] + cn[st]
+                if tot == 0 or npos == 0 or nneg == 0:
+                    lr[st] = 1.0
+                    continue
+                m = tot / (npos + nneg)
+                lr[st] = ((cp[st] + alpha * m) / (npos + alpha)) / ((cn[st] + alpha * m) / (nneg + alpha))
+            self.lr[s] = lr
         self.calibrated, self.n_calib = True, len(examples)
         return self
 

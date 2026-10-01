@@ -55,6 +55,20 @@ class Fusion(unittest.TestCase):
         with self.assertRaises(ValueError):
             OutcomeModel().calibrate([(five(), True)])
 
+    def test_calibrate_unseen_status_is_neutral_with_unequal_classes(self):
+        # 부류 크기가 다를 때(성공 3 : 실패 12) 한 번도 안 나온 상태가 LR 1 이어야 한다 -- Laplace 판은 (12+4)/(3+4)
+        ex = [(five(execution=OK), True)] * 3 + [(five(execution=FAULT), False)] * 12
+        m = OutcomeModel().calibrate(ex)
+        for s in ("outcome", "constraint", "behavior"):
+            for st in (OK, SUSPECT, FAULT):
+                self.assertEqual(m.lr[s][st], 1.0, (s, st))
+        self.assertEqual(m.lr["execution"][SUSPECT], 1.0)
+        self.assertGreater(m.lr["execution"][OK], 1)
+        self.assertLess(m.lr["execution"][FAULT], 1)
+        # 드문 상태는 1 쪽으로 줄어든다: 성공 1 번만 본 FAULT 가 무한대 증거가 되지 않는다
+        ex2 = ex + [(five(consistency=FAULT), True)]
+        self.assertLess(OutcomeModel().calibrate(ex2).lr["consistency"][FAULT], 5)
+
 
 class Verdicts(unittest.TestCase):
     v = Verifier()

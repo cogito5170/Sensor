@@ -1,0 +1,179 @@
+{
+ "n": 287,
+ "resolved": 69,
+ "fit": {
+  "n": 140,
+  "resolved": 36
+ },
+ "test": {
+  "n": 147,
+  "resolved": 33
+ },
+ "auroc": {
+  "Q_A_default": 0.5418660287081339,
+  "Q_A_default_noprior": 0.5103668261562998,
+  "Q_B_calibrated": 0.7308612440191388,
+  "Q_B_calibrated_noprior": 0.6770334928229665,
+  "neg_log_tokens": 0.7060074428495481,
+  "neg_api_calls": 0.6761031366294524,
+  "neg_steps": 0.6751727804359383,
+  "exit_submitted": 0.5901116427432217,
+  "patch_nonempty": 0.5,
+  "repo_prior": 0.5756246677299309
+ },
+ "auroc_check_maxdiff": 3.3306690738754696e-16,
+ "best_baseline": "neg_log_tokens",
+ "diff_vs_best": {
+  "Q_A_default": {
+   "diff": -0.16414141414141414,
+   "ci95": [
+    -0.28110359187922956,
+    -0.041358024691357964
+   ]
+  },
+  "Q_A_default_noprior": {
+   "diff": -0.19564061669324828,
+   "ci95": [
+    -0.3106454971369078,
+    -0.07948717948717943
+   ]
+  },
+  "Q_B_calibrated": {
+   "diff": 0.024853801169590684,
+   "ci95": [
+    -0.08968298109010009,
+    0.14489795918367354
+   ]
+  },
+  "Q_B_calibrated_noprior": {
+   "diff": -0.02897395002658154,
+   "ci95": [
+    -0.13525798525798527,
+    0.0797779076563413
+   ]
+  }
+ },
+ "verdict_A": {
+  "DEGRADE": {
+   "resolved": 20,
+   "unresolved": 78
+  },
+  "RETRY": {
+   "resolved": 13,
+   "unresolved": 36
+  }
+ },
+ "verdict_B": {
+  "DEGRADE": {
+   "resolved": 31,
+   "unresolved": 98
+  },
+  "RETRY": {
+   "resolved": 2,
+   "unresolved": 16
+  }
+ },
+ "per_sensor_test": {
+  "execution": {
+   "FAULT": {
+    "resolved": 16,
+    "unresolved": 62
+   },
+   "OK": {
+    "resolved": 17,
+    "unresolved": 52
+   }
+  },
+  "constraint": {
+   "UNKNOWN": {
+    "resolved": 33,
+    "unresolved": 114
+   }
+  },
+  "consistency": {
+   "FAULT": {
+    "resolved": 2,
+    "unresolved": 1
+   },
+   "OK": {
+    "resolved": 3,
+    "unresolved": 13
+   },
+   "SUSPECT": {
+    "resolved": 21,
+    "unresolved": 42
+   },
+   "UNKNOWN": {
+    "resolved": 7,
+    "unresolved": 58
+   }
+  },
+  "behavior": {
+   "FAULT": {
+    "resolved": 3,
+    "unresolved": 31
+   },
+   "OK": {
+    "resolved": 30,
+    "unresolved": 66
+   },
+   "SUSPECT": {
+    "resolved": 0,
+    "unresolved": 17
+   }
+  },
+  "outcome": {
+   "UNKNOWN": {
+    "resolved": 33,
+    "unresolved": 114
+   }
+  }
+ },
+ "unknown_share_all": {
+  "execution": 0.0,
+  "constraint": 1.0,
+  "consistency": 0.40069686411149824,
+  "behavior": 0.0,
+  "outcome": 1.0
+ },
+ "fault_share_all": {
+  "execution": 0.6202090592334495,
+  "constraint": 0.0,
+  "consistency": 0.024390243902439025,
+  "behavior": 0.23344947735191637,
+  "outcome": 0.0
+ },
+ "Q_std_test": {
+  "Q_A_default": 0.1792813024632504,
+  "Q_A_default_noprior": 0.25404567728753175,
+  "Q_B_calibrated": 0.14995961894280385,
+  "Q_B_calibrated_noprior": 0.1691262524945717
+ },
+ "lr_calibrated": {
+  "outcome": {
+   "OK": 2.7,
+   "SUSPECT": 2.7,
+   "FAULT": 2.7
+  },
+  "execution": {
+   "OK": 1.0799999999999998,
+   "SUSPECT": 2.7,
+   "FAULT": 0.9236842105263158
+  },
+  "constraint": {
+   "OK": 2.7,
+   "SUSPECT": 2.7,
+   "FAULT": 2.7
+  },
+  "consistency": {
+   "OK": 1.4210526315789473,
+   "SUSPECT": 1.130232558139535,
+   "FAULT": 5.4
+  },
+  "behavior": {
+   "OK": 1.5218181818181817,
+   "SUSPECT": 0.36818181818181817,
+   "FAULT": 0.44999999999999996
+  }
+ }
+}
