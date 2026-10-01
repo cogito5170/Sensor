@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from llmsensor.telemetry.catalog import CALL_VARS, CATALOG, RUN_VARS  # noqa: E402
 from llmsensor.telemetry.derive import by_run, calls, run_summary  # noqa: E402
-from llmsensor.telemetry.schema import FIELDS  # noqa: E402
+from llmsensor.telemetry.schema import FIELDS, observed  # noqa: E402
 
 RHO_RED, RHO_CLOCK, MIN_N, BINS = 0.9, 0.9, 30, 5
 ANALYSIS_SOURCES = {"cc_jsonl_self", "cc_stream"}       # 자식 cc_jsonl 은 대조에만(같은 호출을 두 번 세지 않는다)
@@ -153,14 +153,19 @@ def main(argv=None):
     res: dict = {"n_records": len(recs)}
 
     # 1. 가용성
-    av = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0]))
+    # 관측 = 값이 있거나 원천이 null 로 보고(reported_null). v2 꼴부터 둘을 가른다
+    av = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0, 0]))
     for r in recs:
         tag = r["run_id"].split(":")[0]
         for k in FIELDS[r["kind"]]:
             c = av[f"{tag}/{r['kind']}"][k]
-            c[1] += 1
-            c[0] += r[k] is not None
-    res["availability"] = {g: {k: round(o / t, 3) for k, (o, t) in sorted(d.items())} for g, d in sorted(av.items())}
+            c[2] += 1
+            c[0] += observed(r, k)
+            c[1] += r[k] is not None
+    res["availability"] = {g: {k: round(o / t, 3) for k, (o, _, t) in sorted(d.items())} for g, d in sorted(av.items())}
+    res["availability_nonnull"] = {g: {k: round(n / t, 3) for k, (_, n, t) in sorted(d.items())}
+                                   for g, d in sorted(av.items())}
+    res["reported_null_fields"] = {g: sorted(k for k, (o, n, t) in d.items() if o > n) for g, d in sorted(av.items())}
     res["record_counts"] = dict(collections.Counter(f"{r['run_id'].split(':')[0]}/{r['kind']}" for r in recs))
 
     runs = by_run(recs)

@@ -1,6 +1,11 @@
-"""텔레메트리 레코드 꼴 -- 세 종류. 못 본 값은 null 이고 그 이름을 `unobserved` 에 **반드시** 적는다.
+"""텔레메트리 레코드 꼴 (v2) -- 세 종류. null 인 칸은 그 이름이 **정확히 한 목록**에 있어야 한다.
 
-0 과 '안 보임' 을 섞지 않으려는 것이다. 예: SWE-agent 추적의 호출별 토큰은 null + unobserved 에 이름.
+    unobserved     원천이 그 값을 주지 않았다(칸이 없다) -- 못 봤다
+    reported_null  원천이 그 칸을 **null 로 주었다** -- 봤고, 값이 null 이다
+                   (예: claude -p result 의 api_error_status: null = 오류가 보고되지 않았다)
+
+0 과 '안 보임' 을 섞지 않고, '보고된 null' 과 '안 보임' 도 섞지 않으려는 것이다.
+v1 은 둘을 다 unobserved 로 적어서 "오류 없음" 과 "못 봄" 을 못 갈랐다(2026-10-01 결과 문서의 한계 1).
 
     model_call   모형 호출 하나(응답 하나)
     tool_call    도구 호출 하나와 그 결과
@@ -19,8 +24,10 @@ INT = {"type": ["integer", "null"], "minimum": 0}
 NUM = {"type": ["number", "null"]}
 STR = {"type": ["string", "null"]}
 BOOL = {"type": ["boolean", "null"]}
+SCHEMA_VERSION = 2
 COMMON = {"kind": {"type": "string"}, "run_id": {"type": "string", "minLength": 1},
-          "source": {"enum": SOURCES}, "unobserved": {"type": "array", "items": {"type": "string"}}}
+          "source": {"enum": SOURCES}, "unobserved": {"type": "array", "items": {"type": "string"}},
+          "reported_null": {"type": "array", "items": {"type": "string"}}}
 
 MODEL_CALL_FIELDS = {
     "call_index": {"type": "integer", "minimum": 0},
@@ -65,33 +72,44 @@ SCHEMAS = {"model_call": _schema("model_call", MODEL_CALL_FIELDS),
 FIELDS = {"model_call": MODEL_CALL_FIELDS, "tool_call": TOOL_CALL_FIELDS, "run": RUN_FIELDS}
 
 
-def record(kind: str, run_id: str, source: str, **vals) -> dict:
-    """빈 칸은 null 로 채우고 unobserved 에 이름을 적는다."""
+def record(kind: str, run_id: str, source: str, reported_null=(), **vals) -> dict:
+    """빈 칸은 null. reported_null 에 든 이름은 '원천이 null 로 줬다', 나머지 null 은 unobserved."""
     r = {"kind": kind, "run_id": run_id, "source": source}
-    miss = []
-    for k in FIELDS[kind]:
-        v = vals.get(k)
-        r[k] = v
-        if v is None:
-            miss.append(k)
-    extra = set(vals) - set(FIELDS[kind])
+    extra = (set(vals) | set(reported_null)) - set(FIELDS[kind])
     if extra:
         raise KeyError(f"{kind}: 꼴에 없는 칸 {sorted(extra)}")
-    r["unobserved"] = miss
+    rn = set(reported_null)
+    for k in FIELDS[kind]:
+        r[k] = vals.get(k)
+        if k in rn and r[k] is not None:
+            raise ValueError(f"{kind}.{k}: reported_null 인데 값이 있다 ({r[k]!r})")
+    r["unobserved"] = [k for k in FIELDS[kind] if r[k] is None and k not in rn]
+    r["reported_null"] = [k for k in FIELDS[kind] if r[k] is None and k in rn]
     return r
+
+
+def observed(rec: dict, k: str) -> bool:
+    """그 칸을 봤나 -- 값이 있거나, 원천이 null 로 보고했으면 봤다."""
+    return rec.get(k) is not None or k in rec.get("reported_null", ())
 
 
 def check(rec: dict) -> "list[str]":
     from ..sensors.constraint import validate
-    errs, unk = validate(rec, SCHEMAS[rec.get("kind", "?")]) if rec.get("kind") in SCHEMAS else (["kind?"], [])
-    errs += [f"unobserved 불일치: {k}" for k in FIELDS[rec["kind"]] if (rec[k] is None) != (k in rec["unobserved"])] \
-        if rec.get("kind") in FIELDS else []
+    if rec.get("kind") not in SCHEMAS:
+        return ["kind?"]
+    errs, unk = validate(rec, SCHEMAS[rec["kind"]])
+    for k in FIELDS[rec["kind"]]:
+        lists = (k in rec.get("unobserved", [])) + (k in rec.get("reported_null", []))
+        if rec.get(k) is None and lists != 1:
+            errs.append(f"null 인 {k} 가 unobserved/reported_null 중 정확히 하나에 있어야 한다 ({lists})")
+        if rec.get(k) is not None and lists:
+            errs.append(f"값이 있는 {k} 가 null 목록에 있다")
     return errs + [f"검사 못 함: {u}" for u in unk if not u.endswith(":$schema")]
 
 
 if __name__ == "__main__":
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "schema/telemetry.schema.json")
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"$id": "llm-telemetry", "description": __doc__.strip().splitlines()[0],
+    out.write_text(json.dumps({"$id": f"llm-telemetry/v{SCHEMA_VERSION}", "description": __doc__.strip().splitlines()[0],
                                "oneOf": list(SCHEMAS.values())}, ensure_ascii=False, indent=1))
     print(out)

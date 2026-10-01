@@ -42,7 +42,7 @@
 | 도구 오류(t04 · t07) | `is_error: true` + "Exit code N" | tool_is_error (형 1) |
 | 재시도(t07 flaky) | 실패 2 → 성공 1, 같은 겨냥 | retry_count (형 2) |
 | 시간 초과(t11) | **전용 칸 없음.** `is_error: true`, 결과 글 "Exit code 143 · Command timed out after 2m 0s", 지연 120,303 ms | timeout 은 **형 2** (지연 ≈ 도구 한도 · 종료 143) |
-| 회전 상한(t08) | `result.subtype = error_max_turns`, `terminal_reason = max_turns`, `is_error = true`, **ttft_ms = null** | terminal_reason (형 1) |
+| 회전 상한(t08) | `result.subtype = error_max_turns`, `terminal_reason = max_turns`, `is_error = true`, **ttft_ms · api_error_status 키가 없다** | terminal_reason (형 1) |
 | 잘못된 인자(t12) | **안 일어났다** -- 런타임이 상대 경로를 받아들였다 | malformed_call = **UNKNOWN** |
 | stop_reason | tool_use · end_turn 만 나왔다. max_tokens · refusal · pause_turn · model_context_window_exceeded · compaction 은 **한 번도 안 나왔다** | 값 집합은 문서(D)로만 안다 |
 | 압축 · 스트림 오류 · logprobs · 기억 조회 | 안 나왔다 | UNKNOWN |
@@ -105,13 +105,17 @@ claude 실행(13)은 n < 30 이라 실행 단위 상관을 내지 않았다.
 | 압축 · 스트림 오류 · logprobs · 기억 조회 안 나옴 | 맞음 |
 | (예상 못 함) 시간 초과에 전용 칸이 없다 · 잘못된 인자가 유발되지 않았다 · 생각 추정이 1.7 배 과대 | 새로 안 것 |
 
-## 수집 뒤 알게 된 꼴의 한계 (정의는 안 바꿨다)
+## 수집 뒤 알게 된 꼴의 한계 (센서 정의는 안 바꿨다)
 
-1. **null 이 두 뜻이다.** `api_error_status` 는 런타임이 "오류 없음" 으로 null 을 준다. 꼴은 그것을 '못 봄' 으로 적는다.
-   null 이 값인 칸은 다음 판에서 `"none"` 같은 값으로 갈라야 한다.
+1. ~~**null 이 두 뜻이다.**~~ **고침 -- 꼴 v2.** `reported_null` 목록을 더해 '원천이 null 로 줬다'(봤다)와 `unobserved`
+   (키가 없다, 못 봤다)를 가른다. null 인 칸은 정확히 한 목록에 있어야 한다. 다시 모아 분석한 결과: 상관 · 무리 · 대조 등
+   **분석 출력은 v1 과 전부 같았고**, 바뀐 것은 cc_stream 실행의 `api_error_status` 가용성 0 → 0.917(11/12)뿐이다.
+   남은 하나(t08)는 오류 result 에 그 키가 아예 없어서 정말로 못 본 것이다 -- v1 문서의 "ttft_ms = null" 도 실은 "키 없음" 이었다.
 2. cc_stream 수집기는 `message_delta` 의 usage 만 읽는다. `server_tool_use` 는 `message_start` 쪽에만 있어서 cc_stream 의
    server_tool_requests 가 전부 null 이 되었다(cc_jsonl 은 있다). 수집기 버그다 -- 분석 변수는 아니라 결과에 영향 없음.
 3. `tool_latency_ms` 는 한 응답의 병렬 도구들의 **합**이다. 벽시계 대기는 최대값이어야 한다.
 4. 정의상 항등식 목록에 cache_creation ≡ context_growth 를 빠뜨렸다(위).
-5. `tool_head` 에 겨냥 글(경로 · Grep 패턴 · 웹 검색어)이 그대로 들어간다 -- "내용을 안 담는다" 는 도구 출력 · 답에만 맞다.
-   커밋한 `results/sensor_layer_records.jsonl.gz` 에는 임시 경로와 이 세션의 논문 검색어가 들어 있다.
+5. ~~`tool_head` 에 겨냥 글이 그대로 들어간다.~~ **고침.** 겨냥(경로 · URL · 패턴 · 검색어 · 경로꼴 실행 파일)과 인자는
+   열쇠 해시(HMAC-SHA256, 열쇠는 수집마다 무작위 · 저장 안 함)로만 남고, 평문은 맨 프로그램 이름뿐이다. 커밋한 레코드를
+   새 수집기로 다시 만들었다(경로 · 검색어 0 건; `tests/test_telemetry.py` 가 커밋한 파일을 훑어 지킨다).
+   **단 git 이력의 앞 판(bd697b6)에는 옛 파일이 남아 있다** -- 임시 경로와 이 세션의 논문 검색어.

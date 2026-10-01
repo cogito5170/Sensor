@@ -6,7 +6,7 @@ LLM / 에이전트 실행
       ▼
 SENSOR LAYER     llmsensor/telemetry/collect.py   원천 -> 레코드(원천이 준 값만)
       │
-TELEMETRY        schema/telemetry.schema.json     model_call · tool_call · run (못 본 값 = null + unobserved)
+TELEMETRY        schema/telemetry.schema.json     model_call · tool_call · run (v2: null = unobserved | reported_null)
       │          llmsensor/telemetry/derive.py    레코드 -> 파생(레코드만 본다)
       ▼
 STATE MANAGER    (다음 단계 -- 여기에는 해석이 없다)
@@ -76,8 +76,16 @@ t= 16.5s  ctx=32,783  Δctx=  358  out=203  think=135  cum_out=2,138  span=1.7s 
 
 ## 3. 텔레메트리 꼴
 
-[`schema/telemetry.schema.json`](../schema/telemetry.schema.json) -- JSON Schema(2020-12). 세 레코드, 모든 칸이 늘
-있고 못 본 값은 `null` + `unobserved` 목록. 실제 레코드(t11, 시간 초과):
+[`schema/telemetry.schema.json`](../schema/telemetry.schema.json) -- JSON Schema(2020-12), **v2**. 세 레코드, 모든 칸이
+늘 있다. `null` 인 칸은 그 이름이 **정확히 한 목록**에 있어야 한다(`check()` 가 강제):
+
+| 목록 | 뜻 | 예 |
+|---|---|---|
+| `unobserved` | 원천이 그 칸을 **안 줬다**(키가 없다) -- 못 봤다 | SWE-agent 의 호출별 토큰. t08(회전 상한) result 의 `ttft_ms` · `api_error_status` -- 오류로 끝난 result 에는 두 키가 아예 없다 |
+| `reported_null` | 원천이 그 칸을 **null 로 줬다** -- 봤고 값이 null | 정상 종료 result 의 `api_error_status: null` = **오류가 보고되지 않았다** |
+
+v1 은 둘을 다 `unobserved` 로 적어 "오류 없음" 과 "못 봄" 을 못 갈랐다. 가용성 셈에서 `reported_null` 은 **관측**이다
+(`observed()`). 실제 레코드(t11, 시간 초과):
 
 ```json
 {"kind": "model_call", "run_id": "cc_stream:t11_timeout", "source": "cc_stream", "call_index": 0,
@@ -86,22 +94,33 @@ t= 16.5s  ctx=32,783  Δctx=  358  out=203  think=135  cum_out=2,138  span=1.7s 
  "thinking_tokens": 296, "server_tool_requests": null, "iterations": 1, "stop_reason": "tool_use",
  "tool_calls_per_message": 1, "output_text_chars": 0, "thinking_duration_ms": null, "first_chunk_ms": 491.9,
  "stream_chunks": 14, "stream_thinking_estimate": 384, "context_window": 200000,
- "unobserved": ["server_tool_requests", "thinking_duration_ms"]}
+ "unobserved": ["server_tool_requests", "thinking_duration_ms"], "reported_null": []}
 {"kind": "tool_call", "run_id": "cc_stream:t11_timeout", "source": "cc_stream", "call_index": 0, "tool_index": 0,
- "tool_name": "Bash", "tool_head": "Bash:sleep", "tool_sig": "ffd8be180a6b", "tool_input_chars": 100,
+ "tool_name": "Bash", "tool_head": "Bash:sleep", "tool_sig": "<HMAC 12 hex>", "tool_input_chars": 100,
  "t_issued_ms": 5647.2, "t_result_ms": 125950.0, "time_base": "monotonic_ms", "reported_duration_ms": null,
- "is_error": true, "interrupted": null, "tool_output_chars": 43, "unobserved": ["reported_duration_ms", "interrupted"]}
+ "is_error": true, "interrupted": null, "tool_output_chars": 43, "unobserved": ["reported_duration_ms", "interrupted"],
+ "reported_null": []}
 {"kind": "run", "run_id": "cc_stream:t11_timeout", "source": "cc_stream", "model": "claude-haiku-4-5",
  "run_duration_ms": 127932, "api_duration_ms": 6634, "ttft_ms": 3575, "num_turns": 2, "cost_usd": 0.018166,
  "terminal_reason": "completed", "result_subtype": "success", "is_error": false, "permission_denials": 0,
  "context_window": 200000, "max_output_tokens": 32000, "autocompact_threshold": 144000,
- "rate_limit_utilization": 0.8, "reported_input_tokens": 18, "reported_output_tokens": 615, "...": "..."}
+ "rate_limit_utilization": 0.8, "reported_input_tokens": 18, "reported_output_tokens": 615, "...": "...",
+ "unobserved": ["api_duration_without_retries_ms", "tokens_sent", "tokens_received", "api_calls"],
+ "reported_null": ["api_error_status"]}
 ```
 
-프롬프트 · 답 · 도구 출력의 글은 **담지 않는다** -- 해시(`tool_sig`)와 길이만. 그래서 내용이 필요한 파생
-(text_repetition · type_token_ratio)은 이 꼴로는 못 낸다. **단 `tool_head` 에는 겨냥이 글 그대로 들어간다** -- 명령의
-첫 낱말, 파일 경로, Grep 패턴, 웹 검색어. 민감한 경로 · 검색어가 있는 곳에서는 `tool_head` 도 해시로 바꿔야 한다
-(다음 판의 숙제).
+**글은 담지 않는다.** 프롬프트 · 답 · 도구 출력은 길이만, 도구 인자와 겨냥은 **열쇠 해시**(HMAC-SHA256, 12 hex)로만 남는다:
+
+| 칸 | 평문으로 남는 것 | 해시가 되는 것 |
+|---|---|---|
+| `tool_head` | 도구 이름 + **맨 프로그램 이름**(`^[A-Za-z][A-Za-z0-9_.+-]*$` -- git · python3 · pytest · sleep) | 파일 경로 · URL · Grep 패턴 · 웹 검색어 · 경로꼴 실행 파일(`./deploy.sh`) → `Read:#3f9a…` |
+| `tool_sig` | -- | 도구 이름 + 인자 전체 |
+| `tool_name` (SWE-agent) | 맨 프로그램 이름 | 첫 낱말이 경로면 `#해시` |
+
+열쇠는 `LLMSENSOR_HASH_KEY` 환경 변수, 없으면 **수집 프로세스마다 무작위로 만들고 저장하지 않는다.** 한 수집 안에서는
+같은 겨냥 = 같은 해시라 반복 · 재시도를 셀 수 있고, 열쇠 없이는 사전 대입(흔한 경로 · 검색어를 해시해 맞춰 보기)도
+안 된다. 두 데이터셋의 해시를 맞대려면 같은 열쇠를 줘야 한다. 내용이 필요한 파생(text_repetition · type_token_ratio)은
+이 꼴로는 못 낸다.
 
 ## 4. 파생 텔레메트리 (`derive.py`)
 
@@ -192,8 +211,7 @@ State 를 만들 때는 이것을 **걸음 번호에 대해 정규화하거나 �
 | 기억 조회 수 · 지연 · 크기 | OTel 에 꼴(gen_ai.memory.*)만 있다. 본 런타임에 기억 도구가 없었다 |
 | OpenAI · Gemini 의 실제 값 · 스트림 usage · finish_reason | SDK 소스(D)만. 문서 사이트가 이 환경에서 막혔다 |
 | SWE-agent 의 호출별 토큰 · 시각 · 도구 오류 | 그 추적 꼴에 없다(A) |
-| null 이 값인 칸(api_error_status) | 꼴이 '오류 없음' 과 '못 봄' 을 못 가른다 -- 다음 판의 숙제 |
-| (꼴의 한계) tool_head 의 글 | 경로 · 검색어가 그대로 남는다 -- 위 §3 |
+| 오류로 끝난 실행의 ttft · api_error_status | t08(회전 상한)의 result 에 두 키가 **없다** -- unobserved (v2 에서 '보고된 null' 과 갈렸다) |
 
 ## 다음 단계 (State)
 
