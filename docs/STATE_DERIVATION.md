@@ -1,0 +1,291 @@
+# 상태 도출 (registry 에서 생성 -- 손으로 고치지 말 것)
+
+`python3 eval/render_state_docs.py` 로 다시 만든다. 뜻 · 생애 · 질의는 [`STATE_MODEL.md`](STATE_MODEL.md) · [`STATE_LIFECYCLE.md`](STATE_LIFECYCLE.md).
+
+## 근거 종류(Basis) -- 문턱이 어디서 왔나
+
+| 근거 | 뜻 | 기본 설정에서 |
+|---|---|---|
+| `OBSERVED` | 관측값을 그대로 | 동작 |
+| `DEFINITIONAL` | 정의에서 따라 나온다(마지막 결과가 실패 = 미해결, 비용 ≥ 예산 = 소진, 사용률 ≥ 1 = 소진) | 동작 |
+| `RUNTIME_DECLARED` | 경계를 런타임이 선언(자동 압축 문턱 · 창 · 종료 사유) | 동작 -- 런타임이 안 주면 UNKNOWN |
+| `OPERATOR_ASSUMED` | 운영자가 설정에 준 문턱 -- **잰 값이 아니다** | 문턱이 없어 NOT_APPLICABLE · UNKNOWN |
+| `ESTIMATE` | 런타임 추정 -- 권위 없음 | 지표로만, 최종값이 오면 INVALID |
+
+**경험적 문턱(EMPIRICAL)인 규칙은 없다.** 앞 실험들로 정당화되는 문턱이 없기 때문이다.
+
+## 상태 규칙
+
+### `agent.context_pressure` -- `context-pressure-v1` (v1, RUNTIME_DECLARED)
+
+- **뜻**: 맥락이 런타임이 선언한 경계(자동 압축 문턱 · 창)의 어느 쪽에 있나. 경계는 런타임 것이지 우리 것이 아니다
+- **돕는 결정**: 다음 호출 전에 맥락을 줄일까
+- **값**: `BELOW_CONTEXT_LIMIT` · `BELOW_COMPACTION_THRESHOLD` · `ABOVE_COMPACTION_THRESHOLD` · `AT_CONTEXT_LIMIT` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `context_tokens`, `context_window`, `compaction_threshold`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `agent.execution_health` -- `execution-health-v1` (v1, DEFINITIONAL)
+
+- **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)
+- **돕는 결정**: 다시 시도할까 · 사람에게 올릴까
+- **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `tool.tool_execution_health` -- `tool-execution-health-v1` (v1, DEFINITIONAL)
+
+- **뜻**: 도구 하나에 대한 execution_health -- 도구마다 따로
+- **돕는 결정**: 이 도구를 계속 쓸까
+- **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `task.completion_state` -- `completion-state-v1` (v1, RUNTIME_DECLARED)
+
+- **뜻**: 런타임이 실행을 어떻게 끝냈다고 선언했나. **과업 성공이 아니다**(SWE-bench: 정상 제출 243 중 해결 69 이하)
+- **돕는 결정**: 결과를 검증으로 넘길까 · 한도를 올릴까
+- **값**: `RUNNING` · `ENDED_NORMALLY` · `ENDED_BY_LIMIT` · `ENDED_WITH_ERROR` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `termination`, `activity`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `task.progress_state` -- `progress-state-v1` (v1, OPERATOR_ASSUMED)
+
+- **뜻**: 같은 호출 반복으로 본 정체. 문턱은 운영자 가정 -- 기본 설정에서는 UNKNOWN
+- **돕는 결정**: 끊을까
+- **값**: `STALLED` · `NO_STALL_DETECTED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `identical_call_max`, `termination`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `agent.resource_state` -- `resource-state-v1` (v1, DEFINITIONAL)
+
+- **뜻**: 보고된 비용이 설정 예산 안인가
+- **돕는 결정**: 멈출까
+- **값**: `WITHIN_BUDGET` · `BUDGET_EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `cost_fraction`, `cost_margin`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `agent.resource_pressure` -- `resource-pressure-v1` (v1, OPERATOR_ASSUMED)
+
+- **뜻**: 설정 띠로 본 비용 압력(띠 이름은 설정이 정한다). 띠가 없으면 NOT_APPLICABLE
+- **돕는 결정**: 싼 경로로 바꿀까
+- **값**: `LOW` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `cost_fraction`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `runtime.rate_limit_state` -- `rate-limit-state-v1` (v1, DEFINITIONAL)
+
+- **뜻**: 요금 한도 사용률이 1 에 닿았나
+- **돕는 결정**: 늦출까
+- **값**: `AVAILABLE` · `EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `rate_limit_utilization`
+- **기본 TTL**: 300000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `runtime.runtime_reliability` -- `runtime-reliability-v1` (v1, DEFINITIONAL)
+
+- **뜻**: API 오류 보고 · 한도에 잘린 생성이 있었나. '실패를 못 봤다' 와 '건강하다' 를 가른다
+- **돕는 결정**: 다른 공급자로 돌릴까
+- **값**: `NO_FAILURE_OBSERVED` · `FAILURE_OBSERVED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `api_error`, `stop_reasons`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### 종료 선언 표 (`completion-state-v1`) -- 표에 없는 문자열은 추측하지 않고 UNKNOWN
+
+| 칸 | 런타임 값 | 상태 |
+|---|---|---|
+| result_subtype | `success` | `ENDED_NORMALLY` |
+| result_subtype | `error_max_turns` | `ENDED_BY_LIMIT` |
+| result_subtype | `error_during_execution` | `ENDED_WITH_ERROR` |
+| terminal_reason | `completed` | `ENDED_NORMALLY` |
+| terminal_reason | `max_turns` | `ENDED_BY_LIMIT` |
+| terminal_reason | `submitted` | `ENDED_NORMALLY` |
+| terminal_reason | `submitted (exit_cost)` | `ENDED_BY_LIMIT` |
+
+한도에 잘린 생성으로 보는 멈춤 사유(`runtime-reliability-v1`): `max_tokens`, `model_context_window_exceeded`
+
+## 지표 (층 2)
+
+| 지표 | 실체 | 근거 | 입력 | 정의 |
+|---|---|---|---|---|
+| `context_tokens` | agent | OBSERVED | `tokens.input_uncached`, `tokens.cache_read`, `tokens.cache_write` | 마지막 호출이 본 입력 전체 |
+| `context_window` | agent | OBSERVED | `run.context_window`, `call.context_window` | 맥락 창 크기(없으면 설정 override, 근거 OPERATOR_ASSUMED) |
+| `compaction_threshold` | agent | RUNTIME_DECLARED | `run.compaction_threshold` | 런타임이 선언한 자동 압축 문턱(토큰) |
+| `context_utilization` | agent | OBSERVED | `context_tokens`, `context_window` | context_tokens / context_window |
+| `context_margin` | agent | OBSERVED | `context_tokens`, `context_window` | context_window − context_tokens |
+| `compaction_margin` | agent | RUNTIME_DECLARED | `context_tokens`, `compaction_threshold` | compaction_threshold − context_tokens |
+| `context_growth` | agent | OBSERVED | `tokens.input_uncached`, `tokens.cache_read`, `tokens.cache_write` | 마지막 두 호출의 context_tokens 차 (캐시 런타임에서는 ≡ cache_write) |
+| `tool_results` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과(is_error)를 본 도구 호출 수 |
+| `tool_outcome_unobservable` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과를 볼 수 없는 도구 호출 수(SWE-agent 추적 등) |
+| `tool_errors` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | is_error=true 인 결과 수 |
+| `tool_failure_rate` | agent | OBSERVED | `tool_results`, `tool_errors` | tool_errors / tool_results |
+| `tool_targets` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 겨냥별 최근 결과: 미해결(마지막이 실패) · 회복(실패 뒤 성공) |
+| `identical_call_max` | agent | OBSERVED | `tool.signature` | 같은 (도구, 인자)의 최대 반복 수 |
+| `reasoning_tokens` | agent | OBSERVED | `tokens.reasoning` | 최종 보고된 생각 토큰 합 |
+| `reasoning_estimate` | agent | ESTIMATE | `tokens.reasoning_estimate`, `tokens.reasoning` | 생성 도중 런타임 추정(최종값이 오면 INVALID) |
+| `cost_usd` | agent | OBSERVED | `run.cost_usd` | 런타임이 보고한 비용 |
+| `cost_fraction` | agent | OPERATOR_ASSUMED | `cost_usd` | cost / 예산(설정) |
+| `cost_margin` | agent | OPERATOR_ASSUMED | `cost_usd` | 예산 − cost |
+| `stop_reasons` | runtime | OBSERVED | `call.stop_reason` | 본 멈춤 사유 수와 한도에 잘린 것(max_tokens · model_context_window_exceeded) |
+| `api_error` | runtime | OBSERVED | `runtime.api_error_status` | API 오류 보고 -- 보고된 null 은 '오류 보고 없음' |
+| `rate_limit_utilization` | runtime | OBSERVED | `runtime.rate_limit_utilization` | 요금 한도 사용률(런타임 사건) |
+| `termination` | task | RUNTIME_DECLARED | `run.result_subtype`, `run.terminal_reason`, `run.is_error` | 런타임이 선언한 종료(성공 여부가 **아니다**) |
+| `activity` | task | OBSERVED | `call.stop_reason` | 본 호출 · 도구 결과 수 |
+
+## 정준 관측 (층 1)
+
+| 정준 이름 | 텔레메트리 칸 | 실체 | 근거 |
+|---|---|---|---|
+| `tokens.input_uncached` | model_call.`input_tokens` | agent | OBSERVED |
+| `tokens.cache_read` | model_call.`cache_read_input_tokens` | agent | OBSERVED |
+| `tokens.cache_write` | model_call.`cache_creation_input_tokens` | agent | OBSERVED |
+| `tokens.output` | model_call.`output_tokens` | agent | OBSERVED |
+| `tokens.reasoning` | model_call.`thinking_tokens` | agent | OBSERVED |
+| `tokens.reasoning_estimate` | model_call.`stream_thinking_estimate` | agent | ESTIMATE |
+| `call.stop_reason` | model_call.`stop_reason` | agent | OBSERVED |
+| `call.tool_uses` | model_call.`tool_calls_per_message` | agent | OBSERVED |
+| `call.context_window` | model_call.`context_window` | agent | OBSERVED |
+| `tool.name` | tool_call.`tool_name` | tool | OBSERVED |
+| `tool.target` | tool_call.`tool_head` | tool | OBSERVED |
+| `tool.signature` | tool_call.`tool_sig` | tool | OBSERVED |
+| `tool.is_error` | tool_call.`is_error` | tool | OBSERVED |
+| `tool.output_chars` | tool_call.`tool_output_chars` | tool | OBSERVED |
+| `run.terminal_reason` | run.`terminal_reason` | task | OBSERVED |
+| `run.result_subtype` | run.`result_subtype` | task | OBSERVED |
+| `run.is_error` | run.`is_error` | task | OBSERVED |
+| `run.cost_usd` | run.`cost_usd` | agent | OBSERVED |
+| `run.context_window` | run.`context_window` | agent | OBSERVED |
+| `run.compaction_threshold` | run.`autocompact_threshold` | agent | OBSERVED |
+| `runtime.api_error_status` | run.`api_error_status` | runtime | OBSERVED |
+| `runtime.rate_limit_utilization` | run.`rate_limit_utilization` | runtime | OBSERVED |
+| `runtime.model` | run.`model` | runtime | OBSERVED |
+
+## 의존 그래프
+
+```
+state:context_pressure  [context-pressure-v1, RUNTIME_DECLARED]
+  <- metric:context_tokens  [OBSERVED]
+       <- obs:tokens.input_uncached
+       <- obs:tokens.cache_read
+       <- obs:tokens.cache_write
+  <- metric:context_window  [OBSERVED]
+       <- obs:run.context_window
+       <- obs:call.context_window
+  <- metric:compaction_threshold  [RUNTIME_DECLARED]
+       <- obs:run.compaction_threshold
+state:execution_health  [execution-health-v1, DEFINITIONAL]
+  <- metric:tool_results  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_outcome_unobservable  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_targets  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_failure_rate  [OBSERVED]
+       <- metric:tool_results
+       <- metric:tool_errors
+state:tool_execution_health  [tool-execution-health-v1, DEFINITIONAL]
+  <- metric:tool_results  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_outcome_unobservable  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_targets  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_failure_rate  [OBSERVED]
+       <- metric:tool_results
+       <- metric:tool_errors
+state:completion_state  [completion-state-v1, RUNTIME_DECLARED]
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+  <- metric:activity  [OBSERVED]
+       <- obs:call.stop_reason
+state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
+  <- metric:identical_call_max  [OBSERVED]
+       <- obs:tool.signature
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+state:resource_state  [resource-state-v1, DEFINITIONAL]
+  <- metric:cost_fraction  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+  <- metric:cost_margin  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
+  <- metric:cost_fraction  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+state:rate_limit_state  [rate-limit-state-v1, DEFINITIONAL]
+  <- metric:rate_limit_utilization  [OBSERVED]
+       <- obs:runtime.rate_limit_utilization
+state:runtime_reliability  [runtime-reliability-v1, DEFINITIONAL]
+  <- metric:api_error  [OBSERVED]
+       <- obs:runtime.api_error_status
+  <- metric:stop_reasons  [OBSERVED]
+       <- obs:call.stop_reason
+```
+
+## 넣지 않은 후보 상태와 까닭
+
+| 후보 | 까닭 |
+|---|---|
+| `reasoning_load` | 생각 토큰이 많다 = 부하가 높다 의 문턱 근거가 없다. 생각 · 출력은 다른 정보(ρ 0.64)이지만 무엇을 뜻하는지 검증 안 됨. 지표 reasoning_tokens 로만 둔다 |
+| `context_growth_rate` | '빠르다' 의 문턱 근거가 없다. 지표 context_growth 로만 둔다(≡ cache_write, 회계 항등식) |
+| `context_compaction_risk` | context_pressure 의 ABOVE_COMPACTION_THRESHOLD 와 같은 것 -- 중복 |
+| `context_budget_state` | context_pressure 와 같은 것 -- 중복 |
+| `cache_growth_state · step_growth_state` | cache_read ~ 걸음 번호 ρ 0.99 -- 같은 현상(맥락이 자란다). 따로 두지 않는다 |
+| `execution_latency · execution_stability` | 지연이 '느리다' 의 문턱 근거가 없다. 시간 센서는 수집기 정의에 달렸다(앞 실험) |
+| `tool.availability` | 실패와 '쓸 수 없음' 을 관측으로 가르지 못한다(같은 is_error) |
+| `tool.recent_failure` | tool_execution_health 의 UNRESOLVED_FAILURES 와 거의 같다 -- 중복 |
+| `progress_state = ACTIVE/SLOW` | 활동(호출 수)은 진행이 아니다. 진행을 재는 검증된 근거가 없다 |
+| `timeout_state` | 시간 초과에 전용 관측이 없다(앞 실험: is_error + 지연 + 글). 글을 꼴에 안 담으니 판정 불가 -> 넣지 않음 |
+| `token_budget_state` | 토큰 예산 설정이 없다. 필요하면 resource_state 와 같은 꼴로 더한다 |
+| `interaction_state` | 사람 말 · 턴 관측이 텔레메트리 꼴에 없다 |
+| `uncertainty_state` | 저장하지 않는다 -- 질의 때 상태들의 유효성에서 투영한다(decision_context.uncertain) |
+| `generation_state(stop_reason)` | 멈춤 사유를 이름만 바꾼 상태가 된다. 한도에 잘린 것만 runtime_reliability 의 근거로 쓴다 |

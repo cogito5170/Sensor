@@ -19,6 +19,12 @@ NASA 식 analytical redundancy(Chow & Willsky 1984)의 *잔차 생성 → 결정
 레코드 꼴(`schema/telemetry.schema.json`), 수집기(`llmsensor/telemetry/`), 파생, 의존 그래프, 최소 비중복 관측 16 개,
 UNKNOWN 목록. 측정: [`eval/RESULTS_sensor_layer.md`](eval/RESULTS_sensor_layer.md).
 
+**상태 층(State): [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md)** -- 텔레메트리를 받아 실체(agent · task · runtime ·
+tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`). 규칙마다 근거 종류(정의상 · 런타임 선언 · 운영자 가정)가
+붙고, 경험적 근거가 없는 문턱은 기본 설정에 없다. 질의 · 설명(상태 → 규칙 → 지표 → 관측) · 최소 결정 문맥 ·
+신선도(STALE) · UNKNOWN 을 일급으로. 도출: [`docs/STATE_DERIVATION.md`](docs/STATE_DERIVATION.md) ·
+생애: [`docs/STATE_LIFECYCLE.md`](docs/STATE_LIFECYCLE.md) · 시연: `python3 eval/state_demo.py`.
+
 ## 센서 다섯 (진실에 가까운 순)
 
 | 센서 | 무엇을 보나 | FAULT 가 되는 때 | 못 보는 것 |

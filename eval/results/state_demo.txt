@@ -1,0 +1,247 @@
+======================================================================
+1. RAW OBSERVATIONS (마지막 모형 호출과 도구 결과 합계)
+======================================================================
+  input_tokens                   = 10
+  cache_read_input_tokens        = 130000
+  cache_creation_input_tokens    = 6990
+  output_tokens                  = 842
+  thinking_tokens                = 300
+  stop_reason                    = tool_use
+  context_window                 = 180000
+  tool_calls                     = 11
+  tool_errors                    = 2
+  cost_usd                       = (아직 없음 -- 이 런타임은 실행 끝에만 보고)
+  budget (설정)                    = 0.1
+
+======================================================================
+2. DERIVED METRICS (층 2)
+======================================================================
+  context_tokens         = 137000   [DERIVED, OBSERVED]
+  context_window         = 180000   [DERIVED, OBSERVED]
+  context_utilization    = 0.7611   [DERIVED, OBSERVED]
+  context_margin         = 43000   [DERIVED, OBSERVED]
+  tool_results           = 11   [DERIVED, OBSERVED]
+  tool_errors            = 2   [DERIVED, OBSERVED]
+  tool_failure_rate      = 0.1818   [DERIVED, OBSERVED]
+  tool_targets           = {'unresolved': ['WebFetch:#doc'], 'recovered': ['Bash:pytest'], 'targets': 8}   [DERIVED, OBSERVED]
+  cost_usd               = None   [UNKNOWN, OBSERVED]  -- 이 런타임들은 비용을 실행 끝에만 보고한다
+  cost_margin            = None   [UNKNOWN, OPERATOR_ASSUMED]
+
+======================================================================
+3a. SEMANTIC STATE (층 3) -- 실행 중
+======================================================================
+  agent.context_pressure       = BELOW_CONTEXT_LIMIT          INFERRED       FRESH     [context-pressure-v1]
+      why: 맥락 137,000 < 창 180,000 (압축 문턱은 선언되지 않았다)
+  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v1]
+      why: 겨냥 1/8 의 마지막 결과가 실패
+  agent.resource_pressure      = None                         UNKNOWN        UNTIMED   [resource-pressure-v1]
+      why: 비용을 아직 못 봤다
+  agent.resource_state         = None                         UNKNOWN        UNTIMED   [resource-state-v1]
+      why: 비용을 아직 못 봤다: 이 런타임들은 비용을 실행 끝에만 보고한다
+  task.completion_state       = RUNNING                      INFERRED       FRESH     [completion-state-v1]
+      why: 관측이 들어오고 있고 끝 요약이 아직 없다
+  task.progress_state         = None                         UNKNOWN        FRESH     [progress-state-v1]
+      why: 진행을 판정할 검증된 근거가 없다(토큰은 진행이 아니다). 정체 문턱도 설정되지 않았다
+  runtime.rate_limit_state       = None                         UNKNOWN        UNTIMED   [rate-limit-state-v1]
+      why: 요금 한도 사건을 못 받았다
+  runtime.runtime_reliability    = NO_FAILURE_OBSERVED          INFERRED       FRESH     [runtime-reliability-v1]
+      why: 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다
+
+======================================================================
+3b. SEMANTIC STATE -- 실행 끝 요약이 온 뒤(비용 · 압축 문턱 · 종료가 관측됨)
+======================================================================
+  agent.context_pressure       = BELOW_COMPACTION_THRESHOLD   INFERRED       FRESH     [context-pressure-v1]
+      why: 맥락 137,000 < 런타임 압축 문턱 144,000
+  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v1]
+      why: 겨냥 1/8 의 마지막 결과가 실패
+  agent.resource_pressure      = MEDIUM                       INFERRED       FRESH     [resource-pressure-v1]
+      why: 비용/예산 = 0.700, 설정 띠 ['MEDIUM', 'HIGH']
+  agent.resource_state         = WITHIN_BUDGET                INFERRED       FRESH     [resource-state-v1]
+      why: 비용/예산 = 0.700 < 1
+  task.completion_state       = ENDED_NORMALLY               INFERRED       PERMANENT [completion-state-v1]
+      why: 런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다
+  task.progress_state         = None                         NOT_APPLICABLE PERMANENT [progress-state-v1]
+      why: 끝난 과업 -- 진행 상태가 정의되지 않는다
+  runtime.rate_limit_state       = AVAILABLE                    INFERRED       FRESH     [rate-limit-state-v1]
+      why: 사용률 0.62 < 1 (경고 문턱은 런타임 사건에 있으나 꼴 v2 에 안 담았다)
+  runtime.runtime_reliability    = NO_FAILURE_OBSERVED          INFERRED       FRESH     [runtime-reliability-v1]
+      why: API 오류 보고 없음(보고된 null) · 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다
+
+======================================================================
+4. STATE GRAPH (registry 에서)
+======================================================================
+state:context_pressure  [context-pressure-v1, RUNTIME_DECLARED]
+  <- metric:context_tokens  [OBSERVED]
+       <- obs:tokens.input_uncached
+       <- obs:tokens.cache_read
+       <- obs:tokens.cache_write
+  <- metric:context_window  [OBSERVED]
+       <- obs:run.context_window
+       <- obs:call.context_window
+  <- metric:compaction_threshold  [RUNTIME_DECLARED]
+       <- obs:run.compaction_threshold
+state:execution_health  [execution-health-v1, DEFINITIONAL]
+  <- metric:tool_results  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_outcome_unobservable  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_targets  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_failure_rate  [OBSERVED]
+       <- metric:tool_results
+       <- metric:tool_errors
+state:tool_execution_health  [tool-execution-health-v1, DEFINITIONAL]
+  <- metric:tool_results  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_outcome_unobservable  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_targets  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+  <- metric:tool_failure_rate  [OBSERVED]
+       <- metric:tool_results
+       <- metric:tool_errors
+state:completion_state  [completion-state-v1, RUNTIME_DECLARED]
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+  <- metric:activity  [OBSERVED]
+       <- obs:call.stop_reason
+state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
+  <- metric:identical_call_max  [OBSERVED]
+       <- obs:tool.signature
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+state:resource_state  [resource-state-v1, DEFINITIONAL]
+  <- metric:cost_fraction  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+  <- metric:cost_margin  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
+  <- metric:cost_fraction  [OPERATOR_ASSUMED]
+       <- metric:cost_usd
+state:rate_limit_state  [rate-limit-state-v1, DEFINITIONAL]
+  <- metric:rate_limit_utilization  [OBSERVED]
+       <- obs:runtime.rate_limit_utilization
+state:runtime_reliability  [runtime-reliability-v1, DEFINITIONAL]
+  <- metric:api_error  [OBSERVED]
+       <- obs:runtime.api_error_status
+  <- metric:stop_reasons  [OBSERVED]
+       <- obs:call.stop_reason
+
+======================================================================
+5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure
+======================================================================
+  context_pressure = BELOW_COMPACTION_THRESHOLD  (status=INFERRED, freshness=FRESH, age_ms=0.0, rule=context-pressure-v1, evidence=2)
+  execution_health = UNRESOLVED_FAILURES  (status=INFERRED, freshness=FRESH, age_ms=0.0, rule=execution-health-v1, evidence=2)
+  resource_pressure = MEDIUM  (status=INFERRED, freshness=FRESH, age_ms=0.0, rule=resource-pressure-v1, evidence=1)
+
+  explain(execution_health) -- 상태 -> 규칙 -> 지표 -> 관측:
+    rule: execution-health-v1 v1 [DEFINITIONAL]
+    metric tool_targets = {'unresolved': ['WebFetch:#doc'], 'recovered': ['Bash:pytest'], 'targets': 8}
+      <- demo:example/tool_call/9#tool.is_error = True (t=16900.0, cc_stream)
+      <- demo:example/tool_call/4#tool.is_error = False (t=8650.0, cc_stream)
+    metric tool_failure_rate = 0.18181818181818182
+    transitions: None -> NO_FAILURE_OBSERVED @ 2050.0 (결과 1 개 중 실패 없음 -- 건강이 증명된 것은 아니다); NO_FAILURE_OBSERVED -> UNRESOLVED_FAILURES @ 5350.0 (겨냥 1/2 의 마지막 결과가 실패); UNRESOLVED_FAILURES -> RECOVERED_FAILURES @ 8650.0 (실패했던 겨냥 1 개가 뒤에 성공); RECOVERED_FAILURES -> UNRESOLVED_FAILURES @ 16900.0 (겨냥 1/7 의 마지막 결과가 실패)
+
+======================================================================
+6. MINIMAL DECISION CONTEXT
+======================================================================
+{
+ "run": "demo:example",
+ "as_of": 18550.0,
+ "config": "demo-v1",
+ "context": {
+  "pressure": {
+   "value": "BELOW_COMPACTION_THRESHOLD",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "맥락 137,000 < 런타임 압축 문턱 144,000"
+  }
+ },
+ "execution": {
+  "health": {
+   "value": "UNRESOLVED_FAILURES",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "겨냥 1/8 의 마지막 결과가 실패"
+  },
+  "tools_with_failures": {
+   "Bash": "RECOVERED_FAILURES",
+   "WebFetch": "UNRESOLVED_FAILURES"
+  }
+ },
+ "task": {
+  "completion": {
+   "value": "ENDED_NORMALLY",
+   "status": "INFERRED",
+   "freshness": "PERMANENT",
+   "age_ms": null,
+   "why": "런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다"
+  }
+ },
+ "resources": {
+  "budget": {
+   "value": "WITHIN_BUDGET",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "비용/예산 = 0.700 < 1"
+  },
+  "pressure": {
+   "value": "MEDIUM",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "비용/예산 = 0.700, 설정 띠 ['MEDIUM', 'HIGH']"
+  }
+ },
+ "runtime": {
+  "rate_limit": {
+   "value": "AVAILABLE",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "사용률 0.62 < 1 (경고 문턱은 런타임 사건에 있으나 꼴 v2 에 안 담았다)"
+  },
+  "reliability": {
+   "value": "NO_FAILURE_OBSERVED",
+   "status": "INFERRED",
+   "freshness": "FRESH",
+   "age_ms": 0.0,
+   "why": "API 오류 보고 없음(보고된 null) · 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다"
+  }
+ },
+ "uncertain": [],
+ "not_applicable": [
+  "task.progress"
+ ]
+}
+
+======================================================================
+7. LLM 제안은 상태가 되지 않는다
+======================================================================
+  proposal 보관: 1 개 · execution_health 는 그대로 UNRESOLVED_FAILURES
+
+======================================================================
+8. 45 분 뒤 같은 질의(새 관측 없음)
+======================================================================
+  context_pressure = BELOW_COMPACTION_THRESHOLD  status=STALE  freshness=STALE  age_ms=2700000
+  execution_health = UNRESOLVED_FAILURES  status=STALE  freshness=STALE  age_ms=2700000
+  context_pressure: STALE; execution_health: STALE; resource_pressure: STALE; resource_state: STALE; rate_limit_state: STALE; runtime_reliability: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE

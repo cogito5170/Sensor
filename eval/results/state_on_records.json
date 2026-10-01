@@ -1,0 +1,237 @@
+{
+ "runs": 301,
+ "deterministic": true,
+ "final_state_distribution": {
+  "completion_state/cc_jsonl_self": {
+   "INFERRED:RUNNING": 1
+  },
+  "completion_state/cc_stream": {
+   "INFERRED:ENDED_BY_LIMIT": 1,
+   "INFERRED:ENDED_NORMALLY": 11
+  },
+  "completion_state/sweagent": {
+   "INFERRED:ENDED_BY_LIMIT": 45,
+   "INFERRED:ENDED_NORMALLY": 243
+  },
+  "context_pressure/cc_jsonl_self": {
+   "UNKNOWN:None": 1
+  },
+  "context_pressure/cc_stream": {
+   "INFERRED:BELOW_COMPACTION_THRESHOLD": 12
+  },
+  "context_pressure/sweagent": {
+   "UNKNOWN:None": 288
+  },
+  "execution_health/cc_jsonl_self": {
+   "INFERRED:UNRESOLVED_FAILURES": 1
+  },
+  "execution_health/cc_stream": {
+   "INFERRED:NO_FAILURE_OBSERVED": 8,
+   "INFERRED:RECOVERED_FAILURES": 1,
+   "INFERRED:UNRESOLVED_FAILURES": 3
+  },
+  "execution_health/sweagent": {
+   "UNKNOWN:None": 288
+  },
+  "progress_state/cc_jsonl_self": {
+   "UNKNOWN:None": 1
+  },
+  "progress_state/cc_stream": {
+   "NOT_APPLICABLE:None": 12
+  },
+  "progress_state/sweagent": {
+   "NOT_APPLICABLE:None": 288
+  },
+  "rate_limit_state/cc_jsonl_self": {
+   "UNKNOWN:None": 1
+  },
+  "rate_limit_state/cc_stream": {
+   "INFERRED:AVAILABLE": 12
+  },
+  "rate_limit_state/sweagent": {
+   "UNKNOWN:None": 288
+  },
+  "resource_pressure/cc_jsonl_self": {
+   "NOT_APPLICABLE:None": 1
+  },
+  "resource_pressure/cc_stream": {
+   "NOT_APPLICABLE:None": 12
+  },
+  "resource_pressure/sweagent": {
+   "NOT_APPLICABLE:None": 288
+  },
+  "resource_state/cc_jsonl_self": {
+   "NOT_APPLICABLE:None": 1
+  },
+  "resource_state/cc_stream": {
+   "NOT_APPLICABLE:None": 12
+  },
+  "resource_state/sweagent": {
+   "NOT_APPLICABLE:None": 288
+  },
+  "runtime_reliability/cc_jsonl_self": {
+   "INFERRED:NO_FAILURE_OBSERVED": 1
+  },
+  "runtime_reliability/cc_stream": {
+   "INFERRED:NO_FAILURE_OBSERVED": 12
+  },
+  "runtime_reliability/sweagent": {
+   "UNKNOWN:None": 288
+  },
+  "tool_execution_health/cc_jsonl_self": {
+   "INFERRED:RECOVERED_FAILURES": 1,
+   "STALE:NO_FAILURE_OBSERVED": 3,
+   "STALE:UNRESOLVED_FAILURES": 1
+  },
+  "tool_execution_health/cc_stream": {
+   "INFERRED:NO_FAILURE_OBSERVED": 18,
+   "INFERRED:RECOVERED_FAILURES": 1,
+   "INFERRED:UNRESOLVED_FAILURES": 3
+  },
+  "tool_execution_health/sweagent": {
+   "UNKNOWN:None": 2417
+  }
+ },
+ "transitions_per_entity": {
+  "completion_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "completion_state/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "completion_state/sweagent": {
+   "median": 1.0,
+   "max": 1,
+   "n": 288
+  },
+  "context_pressure/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "context_pressure/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "context_pressure/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "execution_health/cc_jsonl_self": {
+   "median": 2,
+   "max": 2,
+   "n": 1
+  },
+  "execution_health/cc_stream": {
+   "median": 1.0,
+   "max": 2,
+   "n": 12
+  },
+  "execution_health/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "progress_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "progress_state/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "progress_state/sweagent": {
+   "median": 1.0,
+   "max": 1,
+   "n": 288
+  },
+  "rate_limit_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "rate_limit_state/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "rate_limit_state/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "resource_pressure/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "resource_pressure/cc_stream": {
+   "median": 0.0,
+   "max": 0,
+   "n": 12
+  },
+  "resource_pressure/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "resource_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "resource_state/cc_stream": {
+   "median": 0.0,
+   "max": 0,
+   "n": 12
+  },
+  "resource_state/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "runtime_reliability/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "runtime_reliability/cc_stream": {
+   "median": 0.0,
+   "max": 0,
+   "n": 12
+  },
+  "runtime_reliability/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "tool_execution_health/cc_jsonl_self": {
+   "median": 0,
+   "max": 2,
+   "n": 5
+  },
+  "tool_execution_health/cc_stream": {
+   "median": 0.0,
+   "max": 1,
+   "n": 22
+  },
+  "tool_execution_health/sweagent": {
+   "median": 0,
+   "max": 0,
+   "n": 2417
+  }
+ },
+ "provenance": {
+  "usable_states": 378,
+  "without_observation_chain": 0,
+  "examples": []
+ }
+}
