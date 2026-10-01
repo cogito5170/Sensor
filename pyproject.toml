@@ -14,4 +14,4 @@ dependencies = []
 llmsensor = "llmsensor.cli:main"
 
 [tool.setuptools]
-packages = ["llmsensor", "llmsensor.sensors"]
+packages = ["llmsensor", "llmsensor.sensors", "llmsensor.adapters"]
