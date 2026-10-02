@@ -210,80 +210,12 @@ state:liveness_state  [liveness-state-v1, DEFINITIONAL]
     transitions: None -> NO_FAILURE_OBSERVED @ 2050.0 (결과 1 개 중 실패 없음 -- 건강이 증명된 것은 아니다); NO_FAILURE_OBSERVED -> UNRESOLVED_FAILURES @ 5350.0 (겨냥 1/2 의 마지막 결과가 실패); UNRESOLVED_FAILURES -> RECOVERED_FAILURES @ 8650.0 (실패했던 겨냥 1 개가 뒤에 성공); RECOVERED_FAILURES -> UNRESOLVED_FAILURES @ 16900.0 (겨냥 1/7 의 마지막 결과가 실패)
 
 ======================================================================
-6. MINIMAL DECISION CONTEXT
+6. 내보내기 계약(llmsensor.state-export/1) -- 결정 문맥은 cogito5170/DC 가 이것을 읽어 짓는다
 ======================================================================
-{
- "run": "demo:example",
- "as_of": 18550.0,
- "config": "demo-v1",
- "context": {
-  "pressure": {
-   "value": "BELOW_COMPACTION_THRESHOLD",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "맥락 137,000 < 런타임 압축 문턱 144,000"
-  }
- },
- "execution": {
-  "health": {
-   "value": "UNRESOLVED_FAILURES",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "겨냥 1/8 의 마지막 결과가 실패"
-  },
-  "tools_with_failures": {
-   "Bash": "RECOVERED_FAILURES",
-   "WebFetch": "UNRESOLVED_FAILURES"
-  }
- },
- "task": {
-  "completion": {
-   "value": "ENDED_NORMALLY",
-   "status": "INFERRED",
-   "freshness": "PERMANENT",
-   "age_ms": null,
-   "why": "런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다"
-  }
- },
- "resources": {
-  "budget": {
-   "value": "WITHIN_BUDGET",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "비용/예산 = 0.700 < 1"
-  },
-  "pressure": {
-   "value": "MEDIUM",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "비용/예산 = 0.700, 설정 띠 ['MEDIUM', 'HIGH']"
-  }
- },
- "runtime": {
-  "rate_limit": {
-   "value": "AVAILABLE",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "사용률 0.62 < 1 (경고 문턱은 런타임 사건에 있으나 꼴 v2 에 안 담았다)"
-  },
-  "reliability": {
-   "value": "NO_FAILURE_OBSERVED",
-   "status": "INFERRED",
-   "freshness": "FRESH",
-   "age_ms": 0.0,
-   "why": "API 오류 보고 없음(보고된 null) · 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다"
-  }
- },
- "uncertain": [],
- "not_applicable": [
-  "task.progress"
- ]
-}
+  subjects: {"agent": "agent:demo:example", "task": "task:demo:example", "runtime": "runtime:demo:example", "tool": ["tool:demo:example:Bash", "tool:demo:example:Edit", "tool:demo:example:Grep", "tool:demo:example:Read", "tool:demo:example:WebFetch"]}
+  as_of:    {"contract": "llmsensor.state-export/1", "run_id": "demo:example", "at": 18550.0, "time_base": "monotonic_ms"}
+  {"contract": "llmsensor.state-export/1", "entity": "agent:demo:example", "name": "execution_health", "value": "UNRESOLVED_FAILURES", "status": "INFERRED", "freshness": "FRESH", "age_ms": 0.0, "basis": "DEFINITIONAL", "rule_id": "execution-health-v1", "rule_version": 1, "config_version": "demo-v1", "evidence_refs": ["agent:demo:example/tool_targets@23", "agent:demo:example/tool_failure_rate@23"], "reason": "겨냥 1/8 의 마지막 결과가 실패", "observed_at": 18550.0, "since": 16900.0, "ttl_ms": 600000, "final": false}
+  {"contract": "llmsensor.state-export/1", "entity": "task:demo:example", "name": "progress_state", "value": null, "status": "NOT_APPLICABLE", "freshness": "PERMANENT", "age_ms": null, "basis": "OPERATOR_ASSUMED", "rule_id": "progress-state-v1", "rule_version": 1, "config_version": "demo-v1", "evidence_refs": ["task:demo:example/termination@23"], "reason": "끝난 과업 -- 진행 상태가 정의되지 않는다", "observed_at": 18550.0, "since": 18550.0, "ttl_ms": 600000, "final": true}
 
 ======================================================================
 7. LLM 제안은 상태가 되지 않는다

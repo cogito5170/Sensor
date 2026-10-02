@@ -1,4 +1,6 @@
-"""MS 센싱 · 결정 문맥의 원칙을 하나씩 깨뜨려 시험이 빨개지는지 본다(과제 §18 Mutation coverage).
+"""MS 센싱의 원칙을 하나씩 깨뜨려 시험이 빨개지는지 본다(과제 §18 Mutation coverage).
+
+결정 문맥 · 참조 정책의 변이는 그 코드와 함께 cogito5170/DC 로 옮겼다(baseline PC-08) -- DC 는 자기 변이를 따로 돌린다.
 
     python3 eval/mutation_ms.py [--out eval/results/mutation_ms.json]
 """
@@ -30,27 +32,6 @@ M = [
     ("execution: 판정 근거 없이 NONE_OBSERVED", "llmsensor/sensing/execution/__init__.py",
      '    return _unk("시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다", ["tool_timeouts", "tool_interruptions"])',
      '    return _inf("NONE_OBSERVED", "x", ["tool_timeouts"])'),
-    ("DC: N/A 선택 상태를 거르지 않는다", "llmsensor/decision/context/__init__.py",
-     "            if sv.status is Status.NOT_APPLICABLE and not need.required:  # Filter",
-     "            if False:  # Filter"),
-    ("DC: STALE 을 쓸 수 있다고 한다", "llmsensor/decision/context/__init__.py",
-     "            usable = sv.status.usable and sv.freshness is not Freshness.STALE    # Validate",
-     "            usable = sv.status.usable or sv.freshness is Freshness.STALE    # Validate"),
-    ("DC: 전제 조건 없이 모든 행동을 가능하다고", "llmsensor/decision/context/__init__.py",
-     "        if a == \"COMPACT_CONTEXT\" and not capabilities.get(\"compaction\", False):",
-     "        if False:"),
-    ("DC: 목표를 제약으로 받는다", "llmsensor/decision/context/__init__.py",
-     "            if k not in CONSTRAINT_KEYS:\n                raise ValueError", "            if False:\n                raise ValueError"),
-    ("DC: 이유 문자열(원 수치)을 넣는다", "llmsensor/decision/context/__init__.py",
-     "                ent, need.state, sv.value, sv.status.value,", "                ent, need.state, sv.reason, sv.status.value,"),
-    ("DC: 얼린 뒤 저장소를 따라 바뀐다(상태를 살아 있는 참조로)", "llmsensor/decision/context/__init__.py",
-     "    def explain(self) -> dict:\n        return json.loads(self._provenance)",
-     "    def explain(self) -> dict:\n        import random\n        return {'x': random.random()}"),
-    ("정책: 모르는 맥락 압력으로 맥락을 줄인다", "llmsensor/policy/context.py",
-     '        return Decision(NAME, ctx.context_id, _pick(ctx, "KEEP_CONTEXT"),\n                        "맥락 압력을 모른다',
-     '        return Decision(NAME, ctx.context_id, _pick(ctx, "REDUCE_CONTEXT"),\n                        "맥락 압력을 모른다'),
-    ("정책: 가능하지 않은 행동을 고른다", "llmsensor/policy/__init__.py",
-     "    return next((a for a in prefs if a in ctx.available_actions), None)", "    return prefs[0]"),
     ("수집기: 스트림의 캐시 쓰기 나눔을 버린다", "llmsensor/telemetry/collect.py",
      "                        merged = dict(c.get(\"_start_usage\") or {})", "                        merged = {}"),
     ("liveness: 운영자 timeout 없이 문턱을 지어낸다", "llmsensor/sensing/liveness/__init__.py",

@@ -64,7 +64,7 @@ task --executed_by--> agent --uses--> tool (도구마다)
 | G 신뢰 | `runtime.runtime_reliability` (DEFINITIONAL) | cc_stream 12/12, JSONL 1/1, SWE-agent 0/288 | timeout_state(전용 관측 없음) |
 | H 과업 | `task.completion_state` (RUNTIME_DECLARED) | 301/301 (SWE-agent 도: 243 정상 · 45 한도) | -- |
 | I 상호작용 | -- | -- | 사람 말 · 턴 관측이 텔레메트리 꼴에 없다 |
-| J 불확실 | -- (저장 안 함) | -- | 질의 때 투영: `decision_context()["uncertain"]` |
+| J 불확실 | -- (저장 안 함) | -- | 결정 문맥이 투영한다: cogito5170/DC 의 `validity.uncertain` |
 
 상태는 **9 개**다(71 개 텔레메트리 후보에서). 중복을 상태로 옮기지 않았다: cache_read · 걸음 번호(ρ 0.99)와
 cache_write ≡ context_growth 는 상태가 아니라 `context_tokens` · `context_growth` 지표의 근거로만 남는다.
@@ -94,7 +94,6 @@ E = StateEngine(config).ingest_all(from_telemetry(records))     # 같은 레코�
 
 E.query("agent:<run>", ["execution_health", "context_pressure"], now=None)  # -> [StateView]
 E.explain("agent:<run>", "execution_health")      # 상태 -> 규칙 -> 지표 -> 관측 id
-E.decision_context("<run>", now=None)             # 정책용 최소 의미 표현
 E.tick({"<run>": now})                            # TTL 넘긴 상태를 STALE 생애 사건으로
 E.invalidate(entity, name, reason, at)            # 명시적 무효화
 E.propose(entity, name, value, author, rationale) # 권위 없는 제안
@@ -105,8 +104,8 @@ E.snapshot()                                      # 결정성 비교용
 근거 지표 id · `since`. 정의는 있는데 아직 계산되지 않은 상태를 물으면 `UNKNOWN` 으로 답한다(K8s: 없음 = Unknown).
 내부 표현은 dataclass 이고 JSON 은 `to_dict()` 의 출력일 뿐이다.
 
-`decision_context()` 에는 원 텔레메트리와 지표 값이 없다(시험이 `cache_read` · `tokens.` · `observation` 등이
-들어가지 않음을 본다). 상태 값 · 유효성 · 신선도 · 나이 · 한 줄 이유, 그리고 `uncertain` · `not_applicable` 목록뿐이다.
+결정 문맥(정책에 줄 최소 의미 표현)은 이 저장소에 없다 -- cogito5170/DC 가 아래 내보내기 계약으로 읽어 짓는다(baseline PC-08).
+원 텔레메트리 · 지표 값이 그쪽으로 넘어가지 않는다는 것은 계약 시험(`tests/test_state_export.py`)이 본다.
 
 ### 6.1 내보내기 계약 -- 상태 층 밖이 읽는 유일한 길 (`llmsensor/state/export.py`)
 
@@ -126,8 +125,8 @@ E.as_of(run_id)                            # 그 실행에서 본 가장 늦은 
 남겨도 같은 결정 문맥이 나오는지 DC 쪽 시험이 본다). Sensor 는 DC 를 import 하지 않는다. DC 는 아직 바뀌는 중이라, 두 저장소가
 맞물리는 자리를 이 계약 하나로 좁혀 두었다.
 
-**겹침:** 이 저장소의 `llmsensor/decision/context`(목적 넷 · 얼림 · explain)는 DC 저장소와 같은 일을 한다. 어느 쪽을 정본으로 둘지는
-아직 정하지 않았다 -- 그때까지 둘 다 이 계약(또는 같은 엔진)만 읽으면 서로를 깨지 않는다.
+**합쳤다(2026-10-02, baseline PC-08):** 이 저장소에 있던 결정 문맥(`llmsensor/decision/context`)과 참조 정책(`llmsensor/policy`)은
+DC 로 옮겼다. `StateEngine.decision_context()` 도 없앴다. 결정 문맥은 DC 하나뿐이다(BD-05).
 
 ## 7. 예 -- 과제 §40 의 수로
 

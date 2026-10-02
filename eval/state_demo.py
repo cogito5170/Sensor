@@ -1,4 +1,4 @@
-"""§40 시연 -- 원 관측 -> 파생 지표 -> 의미 상태 -> 상태 그래프 -> 질의 -> 최소 결정 문맥.
+"""§40 시연 -- 원 관측 -> 파생 지표 -> 의미 상태 -> 상태 그래프 -> 질의 -> 내보내기 계약(결정 문맥은 DC 저장소).
 
     python3 eval/state_demo.py            (결과: eval/results/state_demo.txt)
 
@@ -106,8 +106,11 @@ def main():
                 p(f"      <- {o['observation']} = {o['value']} (t={o['observed_at']}, {o['source']})")
     p("    transitions: " + "; ".join(f"{t.previous} -> {t.new} @ {t.at} ({t.trigger})" for t in ex["transitions"]))
 
-    p("\n" + "=" * 70 + "\n6. MINIMAL DECISION CONTEXT\n" + "=" * 70)
-    p(json.dumps(E.decision_context(RUN), ensure_ascii=False, indent=1))
+    p("\n" + "=" * 70 + "\n6. 내보내기 계약(llmsensor.state-export/1) -- 결정 문맥은 cogito5170/DC 가 이것을 읽어 짓는다\n" + "=" * 70)
+    p(f"  subjects: {json.dumps(E.subjects(RUN), ensure_ascii=False)}")
+    p(f"  as_of:    {json.dumps(E.as_of(RUN), ensure_ascii=False)}")
+    for ent, name in ((A, "execution_health"), (f"task:{RUN}", "progress_state")):
+        p("  " + json.dumps(E.export_state(ent, name), ensure_ascii=False))
 
     p("\n" + "=" * 70 + "\n7. LLM 제안은 상태가 되지 않는다\n" + "=" * 70)
     E.propose(A, "execution_health", "FAILING", "llm", "I think the runtime is failing")
