@@ -225,6 +225,43 @@ v1 값은 `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UN
 
 확인되면 규칙 버전을 올린다. 정책 쪽에서는 `not_applicable` 목록이 `uncertain` 목록으로 옮겨 간다.
 
+#### S1 을 L0 사건 위로 (2026-10-02, baseline#3 CMD-S2 · BD-47) -- `liveness-state-v2`
+
+제가 정한 `run.*` 다섯 칸을 지웠다. 입력은 **L0 사건**(Telemetry `e246ada`)이고, 다섯 뜻은 L1 이 측정한다.
+
+| 뜻 | L0 사건 | 측정 |
+|---|---|---|
+| 종료 사건 | `run.end` | `stream_end` |
+| 흐름 닫힘 | `source.closed` | `stream_end` |
+| 차례 열림 | `input.received` · `turn.start`(열림) 대 `turn.end`(닫힘). `turn.continued` 는 닫지 않는다 | `turn_open` |
+| 마지막 활동 | 모든 사건의 `at` | `silence_ms` |
+| 런타임 진행 신호 | `heartbeat` | `silence_ms` |
+
+- 차례 열림은 원천 순서(`seq`)로 견준다.
+- 묶기는 `llmsensor/sensing/liveness/l0.py` 가 한다. L0 패키지를 import 하지 않는다. 사건마다 묶음 하나, 멱등 열쇠는 사건 id 다. 칸 값(`data`)은 싣지 않는다.
+- **차례 끝을 낸다는 근거가 없으면 '열림' 이라 하지 않는다.** cc_jsonl 은 Stop 훅이 있을 때만 `turn.end` 를 낸다(Telemetry 보고). 그 실행에서 `turn.end` 를 한 번도 못 봤으면 UNKNOWN 이다.
+- 시간 기준 검사는 차례 경계 사건까지 넓혔다. 마지막 사건이 heartbeat 하나면 섞임이 안 보이던 구멍을 시험이 잡았다.
+
+**실데이터** (Telemetry `20dc8df` 의 수집기로 L0 사건을 만든 뒤)
+
+- **이 세션 JSONL:** 사건 1,090.
+  - 차례 경계 사건: `input.received` 20 · `turn.start` 13 · `turn.end` 11.
+  - 사건 시점마다 판정: IN_TURN 977 · AWAITING_INPUT 26 · UNKNOWN 87(첫 `turn.end` 전).
+  - 사람을 기다린 공백(19:07→19:26 등)은 AWAITING_INPUT 이다.
+  - 600 초 Bash 대기(02:29→02:39)는 IN_TURN 이다.
+- **claude -p 12:** 실행 끝 ENDED 12/12. 사건 시점마다 IN_TURN 216 · ENDED 24 · UNKNOWN 12.
+- ACTIVE/STALLED 는 운영자 문턱이 없어 나오지 않는다(기본 설정).
+
+**틀리게 나온 것 -- L0 쪽 구멍 둘 (Telemetry 에 요청)**
+
+1. **429 거절 뒤 5.5 시간(20:46→02:13)이 IN_TURN 이다.** 실제로는 차례가 API 오류로 끝나 사람을 기다렸다.
+   - 그 차례에는 Stop 훅이 돌지 않아 `turn.end` 가 없다.
+   - 운영자 문턱을 켜면 **거짓 STALLED** 가 된다.
+   - Sensor 는 오류에서 차례 끝을 짐작하지 않는다. 런타임이 오류로 차례를 끝낸 것을 L0 가 차례 끝 사건으로 내야 한다.
+2. **cc_stream 의 `tool_progress` 가 `heartbeat` 로 안 나온다(t11: 0/8).**
+   - 수집기가 `parent_tool_use_id` 가 있는 줄을 하위 에이전트 사건으로 보고 버린다.
+   - 그런데 `tool_progress` 는 자기를 부른 도구의 id 를 그 칸에 단다.
+
 #### S7 구현 (2026-10-02, baseline BD-39 · baseline#3 CMD-S3)
 
 `resource-state-v2` 를 짓는다. 지표 `cost_bounds` 하나를 두고, 규칙은 그 지표만 읽는다.

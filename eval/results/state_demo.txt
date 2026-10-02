@@ -44,8 +44,8 @@
       why: 단가 없는 호출 11 개 -- 합을 모른다. 하한 $0.000000 < 예산 $0.1 이라 소진도 증명되지 않는다
   task.completion_state       = RUNNING                      INFERRED       FRESH     [completion-state-v1]
       why: 관측이 들어오고 있고 끝 요약이 아직 없다
-  task.liveness_state         = None                         UNKNOWN        UNTIMED   [liveness-state-v1]
-      why: 차례가 열려 있는지 모른다 -- 공백이 사람을 기다린 것일 수 있어 판정하지 않는다: 차례가 열려 있는지 관측하지 못했다
+  task.liveness_state         = None                         UNKNOWN        UNTIMED   [liveness-state-v2]
+      why: 차례가 열려 있는지 모른다 -- 공백이 사람을 기다린 것일 수 있어 판정하지 않는다: 차례 경계 사건을 받지 않았다
   task.progress_state         = None                         UNKNOWN        FRESH     [progress-state-v1]
       why: 진행을 판정할 검증된 근거가 없다(토큰은 진행이 아니다). 정체 문턱도 설정되지 않았다
   task.quality_state          = None                         UNKNOWN        UNTIMED   [quality-state-v1]
@@ -72,7 +72,7 @@
       why: 비용 $0.070000(reported) < 예산 $0.1
   task.completion_state       = ENDED_NORMALLY               INFERRED       PERMANENT [completion-state-v1]
       why: 런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다
-  task.liveness_state         = ENDED                        INFERRED       PERMANENT [liveness-state-v1]
+  task.liveness_state         = ENDED                        INFERRED       PERMANENT [liveness-state-v2]
       why: 런타임이 종료를 선언했다 {'result_subtype': 'success', 'terminal_reason': 'completed', 'is_error': False}
   task.progress_state         = None                         NOT_APPLICABLE PERMANENT [progress-state-v1]
       why: 끝난 과업 -- 진행 상태가 정의되지 않는다
@@ -185,19 +185,24 @@ state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
 state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
   <- metric:external_outcome  [EXTERNAL_LABEL]
        <- obs:task.external_outcome
-state:liveness_state  [liveness-state-v1, DEFINITIONAL]
+state:liveness_state  [liveness-state-v2, DEFINITIONAL]
   <- metric:stream_end  [OBSERVED]
-       <- obs:run.terminal_seen
-       <- obs:run.transport_closed
+       <- obs:l0.run_end
+       <- obs:l0.source_closed
   <- metric:termination  [RUNTIME_DECLARED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
        <- obs:run.is_error
   <- metric:turn_open  [OBSERVED]
-       <- obs:run.turn_open
+       <- obs:l0.input_received
+       <- obs:l0.turn_start
+       <- obs:l0.turn_end
   <- metric:silence_ms  [OBSERVED]
-       <- obs:run.activity_at_ms
-       <- obs:run.heartbeat_at_ms
+       <- obs:l0.last_event
+       <- obs:l0.heartbeat
+       <- obs:l0.input_received
+       <- obs:l0.turn_start
+       <- obs:l0.turn_end
 
 ======================================================================
 5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure

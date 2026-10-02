@@ -160,9 +160,9 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `task.liveness_state` -- `liveness-state-v1` (v1, DEFINITIONAL)
+### `task.liveness_state` -- `liveness-state-v2` (v2, DEFINITIONAL)
 
-- **뜻**: 대상이 아직 움직이나. 끝남 · 끝 신호 없이 닫힘 · 입력 대기 · 차례 중은 문턱 없이, ACTIVE · STALLED 는 운영자 무음 문턱이 있을 때만(값마다 근거가 따로 남는다). DEAD 는 내지 않는다
+- **뜻**: [ASSESS] 대상이 아직 움직이나 -- L0 차례 경계 사건에서. 끝남 · 끝 신호 없이 닫힘 · 입력 대기 · 차례 중은 문턱 없이, ACTIVE · STALLED 는 운영자 무음 문턱이 있을 때만(값마다 근거가 따로 남는다). DEAD 는 내지 않는다
 - **돕는 결정**: 기다릴까 · 끊고 다시 띄울까
 - **값**: `ENDED` · `ENDED_WITHOUT_TERMINAL` · `AWAITING_INPUT` · `IN_TURN` · `ACTIVE` · `STALLED` · `UNKNOWN` · `NOT_APPLICABLE`
 - **입력 지표**: `stream_end`, `termination`, `turn_open`, `silence_ms`
@@ -229,9 +229,9 @@
 | `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |
 | `cost_bounds` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd`, `run.snapshot_at_ms` | 비용 하한(보고 · 단가 있는 호출의 합 중 큰 것)과, 알면 합(덮는 보고 > 완전한 추정) · 단가표 판본 |
 | `external_outcome` | task | EXTERNAL_LABEL | `task.external_outcome` | 외부 평가 라벨(그대로) |
-| `stream_end` | task | OBSERVED | `run.terminal_seen`, `run.transport_closed` | 종료 사건을 받았나 · 흐름이 닫혔나 |
-| `turn_open` | task | OBSERVED | `run.turn_open` | 차례가 열려 있나(입력 수신 ~ 차례 끝) |
-| `silence_ms` | task | OBSERVED | `run.activity_at_ms`, `run.heartbeat_at_ms` | 평가 시각 − 마지막 활동(사건 또는 런타임 heartbeat) |
+| `stream_end` | task | OBSERVED | `l0.run_end`, `l0.source_closed` | 종료 사건(run.end)을 받았나 · 흐름이 닫혔나(source.closed) |
+| `turn_open` | task | OBSERVED | `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None |
+| `silence_ms` | task | OBSERVED | `l0.last_event`, `l0.heartbeat`, `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 평가 시각 − 마지막 활동(어떤 사건 또는 런타임 heartbeat) |
 
 ## 정준 관측 (층 1)
 
@@ -363,19 +363,24 @@ state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
 state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
   <- metric:external_outcome  [EXTERNAL_LABEL]
        <- obs:task.external_outcome
-state:liveness_state  [liveness-state-v1, DEFINITIONAL]
+state:liveness_state  [liveness-state-v2, DEFINITIONAL]
   <- metric:stream_end  [OBSERVED]
-       <- obs:run.terminal_seen
-       <- obs:run.transport_closed
+       <- obs:l0.run_end
+       <- obs:l0.source_closed
   <- metric:termination  [RUNTIME_DECLARED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
        <- obs:run.is_error
   <- metric:turn_open  [OBSERVED]
-       <- obs:run.turn_open
+       <- obs:l0.input_received
+       <- obs:l0.turn_start
+       <- obs:l0.turn_end
   <- metric:silence_ms  [OBSERVED]
-       <- obs:run.activity_at_ms
-       <- obs:run.heartbeat_at_ms
+       <- obs:l0.last_event
+       <- obs:l0.heartbeat
+       <- obs:l0.input_received
+       <- obs:l0.turn_start
+       <- obs:l0.turn_end
 ```
 
 ## 넣지 않은 후보 상태와 까닭
