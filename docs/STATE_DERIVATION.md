@@ -76,12 +76,12 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.resource_state` -- `resource-state-v1` (v1, DEFINITIONAL)
+### `agent.resource_state` -- `resource-state-v2` (v2, DEFINITIONAL)
 
-- **뜻**: 보고된 비용이 설정 예산 안인가
+- **뜻**: 비용이 설정 예산 안인가 -- 실행 중에도(공급자 단가 × 토큰). 하한 ≥ 예산이면 소진(영구), 합을 알 때만 예산 안. 예산이 없으면 NOT_APPLICABLE (BD-39)
 - **돕는 결정**: 멈출까
 - **값**: `WITHIN_BUDGET` · `BUDGET_EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `cost_fraction`, `cost_margin`
+- **입력 지표**: `cost_bounds`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
 
 ```
@@ -227,6 +227,7 @@
 | `call_cost` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 마지막 호출의 비용 성분($) -- 토큰 × 공급자 단가 |
 | `cost_estimate` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 실행 누적 비용 추정($) |
 | `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |
+| `cost_bounds` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd`, `run.snapshot_at_ms` | 비용 하한(보고 · 단가 있는 호출의 합 중 큰 것)과, 알면 합(덮는 보고 > 완전한 추정) · 단가표 판본 |
 | `external_outcome` | task | EXTERNAL_LABEL | `task.external_outcome` | 외부 평가 라벨(그대로) |
 | `stream_end` | task | OBSERVED | `run.terminal_seen`, `run.transport_closed` | 종료 사건을 받았나 · 흐름이 닫혔나 |
 | `turn_open` | task | OBSERVED | `run.turn_open` | 차례가 열려 있나(입력 수신 ~ 차례 끝) |
@@ -319,11 +320,16 @@ state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
        <- obs:run.is_error
-state:resource_state  [resource-state-v1, DEFINITIONAL]
-  <- metric:cost_fraction  [OPERATOR_ASSUMED]
-       <- metric:cost_usd
-  <- metric:cost_margin  [OPERATOR_ASSUMED]
-       <- metric:cost_usd
+state:resource_state  [resource-state-v2, DEFINITIONAL]
+  <- metric:cost_bounds  [PROVIDER_DECLARED]
+       <- obs:call.model
+       <- obs:tokens.input_uncached
+       <- obs:tokens.output
+       <- obs:tokens.cache_read
+       <- obs:tokens.cache_write_5m
+       <- obs:tokens.cache_write_1h
+       <- obs:run.cost_usd
+       <- obs:run.snapshot_at_ms
 state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
   <- metric:cost_fraction  [OPERATOR_ASSUMED]
        <- metric:cost_usd

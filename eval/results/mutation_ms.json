@@ -93,5 +93,40 @@
   "mutation": "liveness: 평가 순간의 값(ACTIVE)을 뒤 시각에 지금 값으로",
   "file": "llmsensor/state/engine.py",
   "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 예산 없음을 UNKNOWN 으로(BD-39 위반)",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 단가 없는 호출을 빼고 부분 합으로 WITHIN",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 단가 없는 호출이 있으면 소진도 증명하지 않는다",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 중간 스냅숏 보고가 모든 호출을 덮는다고 짐작",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 덮는 보고를 두고 추정이 이긴다",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 소진을 영구로 두지 않는다",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v2: 단가표 판본을 근거에서 뺀다",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
  }
 ]

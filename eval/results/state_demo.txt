@@ -40,8 +40,8 @@
       why: 지연 SLO 가 설정되지 않았다(문턱을 지어내지 않는다)
   agent.resource_pressure      = None                         UNKNOWN        UNTIMED   [resource-pressure-v1]
       why: 비용을 아직 못 봤다
-  agent.resource_state         = None                         UNKNOWN        UNTIMED   [resource-state-v1]
-      why: 비용을 아직 못 봤다: 이 런타임들은 비용을 실행 끝에만 보고한다
+  agent.resource_state         = None                         UNKNOWN        UNTIMED   [resource-state-v2]
+      why: 단가 없는 호출 11 개 -- 합을 모른다. 하한 $0.000000 < 예산 $0.1 이라 소진도 증명되지 않는다
   task.completion_state       = RUNNING                      INFERRED       FRESH     [completion-state-v1]
       why: 관측이 들어오고 있고 끝 요약이 아직 없다
   task.liveness_state         = None                         UNKNOWN        UNTIMED   [liveness-state-v1]
@@ -68,8 +68,8 @@
       why: 지연 SLO 가 설정되지 않았다(문턱을 지어내지 않는다)
   agent.resource_pressure      = MEDIUM                       INFERRED       FRESH     [resource-pressure-v1]
       why: 비용/예산 = 0.700, 설정 띠 ['MEDIUM', 'HIGH']
-  agent.resource_state         = WITHIN_BUDGET                INFERRED       FRESH     [resource-state-v1]
-      why: 비용/예산 = 0.700 < 1
+  agent.resource_state         = WITHIN_BUDGET                INFERRED       FRESH     [resource-state-v2]
+      why: 비용 $0.070000(reported) < 예산 $0.1
   task.completion_state       = ENDED_NORMALLY               INFERRED       PERMANENT [completion-state-v1]
       why: 런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다
   task.liveness_state         = ENDED                        INFERRED       PERMANENT [liveness-state-v1]
@@ -142,11 +142,16 @@ state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
        <- obs:run.is_error
-state:resource_state  [resource-state-v1, DEFINITIONAL]
-  <- metric:cost_fraction  [OPERATOR_ASSUMED]
-       <- metric:cost_usd
-  <- metric:cost_margin  [OPERATOR_ASSUMED]
-       <- metric:cost_usd
+state:resource_state  [resource-state-v2, DEFINITIONAL]
+  <- metric:cost_bounds  [PROVIDER_DECLARED]
+       <- obs:call.model
+       <- obs:tokens.input_uncached
+       <- obs:tokens.output
+       <- obs:tokens.cache_read
+       <- obs:tokens.cache_write_5m
+       <- obs:tokens.cache_write_1h
+       <- obs:run.cost_usd
+       <- obs:run.snapshot_at_ms
 state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
   <- metric:cost_fraction  [OPERATOR_ASSUMED]
        <- metric:cost_usd
@@ -228,4 +233,3 @@ state:liveness_state  [liveness-state-v1, DEFINITIONAL]
   context_pressure = BELOW_COMPACTION_THRESHOLD  status=STALE  freshness=STALE  age_ms=2700000
   execution_health = UNRESOLVED_FAILURES  status=STALE  freshness=STALE  age_ms=2700000
   context_pressure: STALE; execution_health: STALE; resource_pressure: STALE; resource_state: STALE; rate_limit_state: STALE; runtime_reliability: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE
-

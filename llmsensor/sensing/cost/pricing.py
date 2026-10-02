@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 SOURCE = "claude-api skill 2.1.287 models table (cached 2026-09-25) + shared/prompt-caching.md multipliers"
+# 단가표 판본 -- 비용 근거가 어느 표에서 나왔는지 상태까지 따라간다(BD-39 조건 1). 값 · 모형을 바꾸면 올린다
+VERSION = "anthropic-2026-09-25/1"
 
 # $/MTok
 PRICES = {
