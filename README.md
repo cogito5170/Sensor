@@ -19,11 +19,12 @@ NASA 식 analytical redundancy(Chow & Willsky 1984)의 *잔차 생성 → 결정
 레코드 꼴(`schema/telemetry.schema.json`), 수집기(`llmsensor/telemetry/`), 파생, 의존 그래프, 최소 비중복 관측 16 개,
 UNKNOWN 목록. 측정: [`eval/RESULTS_sensor_layer.md`](eval/RESULTS_sensor_layer.md).
 
-**L0 Telemetry 는 따로 섰다(2026-10-02): [cogito5170/Telemetry](https://github.com/cogito5170/Telemetry).** 층은
+**L0 Telemetry 는 따로 섰다(2026-10-02): [cogito5170/Telemetry](https://github.com/cogito5170/Telemetry) -- 선택 의존.** 층은
 L0 Telemetry(무슨 일이 일어났나) → L1 Sensor(그것이 무엇을 뜻하나) → L2 State → L3 DC → L4 Policy → L5 Action(→ L0) 이다.
-이 저장소의 `llmsensor/telemetry/collect.py`(꼴 v3)는 그쪽 수집기가 옮겨 갔고, 그쪽 `compat.to_sensor_records` 가 되지은 v3 가
-여기 수집기의 출력과 같다(그쪽 시험). 아직 이 저장소는 그것에 의존하지 않는다. `llmsensor/telemetry/derive.py` 의 문턱 있는 파생
-(`token_burst` · `token_stagnation` · `token_oscillation`)은 L1 의 일이라 sensing 으로 옮길 자리다 -- 그쪽 `docs/TELEMETRY.md` 7 절.
+`pip install "llmsensor[l0]"` 로 깔면 `llmsensor.telemetry.l0.collect` 가 원천을 L0 사건 원장으로 적고 거기서 꼴 v3 레코드를 되지어 State 에
+넘긴다. 없으면 지금 수집기(`llmsensor/telemetry/collect.py`)를 쓴다. 두 길이 같은지는 `python3 -m llmsensor l0-check cc_jsonl <세션>.jsonl`
+로 맞댄다 -- 실데이터에서 계속 같으면 필수 의존으로 바꾼다. 문턱 있는 판독(`token_burst` · `token_stagnation` · `token_oscillation`)은
+L1 의 일이라 `llmsensor/telemetry/derive.py` 에서 `llmsensor/sensing/token/events.py` 로 옮겼다(실데이터 9538 호출에서 출력 불변, 시험).
 
 **상태 층(State): [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md)** -- 텔레메트리를 받아 실체(agent · task · runtime ·
 tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`). 규칙마다 근거 종류(정의상 · 런타임 선언 · 운영자 가정)가

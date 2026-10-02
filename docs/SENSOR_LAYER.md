@@ -124,6 +124,8 @@ v1 은 둘을 다 `unobserved` 로 적어 "오류 없음" 과 "못 봄" 을 못 
 
 ## 4. 파생 텔레메트리 (`derive.py`)
 
+> 2026-10-02: 아래 세 사건형 판독(token_burst · token_stagnation · token_oscillation)은 문턱이 있는 해석이라 L1 의 일이다 -- `llmsensor/telemetry/derive.py` 에서 `llmsensor/sensing/token/events.py` 로 옮겼다(정의 불변, `tests/test_layer.py`).
+
 | 파생 | 식 | 입력 |
 |---|---|---|
 | context_tokens | input + cache_read + cache_creation | 토큰 셋 |

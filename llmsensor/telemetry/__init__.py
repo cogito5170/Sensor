@@ -3,7 +3,8 @@
     catalog.py   후보 센서 목록 · 형(직접/파생) · 원천별 가용성 근거
     schema.py    텔레메트리 레코드 꼴(model_call · tool_call · run) -- JSON Schema
     collect.py   원천 -> 레코드: Claude Code JSONL · claude -p stream-json(도착 시각 찍은 것) · SWE-agent .traj
-    derive.py    레코드 -> 파생 텔레메트리(레코드만 본다. 원천을 다시 열지 않는다)
+    derive.py    레코드 -> 파생 텔레메트리(레코드만 본다 · 산술만. 문턱 있는 판독은 sensing/token/events.py)
+    l0.py        L0 Telemetry(cogito5170/Telemetry) 선택 의존 -- 있으면 그쪽 수집기 · 원장, 없으면 collect.py
 
 **Telemetry ≠ State.** 여기에는 해석(압박 · 혼란 · 수렴 안 함)이 없다. 관측값과 그 산술만 있다.
 """

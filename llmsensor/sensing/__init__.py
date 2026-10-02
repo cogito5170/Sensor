@@ -53,3 +53,8 @@ def owner(name: str) -> "str | None":
         if any(r.state == name for r in p.rules):
             return p.name
     return None
+
+
+# 팩 하나를 바로 import 해도(`from llmsensor.sensing.token.events import …`) 돌게 -- 팩 → _base → state → registry → packs()
+# 의 고리에서 이 패키지가 먼저 다 서 있어야 한다. state 를 여기서 올려 그 순서를 고정한다.
+from .. import state as _state  # noqa: E402,F401
