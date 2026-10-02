@@ -4,6 +4,10 @@
 
 토큰은 센서가 아니라 관측량이고, 성공은 센서 하나가 아니라 여러 증거에서 추정하는 잠재 상태다.
 """
+# 하위 패키지 llmsensor.telemetry(센서 층)와 함수 telemetry(trace)가 같은 이름이다. 하위 패키지를 먼저
+# 올려 두어야 아래 함수가 그 자리를 차지한다 -- 아니면 누가 나중에 llmsensor.telemetry.* 를 처음
+# import 하는 순간 패키지 속성이 모듈로 덮여 `from llmsensor import telemetry` 가 import 순서에 따라 달라진다.
+from . import telemetry as _telemetry_layer  # noqa: F401
 from .reading import Reading, OK, SUSPECT, FAULT, UNKNOWN
 from .trace import Task, ToolCall, Recorder, from_claude_code, telemetry
 from .sensors import (ExecutionSensor, ConstraintSensor, ConsistencySensor, BehaviorSensor,

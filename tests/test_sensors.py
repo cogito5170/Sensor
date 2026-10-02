@@ -229,3 +229,14 @@ class Model(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TelemetryName(unittest.TestCase):
+    """함수 telemetry 와 하위 패키지 llmsensor.telemetry 가 이름을 나눠 쓴다 -- import 순서에 따라 바뀌면 안 된다."""
+
+    def test_function_survives_subpackage_import(self):
+        import llmsensor
+        from llmsensor.telemetry import collect, derive, schema  # noqa: F401 -- 하위 모듈을 처음 올리는 쪽
+        self.assertTrue(callable(llmsensor.telemetry))
+        from llmsensor import telemetry as t
+        self.assertIs(t, llmsensor.trace.telemetry)
