@@ -1,0 +1,206 @@
+{
+ "cc_stream": {
+  "event_types": {
+   "stream_event/content_block_delta": 2042,
+   "stream_event/content_block_start": 114,
+   "assistant/None": 114,
+   "stream_event/content_block_stop": 114,
+   "system/thinking_tokens": 50,
+   "user/None": 48,
+   "system/status": 41,
+   "stream_event/message_start": 41,
+   "stream_event/message_delta": 41,
+   "stream_event/message_stop": 41,
+   "system/task_summary": 24,
+   "rate_limit_event/None": 14,
+   "active_goal/None": 12,
+   "autocompact_state/None": 12,
+   "system/init": 12,
+   "system/post_turn_summary": 11,
+   "result/success": 11,
+   "tool_progress/None": 8,
+   "result/error_max_turns": 1
+  },
+  "status_events": {
+   "requesting": 41
+  },
+  "message_starts": 41,
+  "tool_progress": [
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 3,
+    "heartbeat": null
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 30,
+    "heartbeat": true
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 33,
+    "heartbeat": null
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 60,
+    "heartbeat": true
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 63,
+    "heartbeat": null
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 90,
+    "heartbeat": true
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 93,
+    "heartbeat": null
+   },
+   {
+    "run": "t11_timeout",
+    "elapsed_s": 120,
+    "heartbeat": true
+   }
+  ],
+  "max_silent_gap_ms": {
+   "t01_create_test": 1125,
+   "t02_fix_bug": 2717,
+   "t03_search": 820,
+   "t04_impossible": 634,
+   "t05_long_write": 1247,
+   "t06_csv_mean": 1273,
+   "t07_flaky_retry": 949,
+   "t08_max_turns": 617,
+   "t09_big_read": 1445,
+   "t10_rename": 972,
+   "t11_timeout": 26717,
+   "t12_bad_args": 828
+  },
+  "stream_end": {
+   "result": 12
+  },
+  "init_mcp_server_count": {
+   "0": 12
+  },
+  "post_turn_summary": {
+   "completed|needs_action=False": 10,
+   "blocked|needs_action=True": 1
+  },
+  "permission_denials": 0,
+  "subagent_stats_sum": {
+   "spawned": 0,
+   "failed": 0,
+   "completed": 0
+  },
+  "rate_limit_events": 14,
+  "rate_limit_status": {
+   "allowed_warning": 14
+  },
+  "five_hour_utilization": {
+   "min": 0.7,
+   "max": 0.72,
+   "distinct": [
+    0.7,
+    0.71,
+    0.72
+   ]
+  }
+ },
+ "cc_jsonl_self": {
+  "api_error_messages": [
+   {
+    "error": "rate_limit",
+    "status": 429,
+    "model": "<synthetic>",
+    "quota_status": "rejected",
+    "quota_type": "five_hour",
+    "overage": "rejected",
+    "fallback_available": false
+   },
+   {
+    "error": "rate_limit",
+    "status": 429,
+    "model": "<synthetic>",
+    "quota_status": "rejected",
+    "quota_type": "five_hour",
+    "overage": "rejected",
+    "fallback_available": false
+   }
+  ],
+  "compaction": [
+   {
+    "trigger": "auto",
+    "preTokens": 783484,
+    "postTokens": 7209,
+    "durationMs": 69703
+   }
+  ],
+  "bash_timeout_moved_to_background": 1,
+  "timeout_regex_vs_runtime": {
+   "TN": 201,
+   "FP": 2,
+   "FN": 1
+  },
+  "webfetch_errors": {
+   "EGRESS_BLOCKED": 2
+  },
+  "stop_hooks": {
+   "runs": 6,
+   "errors": 0,
+   "prevented": 0
+  },
+  "queue_operations": {
+   "enqueue|None": 11,
+   "dequeue|None": 9,
+   "remove|absorbed_mid_turn": 2
+  },
+  "collector": {
+   "synthetic_model_calls": 2,
+   "tool_calls_timed_out": 2
+  },
+  "states_now": {
+   "context_pressure": [
+    "UNKNOWN",
+    null
+   ],
+   "rate_limit_state": [
+    "UNKNOWN",
+    null
+   ],
+   "runtime_reliability": [
+    "INFERRED",
+    "NO_FAILURE_OBSERVED"
+   ],
+   "execution_interruption": [
+    "INFERRED",
+    "TIMEOUT_OBSERVED"
+   ]
+  },
+  "cost_estimate": {
+   "value": null,
+   "reason": "계산할 수 없는 호출이 있다 -- 부분 합을 내지 않는다"
+  }
+ },
+ "sweagent": {
+  "trajs": 288,
+  "model_stats_keys": [
+   "api_calls",
+   "instance_cost",
+   "tokens_received",
+   "tokens_sent",
+   "total_cost"
+  ],
+  "trajectory_step_keys": [
+   "action",
+   "observation",
+   "response",
+   "state",
+   "thought"
+  ]
+ }
+}
