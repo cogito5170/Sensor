@@ -44,6 +44,8 @@
       why: 비용을 아직 못 봤다: 이 런타임들은 비용을 실행 끝에만 보고한다
   task.completion_state       = RUNNING                      INFERRED       FRESH     [completion-state-v1]
       why: 관측이 들어오고 있고 끝 요약이 아직 없다
+  task.liveness_state         = None                         UNKNOWN        UNTIMED   [liveness-state-v1]
+      why: 차례가 열려 있는지 모른다 -- 공백이 사람을 기다린 것일 수 있어 판정하지 않는다: 차례가 열려 있는지 관측하지 못했다
   task.progress_state         = None                         UNKNOWN        FRESH     [progress-state-v1]
       why: 진행을 판정할 검증된 근거가 없다(토큰은 진행이 아니다). 정체 문턱도 설정되지 않았다
   task.quality_state          = None                         UNKNOWN        UNTIMED   [quality-state-v1]
@@ -70,6 +72,8 @@
       why: 비용/예산 = 0.700 < 1
   task.completion_state       = ENDED_NORMALLY               INFERRED       PERMANENT [completion-state-v1]
       why: 런타임 종료 선언 result_subtype='success' -- 과업이 **성공**했다는 뜻이 아니다
+  task.liveness_state         = ENDED                        INFERRED       PERMANENT [liveness-state-v1]
+      why: 런타임이 종료를 선언했다 {'result_subtype': 'success', 'terminal_reason': 'completed', 'is_error': False}
   task.progress_state         = None                         NOT_APPLICABLE PERMANENT [progress-state-v1]
       why: 끝난 과업 -- 진행 상태가 정의되지 않는다
   task.quality_state          = None                         UNKNOWN        UNTIMED   [quality-state-v1]
@@ -176,6 +180,19 @@ state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
 state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
   <- metric:external_outcome  [EXTERNAL_LABEL]
        <- obs:task.external_outcome
+state:liveness_state  [liveness-state-v1, DEFINITIONAL]
+  <- metric:stream_end  [OBSERVED]
+       <- obs:run.terminal_seen
+       <- obs:run.transport_closed
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+  <- metric:turn_open  [OBSERVED]
+       <- obs:run.turn_open
+  <- metric:silence_ms  [OBSERVED]
+       <- obs:run.activity_at_ms
+       <- obs:run.heartbeat_at_ms
 
 ======================================================================
 5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure
@@ -279,3 +296,4 @@ state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
   context_pressure = BELOW_COMPACTION_THRESHOLD  status=STALE  freshness=STALE  age_ms=2700000
   execution_health = UNRESOLVED_FAILURES  status=STALE  freshness=STALE  age_ms=2700000
   context_pressure: STALE; execution_health: STALE; resource_pressure: STALE; resource_state: STALE; rate_limit_state: STALE; runtime_reliability: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE
+

@@ -160,6 +160,18 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
+### `task.liveness_state` -- `liveness-state-v1` (v1, DEFINITIONAL)
+
+- **뜻**: 대상이 아직 움직이나. 끝남 · 끝 신호 없이 닫힘 · 입력 대기 · 차례 중은 문턱 없이, ACTIVE · STALLED 는 운영자 무음 문턱이 있을 때만(값마다 근거가 따로 남는다). DEAD 는 내지 않는다
+- **돕는 결정**: 기다릴까 · 끊고 다시 띄울까
+- **값**: `ENDED` · `ENDED_WITHOUT_TERMINAL` · `AWAITING_INPUT` · `IN_TURN` · `ACTIVE` · `STALLED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `stream_end`, `termination`, `turn_open`, `silence_ms`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
 ### 종료 선언 표 (`completion-state-v1`) -- 표에 없는 문자열은 추측하지 않고 UNKNOWN
 
 | 칸 | 런타임 값 | 상태 |
@@ -216,6 +228,9 @@
 | `cost_estimate` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 실행 누적 비용 추정($) |
 | `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |
 | `external_outcome` | task | EXTERNAL_LABEL | `task.external_outcome` | 외부 평가 라벨(그대로) |
+| `stream_end` | task | OBSERVED | `run.terminal_seen`, `run.transport_closed` | 종료 사건을 받았나 · 흐름이 닫혔나 |
+| `turn_open` | task | OBSERVED | `run.turn_open` | 차례가 열려 있나(입력 수신 ~ 차례 끝) |
+| `silence_ms` | task | OBSERVED | `run.activity_at_ms`, `run.heartbeat_at_ms` | 평가 시각 − 마지막 활동(사건 또는 런타임 heartbeat) |
 
 ## 정준 관측 (층 1)
 
@@ -342,6 +357,19 @@ state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
 state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
   <- metric:external_outcome  [EXTERNAL_LABEL]
        <- obs:task.external_outcome
+state:liveness_state  [liveness-state-v1, DEFINITIONAL]
+  <- metric:stream_end  [OBSERVED]
+       <- obs:run.terminal_seen
+       <- obs:run.transport_closed
+  <- metric:termination  [RUNTIME_DECLARED]
+       <- obs:run.result_subtype
+       <- obs:run.terminal_reason
+       <- obs:run.is_error
+  <- metric:turn_open  [OBSERVED]
+       <- obs:run.turn_open
+  <- metric:silence_ms  [OBSERVED]
+       <- obs:run.activity_at_ms
+       <- obs:run.heartbeat_at_ms
 ```
 
 ## 넣지 않은 후보 상태와 까닭
@@ -364,4 +392,5 @@ state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
 | `token_budget_state` | 토큰 예산 설정이 없다. 필요하면 resource_state 와 같은 꼴로 더한다 |
 | `interaction_state` | 사람 말 · 턴 관측이 텔레메트리 꼴에 없다 |
 | `uncertainty_state` | 저장하지 않는다 -- 질의 때 상태들의 유효성에서 투영한다(decision_context.uncertain) |
+| `liveness DEAD · ALIVE` | DEAD: 기록이 끊긴 것만으로 '대상이 죽음' 과 '수집이 죽음' 을 못 가른다(기록 밖 채널 필요). ALIVE: ACTIVE 와 같은 말을 문턱 없이 하게 된다 -- liveness_state 는 IN_TURN 에서 멈춘다 |
 | `generation_state(stop_reason)` | 멈춤 사유를 이름만 바꾼 상태가 된다. 한도에 잘린 것만 runtime_reliability 의 근거로 쓴다 |

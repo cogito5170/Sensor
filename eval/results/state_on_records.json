@@ -53,6 +53,15 @@
   "latency_state/sweagent": {
    "NOT_APPLICABLE:None": 288
   },
+  "liveness_state/cc_jsonl_self": {
+   "UNKNOWN:None": 1
+  },
+  "liveness_state/cc_stream": {
+   "INFERRED:ENDED": 12
+  },
+  "liveness_state/sweagent": {
+   "INFERRED:ENDED": 288
+  },
   "progress_state/cc_jsonl_self": {
    "UNKNOWN:None": 1
   },
@@ -197,6 +206,21 @@
    "max": 0,
    "n": 288
   },
+  "liveness_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "liveness_state/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "liveness_state/sweagent": {
+   "median": 1.0,
+   "max": 1,
+   "n": 288
+  },
   "progress_state/cc_jsonl_self": {
    "median": 0,
    "max": 0,
@@ -304,7 +328,7 @@
   }
  },
  "provenance": {
-  "usable_states": 386,
+  "usable_states": 686,
   "without_observation_chain": 0,
   "examples": []
  }

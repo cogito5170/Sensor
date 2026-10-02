@@ -332,7 +332,9 @@ class Registry(unittest.TestCase):
             self.assertIn("UNKNOWN", d["allowed_values"])
         self.assertGreaterEqual(len(REGISTRY.candidates), 10)
         names = set(REGISTRY.rules)
-        self.assertLessEqual(len(names), 12)                          # 상태는 적어야 한다(압축)
+        # 상태는 적어야 한다(압축). 12 -> 13: liveness_state(S1) -- 설계(docs/SENSOR_HEALTH_DESIGN.md §0)에서 유일한 새 상태.
+        # 나머지 건강 차원(처분 · 의존 · 한도 여유 · 런타임 행동)은 값 · 지표로 더하기로 해 상한을 더 올리지 않는다
+        self.assertLessEqual(len(names), 13)
 
 
 if __name__ == "__main__":

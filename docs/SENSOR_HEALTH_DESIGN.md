@@ -46,12 +46,11 @@
 
 | 이름 | 실체 | Basis | 뜻 | 없으면 |
 |---|---|---|---|---|
-| `run.activity_at_ms` | TASK | OBSERVED | 이 실행에서 **어떤 사건이든** 마지막으로 온 시각(런타임 시각 또는 수신 시각 -- 어느 쪽인지 `run.activity_clock` 으로) | liveness UNKNOWN |
+| `run.activity_at_ms` | TASK | OBSERVED | 이 실행에서 **어떤 사건이든** 마지막으로 온 시각(시간 기준은 레코드의 `time_base`) | liveness UNKNOWN |
 | `run.terminal_seen` | TASK | OBSERVED | 런타임의 **종료 사건**(결과 레코드)을 받았나 | liveness UNKNOWN |
 | `run.transport_closed` | TASK | OBSERVED | 원천의 흐름이 닫혔나(스트림 EOF · 프로세스 종료) | ENDED_WITHOUT_TERMINAL 판정 불가 |
-| `turn.open` | TASK | OBSERVED | 지금 모델/도구 차례가 열려 있나(사용자 입력을 받아 처리 중) | AWAITING_INPUT 판정 불가 |
-| `input.enqueued_at_ms` | TASK | OBSERVED | 마지막 사용자 입력 도착 시각 | 〃 |
-| `tool.heartbeat_at_ms` | TOOL | RUNTIME_DECLARED | 런타임이 **진행 중**이라고 보낸 마지막 신호 시각 | 활동으로 안 셈(무음으로 봄) |
+| `run.turn_open` | TASK | OBSERVED | 차례가 열려 있나 -- 입력을 **받은 순간부터** 차례가 끝날 때까지 true | AWAITING_INPUT 판정 불가 -> UNKNOWN |
+| `run.heartbeat_at_ms` | TASK | RUNTIME_DECLARED | 런타임이 **진행 중**이라고 보낸 마지막 신호 시각(구현 때 도구 단위 -> 실행 단위로) | 활동으로 안 셈(무음으로 봄) |
 | `tool.timeout_disposition` | TOOL | RUNTIME_DECLARED | 시간 초과 뒤 런타임의 처분: `KILLED` · `BACKGROUNDED` | S2 는 v1 처럼 동작 |
 | `dep.id` · `dep.kind` | DEPENDENCY | OBSERVED | 의존 대상과 종류: `provider` · `tool` · `network_policy` · `mcp_server` · `hook` · `external_http` | S3 UNKNOWN |
 | `dep.fault` | DEPENDENCY | RUNTIME_DECLARED | **런타임이 구조화해 준** 결함 원인(예: `EGRESS_BLOCKED`, HTTP 상태, MCP 상태, 훅 오류) | NO_FAULT_DECLARED 아님 -> UNKNOWN |
@@ -117,9 +116,38 @@ execution 은 "어떻게 끝났나", liveness 는 "지금 움직이나" 를 묻�
 
 - 오래 도는 도구가 heartbeat 를 보내는 동안은 무음이 아니다. 재고: t11 은 26.7초 무음이었지만 heartbeat 가 있었다.
 - 차례가 닫힌 뒤 공백은 STALLED 가 아니라 AWAITING_INPUT 이다.
-- 수신 시각과 런타임 시각을 섞어 빼지 않는다(`run.activity_clock`).
+- 수신 시각과 런타임 시각을 섞어 빼지 않는다(레코드의 `time_base` 가 다르면 UNKNOWN).
 
 **상태로 내지 않는 것:** `DEAD`(기록 안에서 판정 불가), `ALIVE`(ACTIVE 와 같은 뜻을 문턱 없이 말하게 된다).
+
+#### S1 구현 (2026-10-02) -- 설계에서 달라진 점
+
+코드: `llmsensor/sensing/liveness/`. 시험은 `tests/test_liveness.py` 22개로, 가짜 정준 입력만 씁니다. 변이 9개는 `eval/mutation_ms.py` 에 있고 전부 RED 입니다.
+
+**입력을 줄였다(§1.1 수정).**
+- `tool.heartbeat_at_ms` 대신 `run.heartbeat_at_ms` 를 쓴다. 실행 하나의 liveness 에는 "가장 늦은 런타임 신호" 하나면 충분하다.
+- `input.enqueued_at_ms` 를 뺐다. 대신 `run.turn_open` 의 뜻을 "입력을 **받은 순간부터** 차례가 끝날 때까지 true" 로 정했다. 받았는데 처리가 시작되지 않은 입력의 침묵도 그래서 잴 수 있다.
+- `run.activity_clock` 을 뺐다. 기존 레코드의 `time_base` 로 같은 일을 한다. 두 시각의 기준이 다르면 빼지 않고 UNKNOWN 을 낸다.
+
+**종료 판정에 기존 지표를 재사용한다.** 런타임 종료 선언(`termination`: result_subtype · terminal_reason · is_error)도 ENDED 의 근거로 받는다(RUNTIME_DECLARED).
+- 단 종료 칸이 **전부 null 로 보고된** 요약은 종료 선언이 아니다.
+- 이 경우는 시험이 먼저 잡았다. `termination` 지표는 전부 None 인 dict 도 값으로 내는데, 첫 구현이 그것을 ENDED 로 읽었다.
+
+**엔진 변경 셋.** 다른 상태의 뜻은 그대로다.
+1. `Result.basis` -- 값마다 근거를 따로 남긴다. 같은 상태라도 ENDED 는 OBSERVED 또는 RUNTIME_DECLARED, ACTIVE/STALLED 는 OPERATOR_ASSUMED 다.
+2. `Rule.clock_values` -- 평가 순간에만 참인 값(ACTIVE · STALLED)이다. 평가 뒤 시각으로 질의하면 `view()` 가 STALE 로 돌려준다. STALE 을 현재로 쓰지 않는다.
+3. `StateEngine.advance(run_id, now)` -- 시각에 기대는 규칙만 다시 잰다.
+   - now 는 호출자가 준다. 엔진은 여전히 시계를 읽지 않는다(시험이 `time.time` 을 막고 확인한다).
+   - 관측보다 이른 now 는 거절한다.
+
+**설정.** `liveness_timeout_ms` 는 기본 None 이다. TTL 에 `liveness_state` 10분을 더했다(다른 상태와 같은 OPERATOR_ASSUMED 기본값).
+
+**실제 레코드 301 실행에 돌린 결과.**
+- liveness 를 뺀 나머지 상태 · 전이 · 생애 사건은 구현 전과 **같다.**
+- liveness 자체는 이렇게 나왔다.
+  - claude -p 12 · SWE-agent 288 은 ENDED(런타임 종료 선언).
+  - 이 세션 스냅숏 1 은 UNKNOWN(차례 관측 없음).
+- 입력 다섯은 아직 어느 레코드에도 없다. 그래서 ACTIVE · STALLED · AWAITING_INPUT 은 **텔레메트리 계층이 그 칸을 채운 뒤에야** 실제 데이터에서 나온다. 지금 실데이터로 확인된 것은 ENDED 와 UNKNOWN 뿐이다.
 
 ### S2 `execution_interruption` v2 -- 시간 초과가 **어떻게 처리됐나**
 
