@@ -50,7 +50,7 @@ CANONICAL = {
 
 
 def entity_id(kind: EntityType, run_id: str, tool: "str | None" = None) -> str:
-    return f"{kind.value}:{run_id}" + (f":{tool}" if kind is EntityType.TOOL else "")
+    return f"{kind.value}:{run_id}" + (f":{tool}" if kind in (EntityType.TOOL, EntityType.DEPENDENCY) else "")
 
 
 def _time(rec):

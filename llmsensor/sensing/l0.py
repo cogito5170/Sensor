@@ -36,14 +36,20 @@ LIVENESS_CANON = dict(NEW_CANON)
 # 런타임 자신의 행동(S5, BD-53): 실행마다 센 수와 마지막 압축의 전후 토큰. 값을 바꾸는 사건에서만 관측이 생긴다 --
 # 관측이 없으면 '0 회' 가 아니라 '본 적 없음' 이다
 ACTIONS_CANON = {"l0.runtime_actions": ("l0", "runtime.*", T, Basis.RUNTIME_DECLARED)}
-NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON}
+# 의존 대상(S3, BD-54): 그 대상에 대한 **마지막 호출**의 결과와 지금까지의 수. 이름마다 관측 이름이 따로다(l0.dep:<이름>)
+#   provider[.<이름>]  <- llm.response(성공) · llm.error(정준 error_code · http_status)
+#   probe.<겨냥 해시>  <- dependency.probe(error_code · status_code)
+# 결함 원인은 **선언된 것만**: 출처 있는 표로 옮긴 error_code, 또는 HTTP 상태 ≥ 400(RFC 9110 의 정의). 글을 해석하지 않는다
+DEP_PREFIX = "l0.dep:"
+DEPENDENCY_CANON = {DEP_PREFIX + "*": ("l0", "llm.* · dependency.probe", EntityType.DEPENDENCY, Basis.RUNTIME_DECLARED)}
+NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON}
 # 차례 끝을 **늘** 내는 것으로 알려진 원천(Telemetry 보고 baseline#1: cc_stream 의 result). cc_jsonl 은 Stop 훅이 있을 때만이라 넣지 않는다
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
 def batches(events) -> "list[Batch]":
     """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts = [], {}, {}
+    out, pending, acts, deps = [], {}, {}, {}
     for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
         ent = entity_id(T, run)
@@ -64,6 +70,11 @@ def batches(events) -> "list[Batch]":
         if a is not None:
             obs.append(Observation(f"{rid}#l0.runtime_actions", ent, "l0.runtime_actions", dict(a, **val), False, at, tb,
                                    src, Basis.RUNTIME_DECLARED))
+        d = _dependency(deps.setdefault(run, {}), ev)
+        if d is not None:
+            name, v = d
+            obs.append(Observation(f"{rid}#{DEP_PREFIX}{name}", entity_id(EntityType.DEPENDENCY, run, name), DEP_PREFIX + name,
+                                   dict(v, **val), False, at, tb, src, Basis.RUNTIME_DECLARED))
         out.append(Batch(f"l0:{rid}", run, "run", at, tb, src, obs))
     return out
 
@@ -85,3 +96,24 @@ def _action(c, ev):
     else:
         return None
     return dict(c)
+
+
+def _dependency(c, ev):
+    """(이름, 그 대상의 지금 값) 또는 None. 값 = 마지막 호출의 결과(ok · 원인)와 수. 원인은 선언된 것만."""
+    d, t = ev.get("data") or {}, ev["type"]
+    if t in ("llm.response", "llm.error"):
+        name = "provider" + (f".{d['provider']}" if d.get("provider") else "")
+        cause = None
+        if t == "llm.error":
+            cause = {k: d.get(k) for k in ("error_code", "http_status") if d.get(k) is not None} or {"error": "llm.error"}
+    elif t == "dependency.probe" and d.get("target"):
+        name = "probe." + str(d["target"]).lstrip("#")
+        sc, ec = d.get("status_code"), d.get("error_code")
+        cause = {k: v for k, v in (("error_code", ec), ("status_code", sc)) if v is not None} \
+            if ec is not None or (sc is not None and sc >= 400) else None
+    else:
+        return None
+    s = c.setdefault(name, {"calls": 0, "faults": 0})
+    s["calls"] += 1
+    s["faults"] += cause is not None
+    return name, {"ok": cause is None, "cause": cause, "calls": s["calls"], "faults": s["faults"]}

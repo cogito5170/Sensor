@@ -8,6 +8,7 @@
     quality    외부 평가 라벨이 있을 때만(지금은 SWE-bench 판정 뿐)
     liveness   지금 움직이나 -- 끝남 · 입력 대기 · 차례 중(멈춤은 운영자 무음 문턱이 있을 때만)
     actions    런타임이 스스로 한 행동 -- 압축 · 백그라운드 이동 · 입력 빼기 · 권한 거부(지표만)
+    dependency 결함이 어디서 났나 -- 의존 대상마다, 선언된 원인만(ASSESS)
 
 팩은 기존 지표 · 규칙 정의를 **그대로 재사용**하고 새 것을 덧붙인다(뜻 불변 -- 실제 레코드 301 실행 스냅숏으로 확인).
 """
@@ -39,7 +40,8 @@ def packs() -> tuple:
     from .quality import PACK as quality
     from .liveness import PACK as liveness
     from .actions import PACK as actions
-    return (token, execution, latency, provider, cost, quality, liveness, actions)
+    from .dependency import PACK as dependency
+    return (token, execution, latency, provider, cost, quality, liveness, actions, dependency)
 
 
 def canonical_all() -> dict:

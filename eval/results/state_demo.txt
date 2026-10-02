@@ -204,6 +204,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
        <- obs:l0.input_received
        <- obs:l0.turn_start
        <- obs:l0.turn_end
+state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
+  <- metric:dependency_outcome  [RUNTIME_DECLARED]
+       <- obs:l0.dep:*
 
 ======================================================================
 5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure

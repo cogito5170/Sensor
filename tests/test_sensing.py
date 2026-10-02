@@ -39,7 +39,7 @@ class Packs(unittest.TestCase):
                 self.assertIs(REGISTRY.rules[n], old[n], n)      # 뜻 불변 -- 같은 객체
         self.assertEqual(list(REGISTRY.rules)[:len(BASELINE_ORDER)], list(BASELINE_ORDER))
         self.assertEqual({p.name for p in packs()}, {"token", "execution", "latency", "provider", "cost", "quality",
-                                                      "liveness", "actions"})
+                                                      "liveness", "actions", "dependency"})
         self.assertEqual(REGISTRY.check(), [])
 
     def test_every_rule_has_threshold_source(self):
@@ -199,10 +199,10 @@ if __name__ == "__main__":
 
 class OwnerLayer(unittest.TestCase):
     def test_assess_marks_follow_bd35_bd52(self):
-        # 이름 · 값은 그대로, 소유 층 표시만 -- BD-35(건강 성격 넷) + BD-52(liveness). 나머지는 상태 층(None)
+        # 이름 · 값은 그대로, 소유 층 표시만 -- BD-35(건강 성격 넷) + BD-52(liveness) + BD-54(dependency_fault). 나머지는 None
         marked = {n for n, r in REGISTRY.rules.items() if r.owner_layer == "ASSESS"}
         self.assertEqual(marked, {"execution_health", "tool_execution_health", "execution_interruption",
-                                  "runtime_reliability", "liveness_state"})
+                                  "runtime_reliability", "liveness_state", "dependency_fault"})
         self.assertEqual({r.owner_layer for n, r in REGISTRY.rules.items() if n not in marked}, {None})
         self.assertEqual(REGISTRY.state_definition("liveness_state")["owner_layer"], "ASSESS")
 

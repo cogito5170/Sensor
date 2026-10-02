@@ -47,6 +47,9 @@ class Rule:
     clock_values: tuple = ()
     # 소유 층 표시(BD-35 · BD-52). 건강 성격 상태는 "ASSESS" -- 이름 · 값은 그대로, Health 저장소가 서면 옮긴다. None = 상태 층(L2)
     owner_layer: "str | None" = None
+    # 실체마다 따로 서는 규칙(도구처럼). subjects(Ledger) -> 이름들, subject_metrics(이름) -> 그 실체의 지표 정의들
+    subjects: "Callable | None" = field(default=None, compare=False, repr=False)
+    subject_metrics: "Callable | None" = field(default=None, compare=False, repr=False)
 
 
 def _inf(v, reason, ev, final=False, decided_by=()):

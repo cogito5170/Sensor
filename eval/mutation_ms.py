@@ -94,6 +94,12 @@ M = [
      '        a = _action(acts.setdefault(run, {}), ev)', '        a = _action(acts.setdefault(run, {"compaction": 0}), ev)'),
     ('S5: 행동 사건이 없으면 빈 값(0)으로', 'llmsensor/sensing/actions/__init__.py',
      'return _m(ctx, "runtime_actions", None, (), reason=', 'return _m(ctx, "runtime_actions", {}, (), reason='),
+    ('S3: 선언되지 않은 상태 코드를 결함으로', 'llmsensor/sensing/l0.py',
+     'if ec is not None or (sc is not None and sc >= 400) else None', 'if ec is not None or sc is not None else None'),
+    ('S3: 의존 대상을 하나로 접는다(격리 없음)', 'llmsensor/sensing/l0.py',
+     '        name = "probe." + str(d["target"]).lstrip("#")', '        name = "provider"'),
+    ('S3: 의존 실체가 자기 실행의 시계를 못 찾는다', 'llmsensor/state/engine.py',
+     'ent.startswith(("tool:", "dependency:"))', 'ent.startswith("tool:")'),
 ]
 
 

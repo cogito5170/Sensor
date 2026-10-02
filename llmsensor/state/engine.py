@@ -18,6 +18,12 @@ from .registry import REGISTRY
 TOOL_RULE = "tool_execution_health"
 
 
+def _run_of(ent: str) -> str:
+    """실체 id -> 실행 id. 도구 · 의존 대상 실체는 끝에 이름이 붙는다(<유형>:<실행>:<이름>, 실행 id 에도 ':' 가 있을 수 있다)."""
+    body = ent.split(":", 1)[1]
+    return body.rsplit(":", 1)[0] if ent.startswith(("tool:", "dependency:")) else body
+
+
 class StateEngine:
     def __init__(self, config: StateConfig = DEFAULT_CONFIG, registry=REGISTRY):
         self.cfg, self.reg = config, registry
@@ -90,9 +96,16 @@ class StateEngine:
         return M
 
     def _evaluate(self, L, at, trigger):
-        M = self._metrics(L, self.reg.metrics.values(), lambda md: entity_id(md.entity, L.run_id), at)
+        defs = [md for md in self.reg.metrics.values() if md.entity is not EntityType.DEPENDENCY]   # 그것은 실체마다 따로
+        M = self._metrics(L, defs, lambda md: entity_id(md.entity, L.run_id), at)
         for name, rule in self.reg.rules.items():
             if name == TOOL_RULE:
+                continue
+            if rule.subjects is not None:          # 실체마다 서는 규칙(의존 대상 ...)
+                for s in rule.subjects(L):
+                    ent = entity_id(rule.entity, L.run_id, s)
+                    Ms = self._metrics(L, rule.subject_metrics(s), lambda md, e=ent: e, at)
+                    self._apply(ent, rule, Ms, at, trigger, L.run_id)
                 continue
             self._apply(entity_id(rule.entity, L.run_id), rule, M, at, trigger, L.run_id)
         tools = sorted({t["_tool"] for t in L.tools if t.get("_tool")})
@@ -207,7 +220,7 @@ class StateEngine:
     def _now(self, ent, now):
         if now is not None:
             return now
-        run = ent.split(":", 1)[1].rsplit(":", 1)[0] if ent.startswith("tool:") else ent.split(":", 1)[1]
+        run = _run_of(ent)
         L = self.ledgers.get(run)
         return L.last_at if L else None
 
@@ -224,7 +237,7 @@ class StateEngine:
         """실행마다 '지금' 을 주면 TTL 을 넘긴 상태를 STALE 생애 사건으로 남긴다(값은 지우지 않는다)."""
         out = []
         for (ent, name), st in sorted(self.current.items()):
-            run = ent.split(":", 1)[1].rsplit(":", 1)[0] if ent.startswith("tool:") else ent.split(":", 1)[1]
+            run = _run_of(ent)
             if run not in now_by_run:
                 continue
             fr, _ = self._freshness(st, now_by_run[run])

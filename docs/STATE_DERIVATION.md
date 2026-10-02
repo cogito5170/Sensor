@@ -172,6 +172,18 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
+### `dependency.dependency_fault` -- `dependency-fault-v1` (v1, RUNTIME_DECLARED)
+
+- **뜻**: 의존 대상 하나에 대한 마지막 호출이 선언된 원인으로 실패했나. NO_FAULT_DECLARED 는 HEALTHY 가 아니다
+- **돕는 결정**: 다른 대상으로 돌릴까 · 그 대상을 쓰는 행동을 미룰까
+- **값**: `FAULT_DECLARED` · `NO_FAULT_DECLARED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `dependency_outcome`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
 ### 종료 선언 표 (`completion-state-v1`) -- 표에 없는 문자열은 추측하지 않고 UNKNOWN
 
 | 칸 | 런타임 값 | 상태 |
@@ -235,6 +247,7 @@
 | `turn_open` | task | OBSERVED | `l0.turn_start`, `l0.turn_end`, `l0.pending_inputs` | 차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None |
 | `silence_ms` | task | OBSERVED | `l0.last_event`, `l0.heartbeat`, `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 평가 시각 − 마지막 활동(어떤 사건 또는 런타임 heartbeat) |
 | `runtime_actions` | task | RUNTIME_DECLARED | `l0.runtime_actions` | 런타임 자신의 행동 수(압축 · 백그라운드 이동 · 입력 빼기 · 권한 거부) · 마지막 압축 전후 토큰 |
+| `dependency_outcome` | dependency | RUNTIME_DECLARED | `l0.dep:*` | 의존 대상에 대한 마지막 호출의 결과(ok · 선언된 원인)와 호출 · 결함 수 |
 
 ## 정준 관측 (층 1)
 
@@ -385,6 +398,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
        <- obs:l0.input_received
        <- obs:l0.turn_start
        <- obs:l0.turn_end
+state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
+  <- metric:dependency_outcome  [RUNTIME_DECLARED]
+       <- obs:l0.dep:*
 ```
 
 ## 넣지 않은 후보 상태와 까닭

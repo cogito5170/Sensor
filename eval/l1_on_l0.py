@@ -40,9 +40,15 @@ def run(source: str, path: str, run_id: str) -> dict:
     E = StateEngine()
     E.ingest_all(from_telemetry(recs))
     E.ingest_all(batches(evs))
-    want = ("liveness_state", "execution_interruption", "execution_health", "runtime_reliability", "resource_state")
-    states = {f"{n}@{ent.split(':')[0]}": (st.status.value, st.value) for (ent, n), st in sorted(E.current.items())
-              if n in want and not ent.startswith("tool:")}
+    want = ("liveness_state", "execution_interruption", "execution_health", "runtime_reliability", "resource_state",
+            "rate_limit_state", "dependency_fault")
+    states = {}
+    for (ent, n), st in sorted(E.current.items()):
+        if n not in want or ent.startswith("tool:"):
+            continue
+        kind = ent.split(":", 1)[0]
+        label = f"{kind}:{ent.rsplit(':', 1)[1]}" if kind == "dependency" else kind      # 의존 대상은 이름까지
+        states[f"{n}@{label}"] = (st.status.value, st.value)
     types = collections.Counter(e["type"] for e in evs)
     return {"source": source, "events": len(evs), "records": len(recs), "shimmed_fields": shimmed,
             "event_types": dict(sorted(types.items())), "states": states}
