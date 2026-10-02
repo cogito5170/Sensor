@@ -1,5 +1,5 @@
 {
- "$id": "llm-telemetry/v3",
+ "$id": "llm-telemetry/v4",
  "description": "텔레메트리 레코드 꼴 (v2) -- 세 종류. null 인 칸은 그 이름이 **정확히 한 목록**에 있어야 한다.",
  "oneOf": [
   {
@@ -45,11 +45,8 @@
      "minLength": 1
     },
     "source": {
-     "enum": [
-      "cc_jsonl",
-      "cc_stream",
-      "sweagent"
-     ]
+     "type": "string",
+     "pattern": "^(cc_jsonl|cc_stream|sweagent|inproc:[A-Za-z0-9_.-]+)$"
     },
     "unobserved": {
      "type": "array",
@@ -245,11 +242,8 @@
      "minLength": 1
     },
     "source": {
-     "enum": [
-      "cc_jsonl",
-      "cc_stream",
-      "sweagent"
-     ]
+     "type": "string",
+     "pattern": "^(cc_jsonl|cc_stream|sweagent|inproc:[A-Za-z0-9_.-]+)$"
     },
     "unobserved": {
      "type": "array",
@@ -386,11 +380,8 @@
      "minLength": 1
     },
     "source": {
-     "enum": [
-      "cc_jsonl",
-      "cc_stream",
-      "sweagent"
-     ]
+     "type": "string",
+     "pattern": "^(cc_jsonl|cc_stream|sweagent|inproc:[A-Za-z0-9_.-]+)$"
     },
     "unobserved": {
      "type": "array",
