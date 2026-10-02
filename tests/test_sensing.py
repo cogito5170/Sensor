@@ -4,6 +4,7 @@ from llmsensor.providers import ErrorKind, error
 from llmsensor.sensing import BASELINE_ORDER, packs
 from llmsensor.sensing._base import min_samples, percentile
 from llmsensor.sensing.cost import RESOURCE_V1, RESOURCE_V3, pricing
+from llmsensor.sensing.execution import EXECUTION_HEALTH_V2, EXECUTION_HEALTH_V3
 from llmsensor.sensing.provider import RATE_LIMIT_V1, RATE_LIMIT_V2, RATE_LIMIT_V3
 from llmsensor.sensing.quality import external_label_batch
 from llmsensor.state import DEFAULT_CONFIG, REGISTRY, Basis, Status, StateEngine, from_telemetry
@@ -32,6 +33,9 @@ class Packs(unittest.TestCase):
         for n in BASELINE_ORDER:
             if n == "rate_limit_state":
                 self.assertIs(REGISTRY.rules[n], RATE_LIMIT_V3)
+            elif n == "execution_health":                        # baseline BD-84 로 판본을 올렸다(시험: tests/test_execution_health_v3.py)
+                self.assertIs(REGISTRY.rules[n], EXECUTION_HEALTH_V3)
+                self.assertIs(EXECUTION_HEALTH_V2, old[n])
             elif n == "resource_state":                          # baseline BD-39 로 판본을 올렸다(시험: tests/test_resource_v2.py)
                 self.assertIs(REGISTRY.rules[n], RESOURCE_V3)
                 self.assertIs(RESOURCE_V1, old[n])

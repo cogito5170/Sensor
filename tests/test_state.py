@@ -45,11 +45,12 @@ A, T, R = f"agent:{RUN}", f"task:{RUN}", f"runtime:{RUN}"
 
 
 class Unknown(unittest.TestCase):
-    def test_no_tool_results_is_unknown_not_healthy(self):
+    def test_no_tool_results_is_not_healthy(self):
+        # v3(BD-84): 도구 호출이 아직 없다는 것은 관측된 사실 -- 건강 값(NO_FAILURE_OBSERVED)이 아니다
         E = engine([mc(0, 100)])
         v = val(E, A, "execution_health")
-        self.assertEqual((v.status, v.value), (Status.UNKNOWN, None))
-        self.assertIn("증거도 없다", v.reason)
+        self.assertEqual((v.status, v.value), (Status.INFERRED, "NO_TOOL_RUN_YET"))
+        self.assertNotIn(v.value, ("NO_FAILURE_OBSERVED", "RECOVERED_FAILURES"))
 
     def test_unobservable_outcome_is_unknown(self):
         E = engine([mc(0, 100), tc(0, 0, 110, known=False)])
@@ -229,12 +230,11 @@ class Time(unittest.TestCase):
         E = engine([mc(0, 100), tc(0, 0, 110), mc(1, 200), tc(1, 1, 210, err=True), mc(2, 300)])
         evs = [e.event for e in E.lifecycle if e.entity_id == A and e.name == "execution_health"]
         self.assertEqual(evs[0], Lifecycle.CREATE)
-        self.assertIn(Lifecycle.RECOVER, evs)       # UNKNOWN -> NO_FAILURE_OBSERVED
-        self.assertIn(Lifecycle.UPDATE, evs)        # NO_FAILURE -> UNRESOLVED
+        self.assertIn(Lifecycle.UPDATE, evs)        # NO_TOOL_RUN_YET -> NO_FAILURE -> UNRESOLVED (v3: 처음부터 usable 이라 RECOVER 가 없다)
         self.assertIn(Lifecycle.REFRESH, evs)
         tr = [t for t in E.transitions if t.entity_id == A and t.name == "execution_health"]
         self.assertEqual([(t.previous, t.new) for t in tr],
-                         [(None, "NO_FAILURE_OBSERVED"), ("NO_FAILURE_OBSERVED", "UNRESOLVED_FAILURES")])
+                         [("NO_TOOL_RUN_YET", "NO_FAILURE_OBSERVED"), ("NO_FAILURE_OBSERVED", "UNRESOLVED_FAILURES")])
         self.assertTrue(all(t.evidence and t.at is not None for t in tr))
 
     def test_invalidate(self):
@@ -254,7 +254,7 @@ class Provenance(unittest.TestCase):
                 self.assertTrue(ids, (ent, name))
                 self.assertTrue(ids <= set(E.observations), (ent, name))
         ex = E.explain(A, "execution_health")
-        self.assertEqual(ex["rule"]["id"], "execution-health-v2")
+        self.assertEqual(ex["rule"]["id"], "execution-health-v3")
         self.assertEqual(ex["state"]["config_version"], "default-v1")
 
     def test_proposal_never_becomes_state(self):

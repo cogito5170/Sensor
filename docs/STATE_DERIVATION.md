@@ -28,16 +28,16 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.execution_health` -- `execution-health-v2` (v2, DEFINITIONAL)
+### `agent.execution_health` -- `execution-health-v3` (v3, DEFINITIONAL)
 
-- **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)
+- **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). 모델 호출은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. 도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)
 - **돕는 결정**: 다시 시도할까 · 사람에게 올릴까
-- **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`
+- **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `NO_TOOL_RUN_YET` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`, `activity`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
 
 ```
-(규칙 본문: llmsensor/state/rules.py)
+v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 본 호출이 있으면(SWE-agent) v2 와 같이 UNKNOWN.
 ```
 
 ### `tool.tool_execution_health` -- `tool-execution-health-v2` (v2, DEFINITIONAL)
@@ -290,7 +290,7 @@ state:context_pressure  [context-pressure-v1, RUNTIME_DECLARED]
        <- obs:call.context_window
   <- metric:compaction_threshold  [RUNTIME_DECLARED]
        <- obs:run.compaction_threshold
-state:execution_health  [execution-health-v2, DEFINITIONAL]
+state:execution_health  [execution-health-v3, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -306,6 +306,8 @@ state:execution_health  [execution-health-v2, DEFINITIONAL]
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
+  <- metric:activity  [OBSERVED]
+       <- obs:call.stop_reason
 state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error

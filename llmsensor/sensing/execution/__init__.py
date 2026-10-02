@@ -4,8 +4,8 @@
 새로 관측할 수 있게 된 것(꼴 v3 의 timed_out, 기존 interrupted)으로 **execution_interruption** 하나만 더한다.
 과제의 합성 열거 execution_state(RUNNING · FAILED · TIMEOUT ...)는 만들지 않는다 -- docs/MS_SENSING_REVIEW.md C2.
 """
-from ...state.model import Basis, EntityType
-from ...state.rules import Rule, _inf, _unk
+from ...state.model import Basis, EntityType, Status
+from ...state.rules import HEALTH, Result, Rule, _health, _inf, _unk
 from ...trace import ToolCall, retries
 from .. import SensingPack
 from .._base import M, R, _m, canon
@@ -106,10 +106,37 @@ INTERRUPTION = Rule("execution-interruption-v3", 3, "execution_interruption", A,
                     "아니면 TIMEOUT_OBSERVED). 지연 문턱이 아니라 런타임의 선언이다. 시간 초과 ≠ 실패",
                     "시간 제한을 늘릴까 · 배경으로 돌릴까", r_interruption, owner_layer="ASSESS")
 
+_HEALTH_V2 = _health("")
+
+
+def r_execution_health_v3(Mx, prev, cfg):
+    """v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 본 호출이 있으면(SWE-agent) v2 와 같이 UNKNOWN."""
+    res, unobs, act = Mx["tool_results"], Mx["tool_outcome_unobservable"], Mx["activity"]
+    if res.value == 0 and unobs.value == 0:          # 둘 다 0 = 도구 레코드(tool.start)가 하나도 없다 -- 도는 중인 호출도 없다
+        calls = act.value["model_calls"] if act.value else 0
+        if not calls:
+            return _unk("모델 호출도 도구 호출도 못 봤다 -- '아직 없다' 를 말할 관측이 없다", ["tool_results", "activity"])
+        # 없음의 주장이라 가장 늦은 관측(마지막 모델 호출)의 시각을 쓴다(BD-74)
+        return Result("NO_TOOL_RUN_YET", Status.INFERRED,
+                      f"모델 호출 {calls} 개를 봤고 도구 호출은 아직 없다 -- 건강을 말하는 값이 아니다",
+                      ("tool_results", "tool_outcome_unobservable", "activity"), basis=Basis.OBSERVED,
+                      decided_by=tuple(act.inputs))
+    return _HEALTH_V2(Mx, prev, cfg)
+
+
+EXECUTION_HEALTH_V3 = Rule("execution-health-v3", 3, "execution_health", A, Basis.DEFINITIONAL,
+                           ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate", "activity"),
+                           HEALTH + ("NO_TOOL_RUN_YET",),
+                           "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). "
+                           "모델 호출은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. "
+                           "도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)",
+                           "다시 시도할까 · 사람에게 올릴까", r_execution_health_v3, owner_layer="ASSESS")
+EXECUTION_HEALTH_V2 = R["execution_health"]     # 회귀 시험용으로 남긴다
+
 PACK = SensingPack(
     "execution", "실행이 어떻게 끝났나 · 도구 결과에 풀리지 않은 실패 · 시간 초과 · 중단이 있었나",
     {**canon("tool.name", "tool.target", "tool.signature", "tool.is_error", "tool.output_chars", "call.stop_reason",
              "run.terminal_reason", "run.result_subtype", "run.is_error"), **NEW_CANON},
     tuple(M[n] for n in ("tool_results", "tool_outcome_unobservable", "tool_errors", "tool_failure_rate", "tool_targets",
                          "identical_call_max", "termination", "activity")) + NEW_METRICS,
-    (R["execution_health"], R["tool_execution_health"], R["completion_state"], R["progress_state"], INTERRUPTION))
+    (EXECUTION_HEALTH_V3, R["tool_execution_health"], R["completion_state"], R["progress_state"], INTERRUPTION))

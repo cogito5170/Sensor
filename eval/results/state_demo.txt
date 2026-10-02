@@ -32,7 +32,7 @@
 ======================================================================
   agent.context_pressure       = BELOW_CONTEXT_LIMIT          INFERRED       FRESH     [context-pressure-v1]
       why: 맥락 137,000 < 창 180,000 (압축 문턱은 선언되지 않았다)
-  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v2]
+  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v3]
       why: 겨냥 1/8 의 마지막 결과가 실패
   agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v3]
       why: 시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다
@@ -60,7 +60,7 @@
 ======================================================================
   agent.context_pressure       = BELOW_COMPACTION_THRESHOLD   INFERRED       FRESH     [context-pressure-v1]
       why: 맥락 137,000 < 런타임 압축 문턱 144,000
-  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v2]
+  agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v3]
       why: 겨냥 1/8 의 마지막 결과가 실패
   agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v3]
       why: 시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다
@@ -96,7 +96,7 @@ state:context_pressure  [context-pressure-v1, RUNTIME_DECLARED]
        <- obs:call.context_window
   <- metric:compaction_threshold  [RUNTIME_DECLARED]
        <- obs:run.compaction_threshold
-state:execution_health  [execution-health-v2, DEFINITIONAL]
+state:execution_health  [execution-health-v3, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -112,6 +112,8 @@ state:execution_health  [execution-health-v2, DEFINITIONAL]
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
+  <- metric:activity  [OBSERVED]
+       <- obs:call.stop_reason
 state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error
@@ -212,23 +214,23 @@ state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
 5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure
 ======================================================================
   context_pressure = BELOW_COMPACTION_THRESHOLD  (status=INFERRED, freshness=FRESH, age_ms=0.0, rule=context-pressure-v1, evidence=2)
-  execution_health = UNRESOLVED_FAILURES  (status=INFERRED, freshness=FRESH, age_ms=1650.0, rule=execution-health-v2, evidence=2)
+  execution_health = UNRESOLVED_FAILURES  (status=INFERRED, freshness=FRESH, age_ms=1650.0, rule=execution-health-v3, evidence=2)
   resource_pressure = MEDIUM  (status=INFERRED, freshness=FRESH, age_ms=0.0, rule=resource-pressure-v1, evidence=1)
 
   explain(execution_health) -- 상태 -> 규칙 -> 지표 -> 관측:
-    rule: execution-health-v2 v2 [DEFINITIONAL]
+    rule: execution-health-v3 v3 [DEFINITIONAL]
     metric tool_targets = {'unresolved': ['WebFetch:#doc'], 'recovered': ['Bash:pytest'], 'targets': 8}
       <- demo:example/tool_call/9#tool.is_error = True (t=16900.0, cc_stream)
       <- demo:example/tool_call/4#tool.is_error = False (t=8650.0, cc_stream)
     metric tool_failure_rate = 0.18181818181818182
-    transitions: None -> NO_FAILURE_OBSERVED @ 2050.0 (결과 1 개 중 실패 없음 -- 건강이 증명된 것은 아니다); NO_FAILURE_OBSERVED -> UNRESOLVED_FAILURES @ 5350.0 (겨냥 1/2 의 마지막 결과가 실패); UNRESOLVED_FAILURES -> RECOVERED_FAILURES @ 8650.0 (실패했던 겨냥 1 개가 뒤에 성공); RECOVERED_FAILURES -> UNRESOLVED_FAILURES @ 16900.0 (겨냥 1/7 의 마지막 결과가 실패)
+    transitions: NO_TOOL_RUN_YET -> NO_FAILURE_OBSERVED @ 2050.0 (결과 1 개 중 실패 없음 -- 건강이 증명된 것은 아니다); NO_FAILURE_OBSERVED -> UNRESOLVED_FAILURES @ 5350.0 (겨냥 1/2 의 마지막 결과가 실패); UNRESOLVED_FAILURES -> RECOVERED_FAILURES @ 8650.0 (실패했던 겨냥 1 개가 뒤에 성공); RECOVERED_FAILURES -> UNRESOLVED_FAILURES @ 16900.0 (겨냥 1/7 의 마지막 결과가 실패)
 
 ======================================================================
 6. 내보내기 계약(llmsensor.state-export/2) -- 결정 문맥은 cogito5170/DC 가 이것을 읽어 짓는다
 ======================================================================
   subjects: {"scope": "demo:example", "agent": "agent:demo:example", "task": "task:demo:example", "runtime": "runtime:demo:example", "tool": ["tool:demo:example:Bash", "tool:demo:example:Edit", "tool:demo:example:Grep", "tool:demo:example:Read", "tool:demo:example:WebFetch"]}
   as_of:    {"contract": "llmsensor.state-export/2", "run_id": "demo:example", "at": 18550.0, "time_base": "monotonic_ms"}
-  {"contract": "llmsensor.state-export/2", "entity": "agent:demo:example", "entity_ref": {"type": "agent", "scope": "demo:example", "local": null}, "name": "execution_health", "value": "UNRESOLVED_FAILURES", "status": "INFERRED", "freshness": "FRESH", "age_ms": 1650.0, "basis": "DEFINITIONAL", "rule_id": "execution-health-v2", "rule_version": 2, "config_version": "demo-v1", "evidence_refs": ["agent:demo:example/tool_targets@23", "agent:demo:example/tool_failure_rate@23"], "observed_at": 16900.0, "since": 16900.0, "time_base": "monotonic_ms", "ttl_ms": 600000, "final": false}
+  {"contract": "llmsensor.state-export/2", "entity": "agent:demo:example", "entity_ref": {"type": "agent", "scope": "demo:example", "local": null}, "name": "execution_health", "value": "UNRESOLVED_FAILURES", "status": "INFERRED", "freshness": "FRESH", "age_ms": 1650.0, "basis": "DEFINITIONAL", "rule_id": "execution-health-v3", "rule_version": 3, "config_version": "demo-v1", "evidence_refs": ["agent:demo:example/tool_targets@23", "agent:demo:example/tool_failure_rate@23"], "observed_at": 16900.0, "since": 16900.0, "time_base": "monotonic_ms", "ttl_ms": 600000, "final": false}
   {"contract": "llmsensor.state-export/2", "entity": "task:demo:example", "entity_ref": {"type": "task", "scope": "demo:example", "local": null}, "name": "progress_state", "value": null, "status": "NOT_APPLICABLE", "freshness": "PERMANENT", "age_ms": null, "basis": "OPERATOR_ASSUMED", "rule_id": "progress-state-v1", "rule_version": 1, "config_version": "demo-v1", "evidence_refs": ["task:demo:example/termination@23"], "observed_at": 18550.0, "since": 18550.0, "time_base": "monotonic_ms", "ttl_ms": 600000, "final": true}
 
 ======================================================================
@@ -242,4 +244,3 @@ state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
   context_pressure = BELOW_COMPACTION_THRESHOLD  status=STALE  freshness=STALE  age_ms=2700000
   execution_health = UNRESOLVED_FAILURES  status=STALE  freshness=STALE  age_ms=2701650
   context_pressure: STALE; execution_health: STALE; resource_pressure: STALE; resource_state: STALE; rate_limit_state: STALE; runtime_reliability: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE
-

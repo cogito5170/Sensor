@@ -13,7 +13,16 @@
 | `NOT_APPLICABLE` | 이 배치에서 정의되지 않음(예산 없음 · 끝난 과업의 진행) | 묻지 마라 |
 
 **"실패를 못 봤다" ≠ "건강하다".** 그래서 건강 값 이름이 `HEALTHY` 가 아니라 `NO_FAILURE_OBSERVED` 이고, 이유 문자열이
-"건강이 증명된 것은 아니다" 로 끝난다. 본 도구 실행이 하나도 없으면 `NO_FAILURE_OBSERVED` 도 아니고 `UNKNOWN` 이다.
+"건강이 증명된 것은 아니다" 로 끝난다. 본 도구 실행이 하나도 없으면 `NO_FAILURE_OBSERVED` 가 아니다 --
+`execution-health-v3`(baseline BD-84)부터 두 경우를 가른다:
+
+| 경우 | 값 | 까닭 |
+|---|---|---|
+| (a) 모델 호출은 봤고 도구 레코드가 **하나도 없다** | `NO_TOOL_RUN_YET` (INFERRED, 근거 OBSERVED) | "도구 실행이 아직 없다" 는 관측된 사실이다. **건강을 말하지 않는다.** 시각은 마지막 모델 호출(없음의 주장 -- BD-74) |
+| (b) 도구 레코드가 있는데 결과(`is_error`)를 **못 본다** -- SWE-agent · 아직 도는 호출 | `UNKNOWN` | 판정할 근거가 없다(v2 와 같다). `observation` 글에서 오류를 읽어 내지 않는다(BD-10) |
+| 모델 호출도 못 봤다 | `UNKNOWN` | "아직 없다" 를 말할 관측이 없다 |
+
+`NOT_APPLICABLE` 로 쓰지 않는다 -- 실행 건강은 이 배치에서 **정의되고**, 아직 잴 근거가 없을 뿐이다. 실데이터의 첫 평가점: `eval/first_eval.py`.
 
 **관측이 없는 것과 보고된 null 은 다르다**(텔레메트리 꼴 v2). 정상 종료 요약의 `api_error_status: null` 은 "오류 보고
 없음" 이라는 **관측**이라 `runtime_reliability = NO_FAILURE_OBSERVED` 의 근거가 된다. 키가 아예 없으면(오류로 끝난 t08)
@@ -68,7 +77,7 @@ TTL 은 설정(`StateConfig.ttl_ms`)이고 기본값(10 분, 요금 한도 5 분
 전이마다 `previous` · `new` · `trigger`(규칙의 이유) · `rule_id` · `evidence`(지표 id) · `at` · `seq`. 실제 예(시연):
 
 ```
-execution_health:  None -> NO_FAILURE_OBSERVED        @ 2050   결과 1 개 중 실패 없음
+execution_health:  NO_TOOL_RUN_YET -> NO_FAILURE_OBSERVED  @ 2050   결과 1 개 중 실패 없음  (v3 -- v2 에서는 None -> )
                    NO_FAILURE_OBSERVED -> UNRESOLVED  @ 5350   겨냥 1/2 의 마지막 결과가 실패 (pytest)
                    UNRESOLVED -> RECOVERED_FAILURES   @ 8650   실패했던 겨냥 1 개가 뒤에 성공
                    RECOVERED -> UNRESOLVED_FAILURES   @ 16900  겨냥 1/7 의 마지막 결과가 실패 (WebFetch)

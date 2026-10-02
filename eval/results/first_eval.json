@@ -1,0 +1,127 @@
+{
+ "cc_jsonl/pipeline": {
+  "runs": 14,
+  "evaluated": 14,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 14
+  },
+  "last": {
+   "INFERRED NO_FAILURE_OBSERVED": 8,
+   "INFERRED UNRESOLVED_FAILURES": 5,
+   "INFERRED RECOVERED_FAILURES": 1
+  },
+  "first_batch_kind": {
+   "model_call": 14
+  },
+  "no_tool_evals_before_first_tool": {
+   "1": 14
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 14
+  }
+ },
+ "cc_jsonl/time": {
+  "runs": 14,
+  "evaluated": 14,
+  "first": {
+   "UNKNOWN": 14
+  },
+  "last": {
+   "INFERRED NO_FAILURE_OBSERVED": 8,
+   "INFERRED UNRESOLVED_FAILURES": 5,
+   "INFERRED RECOVERED_FAILURES": 1
+  },
+  "first_batch_kind": {
+   "run": 14
+  },
+  "no_tool_evals_before_first_tool": {
+   "3": 14
+  },
+  "unknown_evals_before_first_tool": {
+   "2": 13,
+   "3": 1
+  }
+ },
+ "cc_stream/pipeline": {
+  "runs": 12,
+  "evaluated": 12,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 12
+  },
+  "last": {
+   "INFERRED NO_FAILURE_OBSERVED": 8,
+   "INFERRED UNRESOLVED_FAILURES": 3,
+   "INFERRED RECOVERED_FAILURES": 1
+  },
+  "first_batch_kind": {
+   "model_call": 12
+  },
+  "no_tool_evals_before_first_tool": {
+   "1": 12
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 12
+  }
+ },
+ "cc_stream/time": {
+  "runs": 12,
+  "evaluated": 12,
+  "first": {
+   "UNKNOWN": 12
+  },
+  "last": {
+   "INFERRED NO_FAILURE_OBSERVED": 8,
+   "INFERRED UNRESOLVED_FAILURES": 3,
+   "INFERRED RECOVERED_FAILURES": 1
+  },
+  "first_batch_kind": {
+   "run": 12
+  },
+  "no_tool_evals_before_first_tool": {
+   "0": 5,
+   "3": 6,
+   "11": 1
+  },
+  "unknown_evals_before_first_tool": {
+   "4": 12
+  }
+ },
+ "sweagent/pipeline": {
+  "runs": 288,
+  "evaluated": 288,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 288
+  },
+  "last": {
+   "UNKNOWN": 288
+  },
+  "first_batch_kind": {
+   "model_call": 288
+  },
+  "no_tool_evals_before_first_tool": {
+   "1": 288
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 288
+  }
+ },
+ "sweagent/time": {
+  "runs": 288,
+  "evaluated": 288,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 288
+  },
+  "last": {
+   "UNKNOWN": 288
+  },
+  "first_batch_kind": {
+   "model_call": 288
+  },
+  "no_tool_evals_before_first_tool": {
+   "1": 288
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 288
+  }
+ }
+}

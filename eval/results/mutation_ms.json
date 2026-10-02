@@ -213,5 +213,25 @@
   "mutation": "S3: 의존 실체가 자기 실행의 시계를 못 찾는다",
   "file": "llmsensor/state/engine.py",
   "result": "RED"
+ },
+ {
+  "mutation": "S19: 결과를 못 본 도구가 있는데 NO_TOOL_RUN_YET",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S19: 도구 결과가 있는데 NO_TOOL_RUN_YET",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S19: 모델 호출도 못 봤는데 NO_TOOL_RUN_YET",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S19: 없음의 주장에서 마지막 관측을 뺀다(시각 없음)",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
  }
 ]

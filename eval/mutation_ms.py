@@ -102,6 +102,15 @@ M = [
      '        name = "probe." + str(d["target"]).lstrip("#")', '        name = "provider"'),
     ('S3: 의존 실체가 자기 실행의 시계를 못 찾는다', 'llmsensor/state/engine.py',
      'ent.startswith(("tool:", "dependency:"))', 'ent.startswith("tool:")'),
+    ('S19: 결과를 못 본 도구가 있는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
+     '    if res.value == 0 and unobs.value == 0:', '    if res.value == 0:'),
+    ('S19: 도구 결과가 있는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
+     '    if res.value == 0 and unobs.value == 0:', '    if unobs.value == 0:'),
+    ('S19: 모델 호출도 못 봤는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
+     '        if not calls:\n', '        if False:\n'),
+    ('S19: 없음의 주장에서 마지막 관측을 뺀다(시각 없음)', 'llmsensor/sensing/execution/__init__.py',
+     '("tool_results", "tool_outcome_unobservable", "activity"), basis=Basis.OBSERVED,\n                      decided_by=tuple(act.inputs))',
+     '("tool_results", "tool_outcome_unobservable"), basis=Basis.OBSERVED)'),
 ]
 
 
