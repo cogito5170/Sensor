@@ -24,7 +24,7 @@ INT = {"type": ["integer", "null"], "minimum": 0}
 NUM = {"type": ["number", "null"]}
 STR = {"type": ["string", "null"]}
 BOOL = {"type": ["boolean", "null"]}
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3   # v3: 덧붙이기만 -- timed_out · 캐시 쓰기 5m/1h · 요금 한도 상태/문턱
 COMMON = {"kind": {"type": "string"}, "run_id": {"type": "string", "minLength": 1},
           "source": {"enum": SOURCES}, "unobserved": {"type": "array", "items": {"type": "string"}},
           "reported_null": {"type": "array", "items": {"type": "string"}}}
@@ -36,6 +36,7 @@ MODEL_CALL_FIELDS = {
     "time_base": {"enum": ["unix_ms", "monotonic_ms", None]},
     "input_tokens": INT, "cache_read_input_tokens": INT, "cache_creation_input_tokens": INT,
     "output_tokens": INT, "thinking_tokens": INT, "server_tool_requests": INT, "iterations": INT,
+    "cache_creation_5m_input_tokens": INT, "cache_creation_1h_input_tokens": INT,     # v3 -- 쓰기 값이 다르다
     "stop_reason": STR, "tool_calls_per_message": INT, "output_text_chars": INT,
     "thinking_duration_ms": NUM, "first_chunk_ms": NUM, "stream_chunks": INT, "stream_thinking_estimate": INT,
     "context_window": INT,
@@ -47,12 +48,14 @@ TOOL_CALL_FIELDS = {
     "tool_input_chars": INT, "t_issued_ms": NUM, "t_result_ms": NUM, "time_base": {"enum": ["unix_ms",
                                                                                               "monotonic_ms", None]},
     "reported_duration_ms": NUM, "is_error": BOOL, "interrupted": BOOL, "tool_output_chars": INT,
+    "timed_out": BOOL,   # v3 -- 런타임 선언 문구("Command timed out after", Bash). 다른 도구의 문구는 몰라 null
 }
 RUN_FIELDS = {
     "model": STR, "run_duration_ms": NUM, "api_duration_ms": NUM, "api_duration_without_retries_ms": NUM,
     "ttft_ms": NUM, "num_turns": INT, "cost_usd": NUM, "terminal_reason": STR, "result_subtype": STR,
     "is_error": BOOL, "api_error_status": STR, "permission_denials": INT, "context_window": INT,
     "max_output_tokens": INT, "autocompact_threshold": INT, "rate_limit_utilization": NUM,
+    "rate_limit_status": STR, "rate_limit_threshold": NUM,     # v3 -- 런타임 선언(allowed_warning · surpassedThreshold)
     "tokens_sent": INT, "tokens_received": INT, "api_calls": INT,       # 런타임이 준 실행 합계(있으면)
     "reported_input_tokens": INT, "reported_output_tokens": INT, "reported_cache_read_input_tokens": INT,
     "reported_cache_creation_input_tokens": INT,

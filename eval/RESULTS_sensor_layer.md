@@ -111,8 +111,9 @@ claude 실행(13)은 n < 30 이라 실행 단위 상관을 내지 않았다.
    (키가 없다, 못 봤다)를 가른다. null 인 칸은 정확히 한 목록에 있어야 한다. 다시 모아 분석한 결과: 상관 · 무리 · 대조 등
    **분석 출력은 v1 과 전부 같았고**, 바뀐 것은 cc_stream 실행의 `api_error_status` 가용성 0 → 0.917(11/12)뿐이다.
    남은 하나(t08)는 오류 result 에 그 키가 아예 없어서 정말로 못 본 것이다 -- v1 문서의 "ttft_ms = null" 도 실은 "키 없음" 이었다.
-2. cc_stream 수집기는 `message_delta` 의 usage 만 읽는다. `server_tool_use` 는 `message_start` 쪽에만 있어서 cc_stream 의
-   server_tool_requests 가 전부 null 이 되었다(cc_jsonl 은 있다). 수집기 버그다 -- 분석 변수는 아니라 결과에 영향 없음.
+2. cc_stream 수집기는 `message_delta` 의 usage 만 읽었다. **고침(꼴 v3, 2026-10-02)**: delta 에 없는 칸은 같은 호출의
+   `message_start` usage 로 채운다 -- 캐시 쓰기 5m/1h 나눔이 거기에만 온다(41/41 호출, JSONL 과 칸마다 같음).
+   `server_tool_use` 는 이 수집의 스트림에는 **어디에도 없었다**(처음 판의 "message_start 쪽에만 있다" 는 틀린 말이었다).
 3. `tool_latency_ms` 는 한 응답의 병렬 도구들의 **합**이다. 벽시계 대기는 최대값이어야 한다.
 4. 정의상 항등식 목록에 cache_creation ≡ context_growth 를 빠뜨렸다(위).
 5. ~~`tool_head` 에 겨냥 글이 그대로 들어간다.~~ **고침.** 겨냥(경로 · URL · 패턴 · 검색어 · 경로꼴 실행 파일)과 인자는

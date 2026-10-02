@@ -96,6 +96,19 @@ def _text_len(content) -> int:
     return 0
 
 
+TIMEOUT_TEXT = re.compile(r"Command timed out after")    # Claude Code Bash 의 런타임 선언(앞 실험 t11 에서 봄)
+
+
+def _timed_out(tool_name, block) -> "bool | None":
+    """Bash 결과 글에 런타임의 시간 초과 문구가 있나. 다른 도구는 문구를 모르므로 None(못 봄)."""
+    if tool_name != "Bash":
+        return None
+    c = block.get("content")
+    txt = c if isinstance(c, str) else " ".join(x.get("text", "") for x in c if isinstance(x, dict)) \
+        if isinstance(c, list) else ""
+    return bool(TIMEOUT_TEXT.search(txt))
+
+
 def _usage_fields(u: dict) -> "tuple[dict, list]":
     vals, nulls = _take(u, {"input_tokens": "input_tokens", "cache_read_input_tokens": "cache_read_input_tokens",
                             "cache_creation_input_tokens": "cache_creation_input_tokens",
@@ -110,6 +123,12 @@ def _usage_fields(u: dict) -> "tuple[dict, list]":
         vals["server_tool_requests"] = sum(v for v in st.values() if isinstance(v, int))
     if isinstance(u.get("iterations"), list):
         vals["iterations"] = len(u["iterations"])
+    cc = u.get("cache_creation")
+    if isinstance(cc, dict):
+        v, n = _take(cc, {"cache_creation_5m_input_tokens": "ephemeral_5m_input_tokens",
+                          "cache_creation_1h_input_tokens": "ephemeral_1h_input_tokens"})
+        vals.update(v)
+        nulls += n
     return vals, nulls
 
 
@@ -152,6 +171,7 @@ class _Calls:
         if d is None:
             return
         d["is_error"] = bool(block.get("is_error"))
+        d["timed_out"] = _timed_out(d["tool_name"], block)
         d["tool_output_chars"] = _text_len(block.get("content"))
         d["t_result_ms"] = t
         if extra:
@@ -267,6 +287,7 @@ def from_cc_stream(path, run_id: str, hasher: "Hasher | None" = None) -> "list[d
                 c["model"] = msg.get("model")
                 c["stream_chunks"] = 0
                 c["_start"] = t
+                c["_start_usage"] = dict(msg.get("usage") or {})   # 캐시 쓰기 5m/1h · server_tool_use 는 여기에만 온다
             elif cur is not None:
                 c = L.call(cur)
                 L.seen(c, t)
@@ -276,7 +297,10 @@ def from_cc_stream(path, run_id: str, hasher: "Hasher | None" = None) -> "list[d
                         c["first_chunk_ms"] = t - c["_start"]
                 elif et == "message_delta":
                     if ev.get("usage"):
-                        c["usage"], c["unulls"] = _usage_fields(ev["usage"])
+                        # delta 가 최종값이다. delta 에 없는 칸만 message_start 의 usage 로 채운다
+                        merged = dict(c.get("_start_usage") or {})
+                        merged.update(ev["usage"])
+                        c["usage"], c["unulls"] = _usage_fields(merged)
                     delta = ev.get("delta") or {}
                     c["stop_reason"] = delta.get("stop_reason")
                     if "stop_reason" in delta and delta["stop_reason"] is None:
@@ -300,7 +324,10 @@ def from_cc_stream(path, run_id: str, hasher: "Hasher | None" = None) -> "list[d
                     ex, tn = _take(tur, {"interrupted": "interrupted"})
                     L.tool_result(b, t, ex, tn)
         elif ty == "rate_limit_event":
-            run["rate_limit_utilization"] = (d.get("rate_limit_info") or {}).get("utilization")
+            info = d.get("rate_limit_info") or {}
+            run["rate_limit_utilization"] = info.get("utilization")
+            run["rate_limit_status"] = info.get("status")
+            run["rate_limit_threshold"] = info.get("surpassedThreshold")
         elif ty == "autocompact_state":
             run["autocompact_threshold"] = (d.get("value") or {}).get("threshold")
         elif ty == "result":
