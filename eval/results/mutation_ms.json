@@ -45,11 +45,6 @@
   "result": "RED"
  },
  {
-  "mutation": "수집기: 스트림의 캐시 쓰기 나눔을 버린다",
-  "file": "llmsensor/telemetry/collect.py",
-  "result": "RED"
- },
- {
   "mutation": "liveness: 운영자 timeout 없이 문턱을 지어낸다",
   "file": "llmsensor/sensing/liveness/__init__.py",
   "result": "RED"

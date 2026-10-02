@@ -32,8 +32,8 @@ M = [
     ("execution: 판정 근거 없이 NONE_OBSERVED", "llmsensor/sensing/execution/__init__.py",
      '    return _unk("시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다", ["tool_timeouts", "tool_interruptions"])',
      '    return _inf("NONE_OBSERVED", "x", ["tool_timeouts"])'),
-    ("수집기: 스트림의 캐시 쓰기 나눔을 버린다", "llmsensor/telemetry/collect.py",
-     "                        merged = dict(c.get(\"_start_usage\") or {})", "                        merged = {}"),
+    # (옮김) '수집기: 스트림의 캐시 쓰기 나눔을 버린다' -- 수집기가 Telemetry 로 옮겨 가(CMD-T9) 같은 변이도 그쪽 하니스에 있다.
+    # Sensor 에는 그 코드가 없어 NOT_APPLIED 였다(baseline#3 CMD-S13)
     ('liveness: 운영자 timeout 없이 문턱을 지어낸다', 'llmsensor/sensing/liveness/__init__.py',
      '    timeout = cfg.liveness_timeout_ms\n', '    timeout = cfg.liveness_timeout_ms or 30_000\n'),
     ('liveness: 차례를 모르면 입력 대기로 짐작', 'llmsensor/sensing/liveness/__init__.py',
@@ -127,7 +127,10 @@ def main():
     out_path.write_text(json.dumps(out, ensure_ascii=False, indent=1))
     for r in out:
         print(f"{r['result']:12s} {r['mutation']}")
-    return 0 if all(r["result"] == "RED" for r in out) else 1
+    bad = [r for r in out if r["result"] != "RED"]
+    if bad:     # NOT_APPLIED 도 실패다 -- 변이가 겨눈 코드가 사라졌다는 뜻이고, 그 원칙은 이제 아무도 붙들지 않는다
+        print(f"실패: RED 가 아닌 변이 {len(bad)} 개 -- " + ", ".join(f"{r['mutation']}({r['result']})" for r in bad))
+    return 0 if not bad else 1
 
 
 if __name__ == "__main__":

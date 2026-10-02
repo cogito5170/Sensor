@@ -106,7 +106,7 @@ def main():
                 p(f"      <- {o['observation']} = {o['value']} (t={o['observed_at']}, {o['source']})")
     p("    transitions: " + "; ".join(f"{t.previous} -> {t.new} @ {t.at} ({t.trigger})" for t in ex["transitions"]))
 
-    p("\n" + "=" * 70 + "\n6. 내보내기 계약(llmsensor.state-export/1) -- 결정 문맥은 cogito5170/DC 가 이것을 읽어 짓는다\n" + "=" * 70)
+    p("\n" + "=" * 70 + "\n6. 내보내기 계약(llmsensor.state-export/2) -- 결정 문맥은 cogito5170/DC 가 이것을 읽어 짓는다\n" + "=" * 70)
     p(f"  subjects: {json.dumps(E.subjects(RUN), ensure_ascii=False)}")
     p(f"  as_of:    {json.dumps(E.as_of(RUN), ensure_ascii=False)}")
     for ent, name in ((A, "execution_health"), (f"task:{RUN}", "progress_state")):

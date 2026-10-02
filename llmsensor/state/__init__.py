@@ -6,7 +6,7 @@
     registry.py    정의 목록과 의존 그래프(들여다볼 수 있다)
     engine.py      상태 엔진: 받아들이기 · 이력 · 전이 · 흔들림 억제 · 신선도 · 질의 · 설명 · 결정 문맥
     config.py      운영자 설정(가정이 든 값은 전부 여기, 버전과 함께)
-    export.py      내보내기 계약(llmsensor.state-export/1) -- 상태 층 밖이 읽는 유일한 길
+    export.py      내보내기 계약(llmsensor.state-export/2) -- 상태 층 밖이 읽는 유일한 길
 
 Telemetry = 무엇을 보았나 · State = 지금 무엇이 참이라고 믿나 · Model(registry) = 그 상태가 무엇을 뜻하나.
 정책(무엇을 할까)은 여기 없다.

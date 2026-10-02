@@ -14,7 +14,7 @@ LLM / Tool / Runtime ──► Telemetry (llmsensor/telemetry, 꼴 v3)
         Observation(state/normalize) → Metric → State(state/rules, 근거 종류 · 버전) → 이력 · 근거 사슬
                               │
                               ▼
-        내보내기 계약 llmsensor.state-export/1 (state/export.py) -- 이 저장소의 끝
+        내보내기 계약 llmsensor.state-export/2 (state/export.py) -- 이 저장소의 끝
                               │
                               ▼
         Decision Context (cogito5170/DC, baseline BD-05) → Policy → … → Arbiter/Guard → Action → Telemetry

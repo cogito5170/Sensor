@@ -110,7 +110,7 @@ E.snapshot()                                      # 결정성 비교용
 ### 6.1 내보내기 계약 -- 상태 층 밖이 읽는 유일한 길 (`llmsensor/state/export.py`)
 
 ```python
-E.EXPORT_CONTRACT                          # "llmsensor.state-export/1"
+E.EXPORT_CONTRACT                          # "llmsensor.state-export/2"
 E.state_catalog()                          # 상태 정의: 실체 · 값 집합 · 근거 종류 · 규칙 id/판본 · TTL · 뜻 · 돕는 결정
 E.export_state(entity, name, now=None)     # 상태 하나 -- 기본 값의 새 사본(JSON 가능). 없으면 UNKNOWN
 E.subjects(run_id)                         # 역할 -> 실체(agent · task · runtime · tool 들)
