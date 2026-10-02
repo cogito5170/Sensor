@@ -4,7 +4,7 @@ from llmsensor.providers import ErrorKind, error
 from llmsensor.sensing import BASELINE_ORDER, packs
 from llmsensor.sensing._base import min_samples, percentile
 from llmsensor.sensing.cost import RESOURCE_V1, RESOURCE_V3, pricing
-from llmsensor.sensing.provider import RATE_LIMIT_V1, RATE_LIMIT_V2
+from llmsensor.sensing.provider import RATE_LIMIT_V1, RATE_LIMIT_V2, RATE_LIMIT_V3
 from llmsensor.sensing.quality import external_label_batch
 from llmsensor.state import DEFAULT_CONFIG, REGISTRY, Basis, Status, StateEngine, from_telemetry
 from llmsensor.state.config import Band
@@ -31,7 +31,7 @@ class Packs(unittest.TestCase):
         old = {r.state: r for r in RULES}
         for n in BASELINE_ORDER:
             if n == "rate_limit_state":
-                self.assertIs(REGISTRY.rules[n], RATE_LIMIT_V2)
+                self.assertIs(REGISTRY.rules[n], RATE_LIMIT_V3)
             elif n == "resource_state":                          # baseline BD-39 로 판본을 올렸다(시험: tests/test_resource_v2.py)
                 self.assertIs(REGISTRY.rules[n], RESOURCE_V3)
                 self.assertIs(RESOURCE_V1, old[n])
@@ -92,6 +92,23 @@ class Execution(unittest.TestCase):
         E = engine([mc(0, 100), t, mc(1, 200, stop="end_turn"), end()])
         self.assertEqual(val(E, A, "execution_interruption").value, "TIMEOUT_OBSERVED")
         self.assertEqual(val(E, T, "completion_state").value, "ENDED_NORMALLY")
+
+    def test_timeout_disposition(self):
+        # S2: 처분 -- L0 tool.end.moved_to_background. 모두 같을 때만 그 처분, 섞였거나 모르면 TIMEOUT_OBSERVED(v2 와 같음)
+        def to(i, t, moved):
+            r = tc(0, i, t, head=f"Bash:{i}", err=moved is not True)
+            r["timed_out"] = True
+            r["unobserved"].remove("timed_out")
+            if moved is not None:
+                r["moved_to_background"] = moved           # 꼴 v3 에 아직 없는 칸 -- 정준 입력 계약만으로 시험한다
+            return r
+        cases = {(True,): "TIMEOUT_BACKGROUNDED", (False,): "TIMEOUT_KILLED", (True, True): "TIMEOUT_BACKGROUNDED",
+                 (True, False): "TIMEOUT_OBSERVED", (True, None): "TIMEOUT_OBSERVED", (None,): "TIMEOUT_OBSERVED"}
+        for moves, want in cases.items():
+            recs = [mc(0, 100)] + [to(i, 110 + i, m) for i, m in enumerate(moves)]
+            v = val(engine(recs), A, "execution_interruption")
+            self.assertEqual(v.value, want, moves)
+            self.assertIn("처분", v.reason)
 
     def test_retries_metric(self):
         E = engine([mc(0, 100), tc(0, 0, 110, err=True), mc(1, 200), tc(1, 1, 210), mc(2, 300), tc(2, 2, 310)])
@@ -188,3 +205,35 @@ class OwnerLayer(unittest.TestCase):
                                   "runtime_reliability", "liveness_state"})
         self.assertEqual({r.owner_layer for n, r in REGISTRY.rules.items() if n not in marked}, {None})
         self.assertEqual(REGISTRY.state_definition("liveness_state")["owner_layer"], "ASSESS")
+
+
+class Quota(unittest.TestCase):
+    """S4 -- 한도 여유(계정 범위 값). 소진 예측은 하지 않는다."""
+
+    def _m(self, E, name):
+        ms = [m for i, m in E.metrics.items() if i.startswith(f"{R}/{name}@")]
+        return max(ms, key=lambda m: int(str(m.id.rsplit("@", 1)[1]).split("+")[0]))
+
+    def test_rejected_is_limited_in_v3_not_guessed_in_v2(self):
+        E = engine([mc(0, 100), end(rate_limit_status="rejected", rate_limit_utilization=None)])
+        self.assertEqual(val(E, R, "rate_limit_state").value, "LIMITED")
+        Mx = {m.name: m for m in E.metrics.values() if m.entity_id == R}
+        self.assertIn("추측 안 함", RATE_LIMIT_V2.fn(Mx, None, DEFAULT_CONFIG).reason)
+
+    def test_headroom_is_one_minus_declared_utilization(self):
+        E = engine([mc(0, 100), end(rate_limit_utilization=0.72)])
+        self.assertEqual(self._m(E, "quota_headroom").value, 0.28)
+        E = engine([mc(0, 100), end(rate_limit_utilization=None)])
+        self.assertIsNone(self._m(E, "quota_headroom").value)
+
+    def test_time_to_reset_only_on_unix_time(self):
+        def recs(tb):
+            m, e = mc(0, 1_790_884_000_000), end()
+            m["time_base"] = tb
+            e["rate_limit_resets_at_ms"] = 1_790_884_800_000          # 꼴 v3 에 아직 없는 칸 -- 정준 입력 계약만으로
+            return [m, e]
+        E = engine(recs("unix_ms"))
+        self.assertEqual(self._m(E, "quota_time_to_reset_ms").value, 800_000)
+        v = self._m(engine(recs("monotonic_ms")), "quota_time_to_reset_ms")
+        self.assertIsNone(v.value)
+        self.assertIn("unix ms 가 아니다", v.reason)

@@ -34,7 +34,7 @@
       why: 맥락 137,000 < 창 180,000 (압축 문턱은 선언되지 않았다)
   agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v2]
       why: 겨냥 1/8 의 마지막 결과가 실패
-  agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v2]
+  agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v3]
       why: 시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다
   agent.latency_state          = None                         NOT_APPLICABLE FRESH     [latency-state-v1]
       why: 지연 SLO 가 설정되지 않았다(문턱을 지어내지 않는다)
@@ -50,7 +50,7 @@
       why: 진행을 판정할 검증된 근거가 없다(토큰은 진행이 아니다). 정체 문턱도 설정되지 않았다
   task.quality_state          = None                         UNKNOWN        UNTIMED   [quality-state-v1]
       why: 외부 평가가 없다 -- 품질 점수를 만들지 않는다
-  runtime.rate_limit_state       = None                         UNKNOWN        UNTIMED   [rate-limit-state-v2]
+  runtime.rate_limit_state       = None                         UNKNOWN        UNTIMED   [rate-limit-state-v3]
       why: 요금 한도 사건을 못 받았다
   runtime.runtime_reliability    = NO_FAILURE_OBSERVED          INFERRED       FRESH     [runtime-reliability-v2]
       why: 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다
@@ -62,7 +62,7 @@
       why: 맥락 137,000 < 런타임 압축 문턱 144,000
   agent.execution_health       = UNRESOLVED_FAILURES          INFERRED       FRESH     [execution-health-v2]
       why: 겨냥 1/8 의 마지막 결과가 실패
-  agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v2]
+  agent.execution_interruption = None                         UNKNOWN        UNTIMED   [execution-interruption-v3]
       why: 시간 초과 · 중단을 판정할 수 있는 도구 결과가 없다
   agent.latency_state          = None                         NOT_APPLICABLE FRESH     [latency-state-v1]
       why: 지연 SLO 가 설정되지 않았다(문턱을 지어내지 않는다)
@@ -78,7 +78,7 @@
       why: 끝난 과업 -- 진행 상태가 정의되지 않는다
   task.quality_state          = None                         UNKNOWN        UNTIMED   [quality-state-v1]
       why: 외부 평가가 없다 -- 품질 점수를 만들지 않는다
-  runtime.rate_limit_state       = AVAILABLE                    INFERRED       FRESH     [rate-limit-state-v2]
+  runtime.rate_limit_state       = AVAILABLE                    INFERRED       FRESH     [rate-limit-state-v3]
       why: 사용률 0.62 < 1 (경고 문턱은 런타임 사건에 있으나 꼴 v2 에 안 담았다)
   runtime.runtime_reliability    = NO_FAILURE_OBSERVED          INFERRED       FRESH     [runtime-reliability-v2]
       why: API 오류 보고 없음(보고된 null) · 멈춤 사유 11 개 정상 -- 신뢰가 증명된 것은 아니다
@@ -155,7 +155,7 @@ state:resource_state  [resource-state-v3, DEFINITIONAL]
 state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
   <- metric:cost_fraction  [OPERATOR_ASSUMED]
        <- metric:cost_usd
-state:rate_limit_state  [rate-limit-state-v2, RUNTIME_DECLARED]
+state:rate_limit_state  [rate-limit-state-v3, RUNTIME_DECLARED]
   <- metric:rate_limit_utilization  [OBSERVED]
        <- obs:runtime.rate_limit_utilization
   <- metric:rate_limit_declared  [RUNTIME_DECLARED]
@@ -168,9 +168,10 @@ state:runtime_reliability  [runtime-reliability-v2, DEFINITIONAL]
        <- obs:runtime.api_error_status
   <- metric:stop_reasons  [OBSERVED]
        <- obs:call.stop_reason
-state:execution_interruption  [execution-interruption-v2, RUNTIME_DECLARED]
+state:execution_interruption  [execution-interruption-v3, RUNTIME_DECLARED]
   <- metric:tool_timeouts  [RUNTIME_DECLARED]
        <- obs:tool.timed_out
+       <- obs:tool.moved_to_background
   <- metric:tool_interruptions  [OBSERVED]
        <- obs:tool.interrupted
 state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]

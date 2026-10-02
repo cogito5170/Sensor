@@ -15,6 +15,9 @@ A, T = EntityType.AGENT, EntityType.TASK
 NEW_CANON = {
     "tool.timed_out": ("tool_call", "timed_out", EntityType.TOOL, Basis.RUNTIME_DECLARED),
     "tool.interrupted": ("tool_call", "interrupted", EntityType.TOOL, Basis.OBSERVED),
+    # S2: 시간 초과의 처분 -- L0 tool.end.moved_to_background 와 같은 이름(BD-47). 런타임이 죽이지 않고 백그라운드로 옮겼나.
+    # true = 옮김, false(보고된 거짓) = 옮기지 않음(죽임), 없음 = 처분을 모른다. 꼴 v3 레코드에 아직 안 실린다(Telemetry 요청)
+    "tool.moved_to_background": ("tool_call", "moved_to_background", EntityType.TOOL, Basis.OBSERVED),
     "run.num_turns": ("run", "num_turns", EntityType.TASK, Basis.OBSERVED),
 }
 
@@ -29,7 +32,11 @@ def m_tool_timeouts(L, ctx, Mx):
     rows, hit = _flag(L, "tool.timed_out")
     if not rows:
         return _m(ctx, "tool_timeouts", None, (), reason="시간 초과를 판정할 수 있는 도구 결과가 없다(Bash 문구만 안다)")
-    return _m(ctx, "tool_timeouts", {"timeouts": len(hit), "covered": len(rows)},
+    disp = {"backgrounded": 0, "killed": 0, "unknown": 0}
+    for t in hit:
+        o = t.get("tool.moved_to_background")
+        disp["unknown" if o is None or o.value is None else "backgrounded" if o.value else "killed"] += 1
+    return _m(ctx, "tool_timeouts", {"timeouts": len(hit), "covered": len(rows), **disp},
               [t["tool.timed_out"].id for t in (hit or rows[-1:])], Basis.RUNTIME_DECLARED)
 
 
@@ -61,7 +68,13 @@ def m_turns(L, ctx, Mx):
 def r_interruption(Mx, prev, cfg):
     to, it = Mx["tool_timeouts"], Mx["tool_interruptions"]
     if to.value and to.value["timeouts"]:
-        return _inf("TIMEOUT_OBSERVED", f"도구 시간 초과 {to.value['timeouts']} 회(런타임 문구) / 판정 가능 {to.value['covered']}",
+        v = to.value
+        n = v["timeouts"]
+        # 처분이 모두 같을 때만 그 처분을 값으로 -- 섞였거나 하나라도 모르면 v2 와 같은 TIMEOUT_OBSERVED (짐작하지 않는다)
+        val = ("TIMEOUT_BACKGROUNDED" if v.get("backgrounded") == n else "TIMEOUT_KILLED" if v.get("killed") == n
+               else "TIMEOUT_OBSERVED")
+        return _inf(val, f"도구 시간 초과 {n} 회 / 판정 가능 {v['covered']} -- 처분: 백그라운드 {v.get('backgrounded', 0)} · "
+                         f"죽임 {v.get('killed', 0)} · 모름 {v.get('unknown', n)}",
                     ["tool_timeouts"], decided_by=to.inputs)          # 입력 = 시간 초과가 선 결과들(BD-57)
     if it.value and it.value["interrupted"]:
         return _inf("INTERRUPTED_OBSERVED", f"도구 중단 {it.value['interrupted']} 회(런타임 깃발)", ["tool_interruptions"],
@@ -74,17 +87,19 @@ def r_interruption(Mx, prev, cfg):
 
 
 NEW_METRICS = (
-    MetricDefinition("tool_timeouts", A, ("tool.timed_out",), Basis.RUNTIME_DECLARED,
-                     "런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수", m_tool_timeouts),
+    MetricDefinition("tool_timeouts", A, ("tool.timed_out", "tool.moved_to_background"), Basis.RUNTIME_DECLARED,
+                     "런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 · 그 처분(백그라운드 · 죽임 · 모름)", m_tool_timeouts),
     MetricDefinition("tool_interruptions", A, ("tool.interrupted",), Basis.OBSERVED,
                      "중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수", m_tool_interruptions),
     MetricDefinition("tool_retries", A, ("tool.is_error", "tool.target", "tool.name"), Basis.OBSERVED,
                      "오류 뒤 같은 겨냥 재호출 수", m_tool_retries),
     MetricDefinition("turns", T, ("run.num_turns",), Basis.OBSERVED, "런타임이 보고한 회전 수", m_turns),
 )
-INTERRUPTION = Rule("execution-interruption-v2", 2, "execution_interruption", A, Basis.RUNTIME_DECLARED,
-                    ("tool_timeouts", "tool_interruptions"), ("TIMEOUT_OBSERVED", "INTERRUPTED_OBSERVED", "NONE_OBSERVED"),
-                    "런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다",
+INTERRUPTION = Rule("execution-interruption-v3", 3, "execution_interruption", A, Basis.RUNTIME_DECLARED,
+                    ("tool_timeouts", "tool_interruptions"),
+                    ("TIMEOUT_BACKGROUNDED", "TIMEOUT_KILLED", "TIMEOUT_OBSERVED", "INTERRUPTED_OBSERVED", "NONE_OBSERVED"),
+                    "런타임이 도구의 시간 초과 · 중단을 선언했나, 시간 초과를 어떻게 처분했나(백그라운드로 옮김 · 죽임 -- 모두 같을 때만, "
+                    "아니면 TIMEOUT_OBSERVED). 지연 문턱이 아니라 런타임의 선언이다. 시간 초과 ≠ 실패",
                     "시간 제한을 늘릴까 · 배경으로 돌릴까", r_interruption, owner_layer="ASSESS")
 
 PACK = SensingPack(
