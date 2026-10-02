@@ -98,6 +98,11 @@ E.tick({"<run>": now})                            # TTL 넘긴 상태를 STALE �
 E.invalidate(entity, name, reason, at)            # 명시적 무효화
 E.propose(entity, name, value, author, rationale) # 권위 없는 제안
 E.snapshot()                                      # 결정성 비교용
+
+# L0 사건(또는 L0 원장 경로) -> 엔진 -> state-export 를 한 번에 (CMD-S25). 같은 객체가 MS VERIFY 의 run_state 이음매다
+from llmsensor.run_state import from_l0
+rs = from_l0(events_or_ledger_path, clock=None)   # clock: read 에 now 를 안 줄 때 쓸 시계(관측과 같은 시간 기준)
+rs.read("agent:<run>", "execution_health") · rs.subjects("<run>") · rs.as_of("<run>") · rs.catalog()
 ```
 
 `StateView` 는 값만 주지 않는다: `status`(STALE 판정 포함) · `freshness` · `age_ms` · `basis` · `rule` · `reason` ·
