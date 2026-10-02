@@ -84,6 +84,12 @@ M = [
      '        disp["unknown" if o is None or o.value is None else "backgrounded" if o.value else "killed"] += 1', '        disp["backgrounded" if o is None or o.value is None or o.value else "killed"] += 1'),
     ('S2: 섞인 처분을 하나로 접는다', 'llmsensor/sensing/execution/__init__.py',
      'val = ("TIMEOUT_BACKGROUNDED" if v.get("backgrounded") == n', 'val = ("TIMEOUT_BACKGROUNDED" if v.get("backgrounded")'),
+    ('S4: 런타임이 선언한 거절을 무시', 'llmsensor/sensing/provider/__init__.py',
+     'DECLARED_STATUS_V3 = {**DECLARED_STATUS, "rejected": "LIMITED"}', 'DECLARED_STATUS_V3 = dict(DECLARED_STATUS)'),
+    ('S4: 사용률을 모르면 여유를 1.0 으로', 'llmsensor/sensing/provider/__init__.py',
+     'return _m(ctx, "quota_headroom", None, (), reason=', 'return _m(ctx, "quota_headroom", 1.0, (), reason='),
+    ('S4: 시간 기준이 다른 시각에서 뺀다', 'llmsensor/sensing/provider/__init__.py',
+     '    if now is None or L.time_base != "unix_ms":', '    if now is None:'),
 ]
 
 

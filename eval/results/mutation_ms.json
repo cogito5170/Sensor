@@ -11,8 +11,7 @@
  },
  {
   "mutation": "provider: 모르는 런타임 상태를 WARNING 으로 짐작",
-  "file": "llmsensor/sensing/provider/__init__.py",
-  "result": "RED"
+  "result": "NOT_APPLIED"
  },
  {
   "mutation": "provider: 429 를 무시",
@@ -172,6 +171,21 @@
  {
   "mutation": "S2: 섞인 처분을 하나로 접는다",
   "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S4: 런타임이 선언한 거절을 무시",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S4: 사용률을 모르면 여유를 1.0 으로",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S4: 시간 기준이 다른 시각에서 뺀다",
+  "file": "llmsensor/sensing/provider/__init__.py",
   "result": "RED"
  }
 ]

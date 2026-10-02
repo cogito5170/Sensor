@@ -16,9 +16,13 @@ RT = EntityType.RUNTIME
 NEW_CANON = {
     "runtime.rate_limit_status": ("run", "rate_limit_status", RT, Basis.RUNTIME_DECLARED),
     "runtime.rate_limit_threshold": ("run", "rate_limit_threshold", RT, Basis.RUNTIME_DECLARED),
+    # S4: 한도 창이 다시 차는 시각(unix ms) -- L0 provider.rate_limit.resets_at_ms. 꼴 v3 에 아직 안 실린다(Telemetry 요청)
+    "runtime.rate_limit_resets_at_ms": ("run", "rate_limit_resets_at_ms", RT, Basis.RUNTIME_DECLARED),
 }
 # 런타임 상태 문자열 -> 값. **이 수집에서 본 값만** 넣었다. 모르는 문자열은 추측하지 않는다
 DECLARED_STATUS = {"allowed_warning": "WARNING"}
+# v3: 'rejected' 를 실데이터에서 봤다(이 세션의 5 시간 한도 거절, 2026-10-01 20:45 -- 재고 D2 · L0 provider.rate_limit)
+DECLARED_STATUS_V3 = {**DECLARED_STATUS, "rejected": "LIMITED"}
 LIMIT_ERRORS = {"429", "RATE_LIMITED"}   # HTTP 429 · 어댑터의 정준 종류. HTTP 429 = google.rpc.Code RESOURCE_EXHAUSTED(code.proto) = Anthropic rate_limit_error
 
 
@@ -30,14 +34,38 @@ def m_declared(L, ctx, Mx):
               [o.id for o in (s, t) if o is not None], Basis.RUNTIME_DECLARED)
 
 
-def r_rate_limit_v2(Mx, prev, cfg):
+def _rate_limit(table):
+    return lambda Mx, prev, cfg: r_rate_limit_v2(Mx, prev, cfg, table)
+
+
+def m_quota_headroom(L, ctx, Mx):
+    """1 − 런타임이 선언한 사용률. **계정** 범위 값이다(BD-32) -- 이 실행이 소모한 것이 아니다. 소진 예측은 하지 않는다:
+    사용률이 0.01 단위로 양자화돼 있고 계정 전체의 소모라 이 실행의 속도가 아니다(재고)."""
+    u = L.run.get("runtime.rate_limit_utilization")
+    if u is None or u.value is None:
+        return _m(ctx, "quota_headroom", None, (), reason="런타임이 한도 사용률을 주지 않았다")
+    return _m(ctx, "quota_headroom", round(1 - u.value, 6), [u.id], Basis.RUNTIME_DECLARED)
+
+
+def m_quota_time_to_reset(L, ctx, Mx):
+    r = L.run.get("runtime.rate_limit_resets_at_ms")
+    if r is None or r.value is None:
+        return _m(ctx, "quota_time_to_reset_ms", None, (), reason="런타임이 한도 창이 다시 차는 시각을 주지 않았다")
+    now = ctx.get("now")
+    if now is None or L.time_base != "unix_ms":
+        return _m(ctx, "quota_time_to_reset_ms", None, [r.id],
+                  reason=f"평가 시각이 unix ms 가 아니다(time_base={L.time_base}) -- 다시 차는 시각(unix ms)에서 빼지 않는다")
+    return _m(ctx, "quota_time_to_reset_ms", max(0, r.value - now), [r.id], Basis.RUNTIME_DECLARED)
+
+
+def r_rate_limit_v2(Mx, prev, cfg, table=DECLARED_STATUS):
     api, dec, u = Mx["api_error"], Mx["rate_limit_declared"], Mx["rate_limit_utilization"]
     if api.value and api.value["reported"] and str(api.value["value"]) in LIMIT_ERRORS:
         return _inf("LIMITED", f"API 오류 {api.value['value']} -- 요청이 한도로 거절됐다", ["api_error"])
     if u.value is not None and u.value >= 1:
         return _inf("EXHAUSTED", f"사용률 {u.value} ≥ 1", ["rate_limit_utilization"])
     if dec.value is not None:
-        hit = DECLARED_STATUS.get(dec.value["status"])
+        hit = table.get(dec.value["status"])
         if hit:
             return _inf(hit, f"런타임 선언 {dec.value['status']!r} (사용률 {u.value} ≥ 런타임 문턱 {dec.value['threshold']})",
                         ["rate_limit_declared", "rate_limit_utilization"])
@@ -48,16 +76,25 @@ def r_rate_limit_v2(Mx, prev, cfg):
 
 
 NEW_METRICS = (MetricDefinition("rate_limit_declared", RT, ("runtime.rate_limit_status", "runtime.rate_limit_threshold"),
-                                Basis.RUNTIME_DECLARED, "런타임이 선언한 요금 한도 상태와 그 문턱", m_declared),)
+                                Basis.RUNTIME_DECLARED, "런타임이 선언한 요금 한도 상태와 그 문턱", m_declared),
+               MetricDefinition("quota_headroom", RT, ("runtime.rate_limit_utilization",), Basis.RUNTIME_DECLARED,
+                                "1 − 선언된 한도 사용률(계정 범위 -- 이 실행의 소모가 아니다)", m_quota_headroom),
+               MetricDefinition("quota_time_to_reset_ms", RT, ("runtime.rate_limit_resets_at_ms",), Basis.RUNTIME_DECLARED,
+                                "선언된 한도 창이 다시 차기까지(평가 시각이 unix ms 일 때만)", m_quota_time_to_reset))
 RATE_LIMIT_V2 = Rule("rate-limit-state-v2", 2, "rate_limit_state", RT, Basis.RUNTIME_DECLARED,
                      ("rate_limit_utilization", "rate_limit_declared", "api_error"),
                      ("AVAILABLE", "WARNING", "LIMITED", "EXHAUSTED"),
                      "요금 한도: 429 로 거절됨(LIMITED) · 사용률 ≥ 1(EXHAUSTED) · 런타임이 경고를 선언(WARNING) · 그 밖(AVAILABLE). "
                      "v1(AVAILABLE · EXHAUSTED)의 확장 -- 새 관측이 없으면 v1 과 같다", "늦출까 · 공급자를 바꿀까", r_rate_limit_v2)
+RATE_LIMIT_V3 = Rule("rate-limit-state-v3", 3, "rate_limit_state", RT, Basis.RUNTIME_DECLARED,
+                     ("rate_limit_utilization", "rate_limit_declared", "api_error"),
+                     ("AVAILABLE", "WARNING", "LIMITED", "EXHAUSTED"),
+                     "v2 + 런타임이 선언한 거절('rejected')도 LIMITED. 그 밖은 v2 와 같다", "늦출까 · 공급자를 바꿀까",
+                     _rate_limit(DECLARED_STATUS_V3))
 RATE_LIMIT_V1 = R["rate_limit_state"]       # 회귀 시험용으로 남긴다
 
 PACK = SensingPack(
     "provider", "공급자가 요청을 받아 주나 -- API 오류 · 한도에 잘린 생성 · 요금 한도",
     {**canon("runtime.api_error_status", "runtime.rate_limit_utilization", "runtime.model"), **NEW_CANON},
     tuple(M[n] for n in ("stop_reasons", "api_error", "rate_limit_utilization")) + NEW_METRICS,
-    (RATE_LIMIT_V2, R["runtime_reliability"]))
+    (RATE_LIMIT_V3, R["runtime_reliability"]))
