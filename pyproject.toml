@@ -8,11 +8,9 @@ version = "0.1.0"
 description = "LLM 전용 센서 -- 실행 · 제약 · 일관성 · 행동 · 외부 결과 판독, 성능모형 잔차, 증거 융합, 결정론적 판정기"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
-
-[project.optional-dependencies]
-# L0 Telemetry(선택). 없으면 llmsensor/telemetry/collect.py 를 쓴다
-l0 = ["l0-telemetry @ git+https://github.com/cogito5170/Telemetry"]
+# L0 Telemetry -- 필수(2026-10-02, CMD-T9). 원천 수집은 그쪽이 한다(llmsensor/telemetry/collect.py 는 이음매).
+# 판은 통합 브랜치에 고정(BD-68, CMD-T9') -- 단계가 끝나면 그 머리의 태그로 옮긴다
+dependencies = ["l0-telemetry @ git+https://github.com/cogito5170/Telemetry@claude/gracious-meitner-vp49xe"]
 
 [project.scripts]
 llmsensor = "llmsensor.cli:main"

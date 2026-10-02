@@ -1,12 +1,12 @@
-"""내보내기 계약(llmsensor.state-export/1) -- 상태 층 밖(cogito5170/DC 등)이 기대는 꼴을 붙든다.
+"""내보내기 계약(llmsensor.state-export/2) -- 상태 층 밖(cogito5170/DC 등)이 기대는 꼴을 붙든다.
 
-칸을 빼거나 이름 · 뜻을 바꾸면 여기가 빨개진다 -- 그러면 판본을 올려야 한다(/2).
+칸을 빼거나 이름 · 뜻을 바꾸면 여기가 빨개진다 -- 그러면 판본을 올려야 한다(/3). 소유: DC 세션(baseline BD-56).
 """
 import json
 import unittest
 
 from llmsensor.state import REGISTRY, StateEngine, from_telemetry
-from llmsensor.state.export import CONTRACT, FIELDS
+from llmsensor.state.export import CONTRACT, FIELDS, entity_ref
 from tests.test_state import RUN, end, mc, tc
 
 A = f"agent:{RUN}"
@@ -20,10 +20,28 @@ def engine(with_end=True):
 
 
 class Contract(unittest.TestCase):
+    def test_v2_entity_ref_time_base_and_vocabularies(self):
+        """/2 (CMD-D7): 실체 id 꼴 <유형>:<범위>:<지역>(BD-32) · 시각 기준(BD-33) · 근거 종류 8 개 · reason 없음."""
+        from llmsensor.state.model import Basis
+        E = engine()
+        d = E.export_state(A, "execution_health")
+        self.assertEqual(d["entity_ref"], {"type": "agent", "scope": RUN, "local": None})
+        self.assertEqual(entity_ref(f"tool:{RUN}:Bash"), {"type": "tool", "scope": RUN, "local": "Bash"})
+        self.assertEqual(d["time_base"], "monotonic_ms")
+        self.assertNotIn("reason", d)
+        c = E.state_catalog()
+        self.assertEqual(c["bases"], [b.value for b in Basis])
+        self.assertEqual(len(c["bases"]), 8)
+        self.assertIn(d["time_base"], c["time_bases"])
+        self.assertEqual(E.subjects(RUN)["scope"], RUN)
+        for name in REGISTRY.rules:                       # 모든 상태의 근거 종류가 catalog 어휘 안에 있다
+            self.assertIn(E.export_state(A, name)["basis"], c["bases"])
+        self.assertIsNone(StateEngine().export_state(A, "execution_health")["time_base"])   # 모르는 실행은 null
+
     def test_version_and_fields_are_pinned(self):
         E = engine()
         self.assertEqual(E.EXPORT_CONTRACT, CONTRACT)
-        self.assertEqual(CONTRACT, "llmsensor.state-export/1")
+        self.assertEqual(CONTRACT, "llmsensor.state-export/2")
         for name in REGISTRY.rules:
             for ent in (A, f"task:{RUN}", f"runtime:{RUN}"):
                 d = E.export_state(ent, name)

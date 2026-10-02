@@ -93,21 +93,31 @@ class CollectorDefectsFixed(unittest.TestCase):
         self.assertEqual((run["api_error_status"], run["rate_limit_status"]), ("429", "rejected"))
 
 
-class OptionalL0(unittest.TestCase):
+class RequiredL0(unittest.TestCase):
+    """CMD-T9: L0 Telemetry 는 필수 의존이다. 없으면 수집을 부를 때 분명한 ImportError -- 상태 층만 쓰는 import 는 깨지지 않는다."""
 
-    def test_falls_back_without_l0(self):
-        with mock.patch.dict(sys.modules, {"telemetry": None}), tempfile.TemporaryDirectory() as d:
-            self.assertFalse(l0.available())
-            recs, backend = l0.collect("cc_jsonl", _session(d), "x")
-            self.assertEqual(backend, "native")
-            self.assertTrue(recs)
-            self.assertEqual(l0.compare("cc_jsonl", _session(d)), {"available": False})
-            with self.assertRaises(ImportError):
-                l0.records_from_ledger(os.path.join(d, "none.jsonl"))
+    def test_missing_l0_is_a_clear_error(self):
+        import subprocess
+        prog = ("import llmsensor, llmsensor.state\n"                      # 수집을 안 쓰는 쪽은 그대로 돈다
+                "from llmsensor.telemetry import l0\n"
+                "assert not l0.available()\n"
+                "try:\n"
+                "    import llmsensor.telemetry.collect\n"
+                "except ImportError as e:\n"
+                "    print('IMPORT-ERROR', e)\n")
+        with tempfile.TemporaryDirectory() as d:
+            env = dict(os.environ, PYTHONPATH=str(ROOT), LLMSENSOR_L0_SIBLING="0")
+            p = subprocess.run([sys.executable, "-c", prog], cwd=d, env=env, capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertIn("IMPORT-ERROR", p.stdout)
+        self.assertIn("cogito5170/Telemetry", p.stdout)                  # 무엇을 깔지 말한다
 
-    def test_impostor_named_telemetry_is_not_l0(self):
+    def test_impostor_named_telemetry_is_refused(self):
         with mock.patch.dict(sys.modules, {"telemetry": types.ModuleType("telemetry")}):
             self.assertFalse(l0.available())
+            with self.assertRaises(ImportError) as cm:
+                l0.require()
+            self.assertIn("다른 패키지", str(cm.exception))
 
 
 @unittest.skipUnless((TELEMETRY / "telemetry").is_dir(), "옆에 ../Telemetry 가 없다")
@@ -117,16 +127,18 @@ class WithL0(unittest.TestCase):
         if str(TELEMETRY) not in sys.path:
             sys.path.insert(0, str(TELEMETRY))
 
-    def test_prefers_l0_and_matches_native(self):
+    def test_collect_is_l0_and_invariants_hold(self):
         self.assertTrue(l0.available())
         with tempfile.TemporaryDirectory() as d:
             p = _session(d)
-            _, backend = l0.collect("cc_jsonl", p, "x")
-            self.assertEqual(backend, "l0")
-            _, backend = l0.collect("cc_jsonl", p, "x", prefer_l0=False)
-            self.assertEqual(backend, "native")
+            for prefer in (True, False):                                  # 옛 인자는 남았지만 길은 하나다
+                recs, backend = l0.collect("cc_jsonl", p, "x", prefer_l0=prefer)
+                self.assertEqual(backend, "l0")
+            self.assertEqual(recs, from_cc_jsonl(p, "x"))               # 이음매 == l0.collect
             r = l0.compare("cc_jsonl", p)
-            self.assertTrue(r["same"], r)
+        self.assertTrue(r["same"], r)
+        self.assertEqual((r["against"], r["native"], r["deterministic"], r["state_ingest"]),
+                         ("invariants", None, True, True))
 
     def test_inproc_ledger_passes_v4_schema(self):
         """CMD-T3: 프로세스 안 계측 원장(source = inproc:<이름>)도 꼴 v4 를 통과한다. 이름 없는 inproc 는 아니다."""
