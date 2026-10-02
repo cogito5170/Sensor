@@ -160,7 +160,7 @@ class Contract(unittest.TestCase):
         self.assertIs(REGISTRY.metrics["quota_headroom"].fn, next(d for d in NEW_METRICS if d.name == "quota_headroom").fn)
 
     def test_state_count_unchanged(self):
-        self.assertLessEqual(len(REGISTRY.rules), 14)      # 지표만 늘었다
+        self.assertLessEqual(len(REGISTRY.rules), 15)      # 지표만 늘었다
 
 
 if __name__ == "__main__":

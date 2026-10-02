@@ -29,7 +29,7 @@ class StateConfig:
         "context_pressure": 10 * 60_000, "execution_health": 10 * 60_000, "tool_execution_health": 10 * 60_000,
         "completion_state": 10 * 60_000, "progress_state": 10 * 60_000, "resource_state": 10 * 60_000,
         "resource_pressure": 10 * 60_000, "rate_limit_state": 5 * 60_000, "runtime_reliability": 10 * 60_000,
-        "liveness_state": 10 * 60_000, "dependency_fault": 10 * 60_000,
+        "liveness_state": 10 * 60_000, "dependency_fault": 10 * 60_000, "action_state": 10 * 60_000,
     })
     # 아래는 전부 OPERATOR_ASSUMED. 기본은 없음
     cost_budget_usd: "float | None" = None

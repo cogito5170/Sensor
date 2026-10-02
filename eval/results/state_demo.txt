@@ -101,20 +101,24 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_unobservable  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_pending  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
        <- obs:tool.index
        <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
@@ -127,20 +131,24 @@ state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_unobservable  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_pending  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
        <- obs:tool.index
        <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
@@ -154,6 +162,7 @@ state:completion_state  [completion-state-v1, RUNTIME_DECLARED]
 state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
   <- metric:identical_call_max  [OBSERVED]
        <- obs:tool.signature
+       <- obs:l0.actions
   <- metric:termination  [RUNTIME_DECLARED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
@@ -223,6 +232,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
 state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
   <- metric:dependency_outcome  [RUNTIME_DECLARED]
        <- obs:l0.dep:*
+state:action_state  [action-state-v1, RUNTIME_DECLARED]
+  <- metric:action_outcome  [RUNTIME_DECLARED]
+       <- obs:l0.act:*
 
 ======================================================================
 5. QUERY (실행 끝 요약 뒤): '지금 실행 상태는?' -> execution_health · context_pressure · resource_pressure

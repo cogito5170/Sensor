@@ -185,6 +185,18 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
+### `action.action_state` -- `action-state-v1` (v1, RUNTIME_DECLARED)
+
+- **뜻**: 실행기가 실행한 행동 하나(command_id)가 어떻게 됐나: 보냄 · 오류 없이 끝남 · 오류로 끝남. 효과(좋아졌나)는 판정하지 않는다
+- **돕는 결정**: 다시 시도할까 · 다른 행동으로 바꿀까 · 사람에게 올릴까
+- **값**: `STARTED` · `COMPLETED` · `FAILED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `action_outcome`
+- **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
 ### 종료 선언 표 (`completion-state-v1`) -- 표에 없는 문자열은 추측하지 않고 UNKNOWN
 
 | 칸 | 런타임 값 | 상태 |
@@ -210,13 +222,13 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 | `context_margin` | agent | OBSERVED | `context_tokens`, `context_window` | context_window − context_tokens |
 | `compaction_margin` | agent | RUNTIME_DECLARED | `context_tokens`, `compaction_threshold` | compaction_threshold − context_tokens |
 | `context_growth` | agent | OBSERVED | `tokens.input_uncached`, `tokens.cache_read`, `tokens.cache_write` | 마지막 두 호출의 context_tokens 차 (캐시 런타임에서는 ≡ cache_write) |
-| `tool_results` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과(is_error)를 본 도구 호출 수 |
-| `tool_outcome_unobservable` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과를 볼 수 없는 도구 호출 수(SWE-agent 추적 등) |
-| `tool_outcome_pending` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `tool.index`, `l0.tool_ends` | 결과를 못 본 호출 가운데 tool.end 가 아직 없는 것(도는 중). L0 를 안 받았으면 모름 |
-| `tool_errors` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | is_error=true 인 결과 수 |
+| `tool_results` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `l0.actions` | 결과(is_error)를 본 도구 호출 수 |
+| `tool_outcome_unobservable` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `l0.actions` | 결과를 볼 수 없는 도구 호출 수(SWE-agent 추적 등) |
+| `tool_outcome_pending` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `l0.actions`, `tool.index`, `l0.tool_ends` | 결과를 못 본 호출 가운데 tool.end 가 아직 없는 것(도는 중). L0 를 안 받았으면 모름 |
+| `tool_errors` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `l0.actions` | is_error=true 인 결과 수 |
 | `tool_failure_rate` | agent | OBSERVED | `tool_results`, `tool_errors` | tool_errors / tool_results |
-| `tool_targets` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 겨냥별 최근 결과: 미해결(마지막이 실패) · 회복(실패 뒤 성공) |
-| `identical_call_max` | agent | OBSERVED | `tool.signature` | 같은 (도구, 인자)의 최대 반복 수 |
+| `tool_targets` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `l0.actions` | 겨냥별 최근 결과: 미해결(마지막이 실패) · 회복(실패 뒤 성공) |
+| `identical_call_max` | agent | OBSERVED | `tool.signature`, `l0.actions` | 같은 (도구, 인자)의 최대 반복 수 |
 | `reasoning_tokens` | agent | OBSERVED | `tokens.reasoning` | 최종 보고된 생각 토큰 합 |
 | `reasoning_estimate` | agent | ESTIMATE | `tokens.reasoning_estimate`, `tokens.reasoning` | 생성 도중 런타임 추정(최종값이 오면 INVALID) |
 | `cost_usd` | agent | OBSERVED | `run.cost_usd` | 런타임이 보고한 비용 |
@@ -253,6 +265,7 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 | `silence_ms` | task | OBSERVED | `l0.last_event`, `l0.heartbeat`, `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 평가 시각 − 마지막 활동(어떤 사건 또는 런타임 heartbeat) |
 | `runtime_actions` | task | RUNTIME_DECLARED | `l0.runtime_actions` | 런타임 자신의 행동 수(압축 · 백그라운드 이동 · 입력 빼기 · 권한 거부) · 마지막 압축 전후 토큰 |
 | `dependency_outcome` | dependency | RUNTIME_DECLARED | `l0.dep:*` | 의존 대상에 대한 마지막 호출의 결과(ok · 선언된 원인)와 호출 · 결함 수 |
+| `action_outcome` | action | RUNTIME_DECLARED | `l0.act:*` | 행동 하나의 마지막 시도: dispatch 를 봤나 · result 를 봤나 · is_error · 시도 수 |
 
 ## 정준 관측 (층 1)
 
@@ -300,20 +313,24 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_unobservable  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_pending  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
        <- obs:tool.index
        <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
@@ -326,20 +343,24 @@ state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_unobservable  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_outcome_pending  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
        <- obs:tool.index
        <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+       <- obs:l0.actions
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
@@ -353,6 +374,7 @@ state:completion_state  [completion-state-v1, RUNTIME_DECLARED]
 state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
   <- metric:identical_call_max  [OBSERVED]
        <- obs:tool.signature
+       <- obs:l0.actions
   <- metric:termination  [RUNTIME_DECLARED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
@@ -422,6 +444,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
 state:dependency_fault  [dependency-fault-v1, RUNTIME_DECLARED]
   <- metric:dependency_outcome  [RUNTIME_DECLARED]
        <- obs:l0.dep:*
+state:action_state  [action-state-v1, RUNTIME_DECLARED]
+  <- metric:action_outcome  [RUNTIME_DECLARED]
+       <- obs:l0.act:*
 ```
 
 ## 넣지 않은 후보 상태와 까닭

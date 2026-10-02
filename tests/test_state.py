@@ -322,7 +322,8 @@ class Registry(unittest.TestCase):
         # 상태는 적어야 한다(압축). 12 -> 13: liveness_state(S1) -- 설계(docs/SENSOR_HEALTH_DESIGN.md §0)에서 유일한 새 상태.
         # 나머지 건강 차원(처분 · 의존 · 한도 여유 · 런타임 행동)은 값 · 지표로 더하기로 해 상한을 더 올리지 않는다
         # 13 -> 14: dependency_fault(S3) -- baseline BD-54 가 상한 올림을 허용했다
-        self.assertLessEqual(len(names), 14)
+        # 14 -> 15: action_state(S6) -- baseline BD-108 · CMD-S24 가 지시했다
+        self.assertLessEqual(len(names), 15)
 
 
 if __name__ == "__main__":

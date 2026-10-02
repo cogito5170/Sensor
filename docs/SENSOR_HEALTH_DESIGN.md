@@ -230,7 +230,12 @@ v1 값은 `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UN
 >   - COMPLETED(result, is_error=false)
 >   - FAILED(result, is_error=true)
 > - 아래 원안의 값 PROPOSED · ACCEPTED · CANCELLED 는 L0 사건이 생기기 전에는 내지 않는다.
-> - **짓지 않았다**(CMD-S4: 입력 계약만).
+> - ~~짓지 않았다(CMD-S4: 입력 계약만).~~ **지었다(2026-10-02, CMD-S24 · BD-108)** -- `action-state-v1`, 팩 `sensing/action_state`.
+>   - 실체 `action:<실행>:<command_id>`(BD-99). 값은 그 ref 의 **마지막 시도**: STARTED · COMPLETED · FAILED · UNKNOWN(result 에 is_error 없음 · dispatch 없는 result).
+>   - 같은 command_id 를 차례로 다시 쓰면 시도가 하나 더 선다 -- 끝난 값도 final 이 아니다.
+>   - 실행(agent) 실체의 `tool_results` · `tool_errors` · `tool_outcome_pending` · `tool_targets` · `identical_call_max` 가 행동 시도도 센다(새 상태 없음 -- BD-79). 도구 실체는 세우지 않는다.
+>   - 잃는 것: `action.result` 에 `timed_out` · `interrupted` 칸이 없어 `execution_interruption` 은 행동을 못 본다.
+>   - 엔진은 실체를 세울 때 실행을 기억한다 -- 행동 id(`<run_id>/a<n>`)에 ':' 가 있어 실체 id 를 글자로 가를 수 없다.
 
 **지금은 우리 정책의 결정을 실행하는 주체가 없다.** 그래서 센서는 **실행 주체가 내야 할 기록의 꼴**(§1 `action.*`)만 정하고 판정한다. 실행 주체는 누구든 그 꼴만 맞추면 된다.
 

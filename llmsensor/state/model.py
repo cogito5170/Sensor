@@ -68,6 +68,7 @@ class EntityType(str, Enum):
     RUNTIME = "runtime"
     TOOL = "tool"
     DEPENDENCY = "dependency"      # 의존 대상(공급자 · 외부 서비스) 하나 -- BD-54, 실체 id dependency:<실행>:<이름>
+    ACTION = "action"              # 실행기가 실행한 행동 하나 -- BD-99 · BD-108, 실체 id action:<실행>:<command_id>
 
 
 @dataclass(frozen=True)

@@ -210,7 +210,7 @@
   "result": "RED"
  },
  {
-  "mutation": "S3: 의존 실체가 자기 실행의 시계를 못 찾는다",
+  "mutation": "S3 · S24: 실체가 자기 실행을 기억하지 않는다(시계를 못 찾는다)",
   "file": "llmsensor/state/engine.py",
   "result": "RED"
  },
@@ -272,6 +272,41 @@
  {
   "mutation": "S23: 근거를 가르지 않는다",
   "file": "llmsensor/state/rules.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: dispatch 만 있는데 COMPLETED",
+  "file": "llmsensor/sensing/action_state/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: is_error 를 못 봤는데 COMPLETED",
+  "file": "llmsensor/sensing/action_state/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: dispatch 없는 result 를 받아들인다",
+  "file": "llmsensor/sensing/action_state/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: 되풀이의 result 를 첫 시도에 붙인다",
+  "file": "llmsensor/sensing/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: 실행 지표가 행동을 세지 않는다",
+  "file": "llmsensor/state/metrics.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: identical_call_max 가 행동 서명을 세지 않는다",
+  "file": "llmsensor/state/metrics.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S24: 행동의 실패 시각을 마지막 행동 시각으로",
+  "file": "llmsensor/state/metrics.py",
   "result": "RED"
  },
  {

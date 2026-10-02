@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 # L0 Telemetry -- 필수(2026-10-02, CMD-T9). 원천 수집은 그쪽이 한다(llmsensor/telemetry/collect.py 는 이음매).
 # 판은 통합 브랜치에 고정(BD-68, CMD-T9') -- 단계가 끝나면 그 머리의 태그로 옮긴다
-dependencies = ["l0-telemetry @ git+https://github.com/cogito5170/Telemetry@70b4febc47a809cb7aeeeb1e77b9e0f414efc362"]
+dependencies = ["l0-telemetry @ git+https://github.com/cogito5170/Telemetry@89d2887768a1f230860ea6323870a747fd4323ef"]
 
 [project.scripts]
 llmsensor = "llmsensor.cli:main"

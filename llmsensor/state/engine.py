@@ -18,16 +18,13 @@ from .registry import REGISTRY
 TOOL_RULE = "tool_execution_health"
 
 
-def _run_of(ent: str) -> str:
-    """실체 id -> 실행 id. 도구 · 의존 대상 실체는 끝에 이름이 붙는다(<유형>:<실행>:<이름>, 실행 id 에도 ':' 가 있을 수 있다)."""
-    body = ent.split(":", 1)[1]
-    return body.rsplit(":", 1)[0] if ent.startswith(("tool:", "dependency:")) else body
-
-
 class StateEngine:
     def __init__(self, config: StateConfig = DEFAULT_CONFIG, registry=REGISTRY):
         self.cfg, self.reg = config, registry
         self.ledgers: dict = {}
+        # 실체 id -> 실행 id. _apply 가 실체를 세울 때 적는다. 실체 id 를 글자로 가르지 않는다 -- 도구 · 의존 대상 · 행동의
+        # 이름에도 ':' 가 있을 수 있다(행동 id `<run_id>/a<n>`, 실행 id `cc_stream:demo`)
+        self._ent_run: dict = {}
         self.observations: dict = {}
         self.metrics: dict = {}
         self.current: dict = {}             # (entity, name) -> State
@@ -96,7 +93,8 @@ class StateEngine:
         return M
 
     def _evaluate(self, L, at, trigger):
-        defs = [md for md in self.reg.metrics.values() if md.entity is not EntityType.DEPENDENCY]   # 그것은 실체마다 따로
+        defs = [md for md in self.reg.metrics.values()
+                if md.entity not in (EntityType.DEPENDENCY, EntityType.ACTION)]   # 그것은 실체마다 따로
         M = self._metrics(L, defs, lambda md: entity_id(md.entity, L.run_id), at)
         for name, rule in self.reg.rules.items():
             if name == TOOL_RULE:
@@ -139,6 +137,7 @@ class StateEngine:
         key = (ent, rule.state)
         if run_id is not None:
             self.by_run.setdefault(run_id, set()).add(key)
+            self._ent_run[ent] = run_id
         prev = self.current.get(key)
         if prev is not None and prev.final:
             return                                       # 끝난 일에 대한 사실은 다시 계산하지 않는다
@@ -220,8 +219,7 @@ class StateEngine:
     def _now(self, ent, now):
         if now is not None:
             return now
-        run = _run_of(ent)
-        L = self.ledgers.get(run)
+        L = self.ledgers.get(self._ent_run.get(ent))
         return L.last_at if L else None
 
     def _freshness(self, st, now):
@@ -237,7 +235,7 @@ class StateEngine:
         """실행마다 '지금' 을 주면 TTL 을 넘긴 상태를 STALE 생애 사건으로 남긴다(값은 지우지 않는다)."""
         out = []
         for (ent, name), st in sorted(self.current.items()):
-            run = _run_of(ent)
+            run = self._ent_run.get(ent)
             if run not in now_by_run:
                 continue
             fr, _ = self._freshness(st, now_by_run[run])

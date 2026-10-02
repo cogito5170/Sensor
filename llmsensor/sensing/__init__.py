@@ -41,7 +41,8 @@ def packs() -> tuple:
     from .liveness import PACK as liveness
     from .actions import PACK as actions
     from .dependency import PACK as dependency
-    return (token, execution, latency, provider, cost, quality, liveness, actions, dependency)
+    from .action_state import PACK as action_state
+    return (token, execution, latency, provider, cost, quality, liveness, actions, dependency, action_state)
 
 
 def canonical_all() -> dict:

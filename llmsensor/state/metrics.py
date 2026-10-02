@@ -110,8 +110,39 @@ def m_context_growth(L, ctx, M):
 
 
 # ---- 도구 / 실행 ----
+class _Ref:
+    """행동 시도에서 지은 행의 칸 -- 지표가 쓰는 것은 id(근거 관측) · value 뿐이다."""
+    __slots__ = ("id", "value")
+
+    def __init__(self, id, value):
+        self.id, self.value = id, value
+
+
+def _action_rows(L):
+    """S24 (BD-108): 실행기가 낸 행동 시도(L0 action.dispatch / action.result)를 도구 행과 같은 꼴로. 실행(agent) 실체 지표만 센다 --
+    도구 실체는 세우지 않는다. 칸의 id 는 그 칸을 정한 사건의 관측(dispatch · result)이다(BD-57 근거 시각)."""
+    a = L.run.get("l0.actions")
+    if a is None or a.value is None:
+        return []
+    rows = []
+    for x in a.value["attempts"]:
+        src = x["dispatch"] or x["result"]
+        row = {"tool.name": _Ref(src, x["action_type"]), "_tool": None, "_action": True,
+               "_pending": x["result"] is None}
+        if x["target"] is not None:
+            row["tool.target"] = _Ref(x["dispatch"], f"{x['action_type']}:{x['target']}")
+        if x["args_sig"] is not None:
+            row["tool.signature"] = _Ref(x["dispatch"], x["args_sig"])
+        if x["result"] is not None and x["is_error"] is not None:
+            row["tool.is_error"] = _Ref(x["result"], x["is_error"])
+        rows.append(row)
+    return rows
+
+
 def _tool_rows(L, tool=None):
-    return [t for t in L.tools if tool is None or t["_tool"] == tool]
+    if tool is not None:
+        return [t for t in L.tools if t["_tool"] == tool]
+    return list(L.tools) + _action_rows(L)
 
 
 def _outcomes(rows):
@@ -141,13 +172,13 @@ def _tool_metrics(prefix, tool):
         if L.run.get("l0.last_event") is None:
             return _m(ctx, prefix + "tool_outcome_pending", None, [],
                       reason="L0 사건을 받지 않았다 -- 결과가 아직 안 왔는지 원천이 주지 않는지 모른다")
-        if any(t.get("tool.index") is None for t in blind):
+        if any(t.get("tool.index") is None for t in blind if not t.get("_action")):
             return _m(ctx, prefix + "tool_outcome_pending", None, [], reason="tool_index 를 모르는 호출이 있다")
         e = L.run.get("l0.tool_ends")
         done = set(e.value["indices"]) if e is not None and e.value is not None else set()   # L0 를 받았고 tool.end 가 없다 = 0 개
-        wait = [t for t in blind if t["tool.index"].value not in done]
+        wait = [t for t in blind if (t["_pending"] if t.get("_action") else t["tool.index"].value not in done)]
         return _m(ctx, prefix + "tool_outcome_pending", len(wait),
-                  [t["tool.index"].id for t in wait] + ([e.id] if e is not None else []))
+                  [(t["tool.name"] if t.get("_action") else t["tool.index"]).id for t in wait] + ([e.id] if e is not None else []))
 
     def errors(L, ctx, M):
         seen, _ = _outcomes(_tool_rows(L, tool))
@@ -182,9 +213,11 @@ A_RES, A_UNOBS, A_ERR, A_RATE, A_TGT, A_PEND = _tool_metrics("", None)
 
 
 def m_identical_call_max(L, ctx, M):
+    """같은 (도구, 인자) 서명의 최대 반복 수. 행동은 args_sig 로 센다(S24) -- args_sig 는 tool_sig 와 같은 방식으로 행동 이름을
+    품은 해시라(Telemetry CMD-T17) 열쇠 (action_type, args_sig) 와 같다."""
     c = {}
     ids = {}
-    for t in L.tools:
+    for t in _tool_rows(L, None):
         s = t.get("tool.signature")
         if s is not None:
             c[s.value] = c.get(s.value, 0) + 1
@@ -281,7 +314,7 @@ def m_activity(L, ctx, M):
 
 
 AGENT, TASK, RUNTIME, TOOL = EntityType.AGENT, EntityType.TASK, EntityType.RUNTIME, EntityType.TOOL
-_TC = ("tool.is_error", "tool.target", "tool.name")
+_TC = ("tool.is_error", "tool.target", "tool.name", "l0.actions")
 
 METRICS = [
     MetricDefinition("context_tokens", AGENT, ("tokens.input_uncached", "tokens.cache_read", "tokens.cache_write"),
@@ -309,7 +342,7 @@ METRICS = [
                      "tool_errors / tool_results", A_RATE),
     MetricDefinition("tool_targets", AGENT, _TC, Basis.OBSERVED,
                      "겨냥별 최근 결과: 미해결(마지막이 실패) · 회복(실패 뒤 성공)", A_TGT),
-    MetricDefinition("identical_call_max", AGENT, ("tool.signature",), Basis.OBSERVED,
+    MetricDefinition("identical_call_max", AGENT, ("tool.signature", "l0.actions"), Basis.OBSERVED,
                      "같은 (도구, 인자)의 최대 반복 수", m_identical_call_max),
     MetricDefinition("reasoning_tokens", AGENT, ("tokens.reasoning",), Basis.OBSERVED,
                      "최종 보고된 생각 토큰 합", m_reasoning_tokens),

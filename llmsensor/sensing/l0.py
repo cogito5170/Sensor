@@ -56,15 +56,27 @@ RATE_LIMIT_WINDOWS_CANON = {"l0.rate_limit_windows": ("l0", "provider.rate_limit
 WINDOW_KEYS = ("utilization", "resets_at_ms")
 # S23: 도구 결과를 기다리는 중인가, 원천이 결과를 주지 않는가 -- tool.end 를 본 tool_index 들(시각과 무관하다: SWE-agent 는 시각이 없다)
 TOOL_ENDS_CANON = {"l0.tool_ends": ("l0", "tool.end", EntityType.TASK, Basis.OBSERVED)}
+# S6 · 실행 지표(CMD-S24 · BD-108): 실행기가 낸 action.dispatch / action.result 를 **직접** 읽는다(compat 은 넓히지 않는다 -- BD-80).
+#   l0.action_dispatch · l0.action_result  사건 하나마다 관측 하나(근거 id · 시각이 행동마다 따로 선다 -- BD-57)
+#   l0.actions      그 실행의 행동 시도 목록. 시도마다 action_ref · action_type · target · args_sig · 두 관측 id · is_error.
+#                   같은 action_ref 를 **차례로** 다시 쓰면(같은 명령의 되풀이) 시도가 하나 더 선다. result 는 그 ref 의 열린 시도에 붙는다
+#   l0.act:<ref>    실체 action:<실행>:<ref> 의 마지막 시도 -- S6 action_state 가 읽는다
+ACT_PREFIX = "l0.act:"
+ACTION_STATE_CANON = {
+    "l0.action_dispatch": ("l0", "action.dispatch", EntityType.TASK, Basis.RUNTIME_DECLARED),
+    "l0.action_result": ("l0", "action.result", EntityType.TASK, Basis.RUNTIME_DECLARED),
+    "l0.actions": ("l0", "action.dispatch · action.result", EntityType.TASK, Basis.RUNTIME_DECLARED),
+    ACT_PREFIX + "*": ("l0", "action.dispatch · action.result", EntityType.ACTION, Basis.RUNTIME_DECLARED),
+}
 NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_CANON, **RATE_LIMIT_CANON,
-             **RATE_LIMIT_WINDOWS_CANON, **TOOL_ENDS_CANON}
+             **RATE_LIMIT_WINDOWS_CANON, **TOOL_ENDS_CANON, **ACTION_STATE_CANON}
 # 차례 끝을 **늘** 내는 것으로 알려진 원천(Telemetry 보고 baseline#1: cc_stream 의 result). cc_jsonl 은 Stop 훅이 있을 때만이라 넣지 않는다
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
 def batches(events) -> "list[Batch]":
     """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts, deps, tos, wins, ends = [], {}, {}, {}, {}, {}, {}
+    out, pending, acts, deps, tos, wins, ends, runs_acts = [], {}, {}, {}, {}, {}, {}, {}
     for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
         ent = entity_id(T, run)
@@ -117,6 +129,8 @@ def batches(events) -> "list[Batch]":
             wins[run] = cur
             obs.append(Observation(f"{rid}#l0.rate_limit_windows", ent, "l0.rate_limit_windows", dict(val, windows=cur),
                                    False, at, tb, src, Basis.RUNTIME_DECLARED))
+        if ev["type"] in ("action.dispatch", "action.result") and data.get("action_ref") is not None:
+            obs += _executor_action(runs_acts.setdefault(run, []), ev, rid, run, ent, val, at, tb, src)
         d = _dependency(deps.setdefault(run, {}), ev)
         if d is not None:
             name, v = d
@@ -143,6 +157,32 @@ def _action(c, ev):
     else:
         return None
     return dict(c)
+
+
+def _executor_action(attempts, ev, rid, run, ent, val, at, tb, src):
+    """행동 사건 하나 -> 관측들. attempts(그 실행의 시도 목록)를 고친다. 칸 값은 이름 · 해시 · 선언된 결과만 -- 글은 없다."""
+    d, ref = ev.get("data") or {}, str(ev["data"]["action_ref"])
+    if ev["type"] == "action.dispatch":
+        name = "l0.action_dispatch"
+        a = {"ref": ref, "action_type": d.get("action_type"), "target": d.get("target"), "args_sig": d.get("args_sig"),
+             "dispatch": f"{rid}#{name}", "result": None, "is_error": None, "seq": ev["seq"]}
+        attempts.append(a)
+        v = {k: d.get(k) for k in ("action_type", "target", "args_sig", "decision_ref")}
+    else:
+        name = "l0.action_result"
+        a = next((x for x in reversed(attempts) if x["ref"] == ref and x["result"] is None), None)
+        if a is None:                       # dispatch 없이 온 결과 -- 순서를 어겼다. 시도로 세우되 dispatch 가 없다고 적는다
+            a = {"ref": ref, "action_type": None, "target": None, "args_sig": None, "dispatch": None, "seq": ev["seq"]}
+            attempts.append(a)
+        a.update(result=f"{rid}#{name}", is_error=d.get("is_error"),
+                 is_error_unobserved="is_error" in (ev.get("unobserved") or ()))
+        v = {k: d.get(k) for k in ("is_error", "exit_code", "status_code", "exception", "output_chars", "elapsed_ms")}
+    last = dict(a, attempts=sum(x["ref"] == ref for x in attempts))
+    return [Observation(f"{rid}#{name}", ent, name, dict(val, action_ref=ref, **v), False, at, tb, src, Basis.RUNTIME_DECLARED),
+            Observation(f"{rid}#l0.actions", ent, "l0.actions", dict(val, attempts=[dict(x) for x in attempts]), False, at,
+                        tb, src, Basis.RUNTIME_DECLARED),
+            Observation(f"{rid}#{ACT_PREFIX}{ref}", entity_id(EntityType.ACTION, run, ref), ACT_PREFIX + ref, dict(val, **last),
+                        False, at, tb, src, Basis.RUNTIME_DECLARED)]
 
 
 def _dependency(c, ev):

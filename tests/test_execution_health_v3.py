@@ -98,7 +98,7 @@ class Contract(unittest.TestCase):
     def test_value_is_added_not_a_state(self):
         self.assertIs(REGISTRY.rules["execution_health"], EXECUTION_HEALTH_V3)
         self.assertEqual(EXECUTION_HEALTH_V3.values, EXECUTION_HEALTH_V2.values + ("NO_TOOL_RUN_YET",))
-        self.assertLessEqual(len(REGISTRY.rules), 14)      # 상한 그대로 -- 값이 늘 뿐 상태가 늘지 않는다
+        self.assertLessEqual(len(REGISTRY.rules), 15)      # 상한 그대로 -- 값이 늘 뿐 상태가 늘지 않는다
         self.assertEqual(REGISTRY.rules["tool_execution_health"].id, "tool-execution-health-v2")   # 도구 실체는 그대로
 
     def test_catalog_carries_the_value(self):
