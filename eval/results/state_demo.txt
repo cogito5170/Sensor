@@ -238,4 +238,3 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
   context_pressure = BELOW_COMPACTION_THRESHOLD  status=STALE  freshness=STALE  age_ms=2700000
   execution_health = UNRESOLVED_FAILURES  status=STALE  freshness=STALE  age_ms=2701650
   context_pressure: STALE; execution_health: STALE; resource_pressure: STALE; resource_state: STALE; rate_limit_state: STALE; runtime_reliability: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE; tool_execution_health: STALE
-
