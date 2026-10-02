@@ -124,11 +124,11 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.execution_interruption` -- `execution-interruption-v2` (v2, RUNTIME_DECLARED)
+### `agent.execution_interruption` -- `execution-interruption-v3` (v3, RUNTIME_DECLARED)
 
-- **뜻**: 런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다
+- **뜻**: 런타임이 도구의 시간 초과 · 중단을 선언했나, 시간 초과를 어떻게 처분했나(백그라운드로 옮김 · 죽임 -- 모두 같을 때만, 아니면 TIMEOUT_OBSERVED). 지연 문턱이 아니라 런타임의 선언이다. 시간 초과 ≠ 실패
 - **돕는 결정**: 시간 제한을 늘릴까 · 배경으로 돌릴까
-- **값**: `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **값**: `TIMEOUT_BACKGROUNDED` · `TIMEOUT_KILLED` · `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UNKNOWN` · `NOT_APPLICABLE`
 - **입력 지표**: `tool_timeouts`, `tool_interruptions`
 - **기본 TTL**: None ms (OPERATOR_ASSUMED)
 
@@ -213,7 +213,7 @@
 | `rate_limit_utilization` | runtime | OBSERVED | `runtime.rate_limit_utilization` | 요금 한도 사용률(런타임 사건) |
 | `termination` | task | RUNTIME_DECLARED | `run.result_subtype`, `run.terminal_reason`, `run.is_error` | 런타임이 선언한 종료(성공 여부가 **아니다**) |
 | `activity` | task | OBSERVED | `call.stop_reason` | 본 호출 · 도구 결과 수 |
-| `tool_timeouts` | agent | RUNTIME_DECLARED | `tool.timed_out` | 런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 |
+| `tool_timeouts` | agent | RUNTIME_DECLARED | `tool.timed_out`, `tool.moved_to_background` | 런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 · 그 처분(백그라운드 · 죽임 · 모름) |
 | `tool_interruptions` | agent | OBSERVED | `tool.interrupted` | 중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수 |
 | `tool_retries` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 오류 뒤 같은 겨냥 재호출 수 |
 | `turns` | task | OBSERVED | `run.num_turns` | 런타임이 보고한 회전 수 |
@@ -346,9 +346,10 @@ state:runtime_reliability  [runtime-reliability-v2, DEFINITIONAL]
        <- obs:runtime.api_error_status
   <- metric:stop_reasons  [OBSERVED]
        <- obs:call.stop_reason
-state:execution_interruption  [execution-interruption-v2, RUNTIME_DECLARED]
+state:execution_interruption  [execution-interruption-v3, RUNTIME_DECLARED]
   <- metric:tool_timeouts  [RUNTIME_DECLARED]
        <- obs:tool.timed_out
+       <- obs:tool.moved_to_background
   <- metric:tool_interruptions  [OBSERVED]
        <- obs:tool.interrupted
 state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]

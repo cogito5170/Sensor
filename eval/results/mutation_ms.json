@@ -163,5 +163,15 @@
   "mutation": "BD-57: 미해결 실패의 시각 대신 모든 근거의 가장 늦은 시각",
   "file": "llmsensor/state/rules.py",
   "result": "RED"
+ },
+ {
+  "mutation": "S2: 처분을 모르면 백그라운드로 짐작",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S2: 섞인 처분을 하나로 접는다",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
  }
 ]

@@ -93,6 +93,23 @@ class Execution(unittest.TestCase):
         self.assertEqual(val(E, A, "execution_interruption").value, "TIMEOUT_OBSERVED")
         self.assertEqual(val(E, T, "completion_state").value, "ENDED_NORMALLY")
 
+    def test_timeout_disposition(self):
+        # S2: 처분 -- L0 tool.end.moved_to_background. 모두 같을 때만 그 처분, 섞였거나 모르면 TIMEOUT_OBSERVED(v2 와 같음)
+        def to(i, t, moved):
+            r = tc(0, i, t, head=f"Bash:{i}", err=moved is not True)
+            r["timed_out"] = True
+            r["unobserved"].remove("timed_out")
+            if moved is not None:
+                r["moved_to_background"] = moved           # 꼴 v3 에 아직 없는 칸 -- 정준 입력 계약만으로 시험한다
+            return r
+        cases = {(True,): "TIMEOUT_BACKGROUNDED", (False,): "TIMEOUT_KILLED", (True, True): "TIMEOUT_BACKGROUNDED",
+                 (True, False): "TIMEOUT_OBSERVED", (True, None): "TIMEOUT_OBSERVED", (None,): "TIMEOUT_OBSERVED"}
+        for moves, want in cases.items():
+            recs = [mc(0, 100)] + [to(i, 110 + i, m) for i, m in enumerate(moves)]
+            v = val(engine(recs), A, "execution_interruption")
+            self.assertEqual(v.value, want, moves)
+            self.assertIn("처분", v.reason)
+
     def test_retries_metric(self):
         E = engine([mc(0, 100), tc(0, 0, 110, err=True), mc(1, 200), tc(1, 1, 210), mc(2, 300), tc(2, 2, 310)])
         m = [m for m in E.metrics.values() if m.name == "tool_retries"][-1]

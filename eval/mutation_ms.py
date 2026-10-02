@@ -80,6 +80,10 @@ M = [
      '        return min(ts) if ts else None', '        return max(ts) if ts else None'),
     ('BD-57: 미해결 실패의 시각 대신 모든 근거의 가장 늦은 시각', 'llmsensor/state/rules.py',
      '[prefix + "tool_targets", prefix + "tool_failure_rate"], decided_by=tg.inputs[:nu])', '[prefix + "tool_targets", prefix + "tool_failure_rate"])'),
+    ('S2: 처분을 모르면 백그라운드로 짐작', 'llmsensor/sensing/execution/__init__.py',
+     '        disp["unknown" if o is None or o.value is None else "backgrounded" if o.value else "killed"] += 1', '        disp["backgrounded" if o is None or o.value is None or o.value else "killed"] += 1'),
+    ('S2: 섞인 처분을 하나로 접는다', 'llmsensor/sensing/execution/__init__.py',
+     'val = ("TIMEOUT_BACKGROUNDED" if v.get("backgrounded") == n', 'val = ("TIMEOUT_BACKGROUNDED" if v.get("backgrounded")'),
 ]
 
 
