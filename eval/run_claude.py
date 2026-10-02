@@ -30,8 +30,16 @@ def run(name: str, out: Path) -> dict:
            "--include-partial-messages", "--max-turns", str(task.get("max_turns", 20)), "--allowedTools", *TOOLS]
     path = out / f"{name}.stream.jsonl"
     t0 = time.monotonic()
+    rc = capture(cmd, work, path, task.get("timeout", 400))
+    return {"task": name, "returncode": rc, "seconds": round(time.monotonic() - t0, 1), "cwd": str(work)}
+
+
+def capture(cmd, cwd, path, timeout) -> int:
+    """줄마다 {"_t": 단조 ms, "line": 원래 줄}. 프로세스가 끝나면 **마지막에** {"_t", "closed": true, "returncode"} 한 줄
+    (baseline#3 CMD-S11) -- L0 의 source.closed 가 이 줄에서만 나온다. 파일 끝은 닫힘이 아니다."""
+    t0 = time.monotonic()
     with open(path, "w", encoding="utf-8") as f:
-        p = subprocess.Popen(cmd, cwd=work, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+        p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
                              text=True, bufsize=1)
         try:
             for line in p.stdout:
@@ -40,10 +48,13 @@ def run(name: str, out: Path) -> dict:
                     f.write(json.dumps({"_t": round(t, 3), "line": json.loads(line)}, ensure_ascii=False) + "\n")
                 except json.JSONDecodeError:
                     f.write(json.dumps({"_t": round(t, 3), "raw": line.rstrip()}, ensure_ascii=False) + "\n")
-            p.wait(timeout=task.get("timeout", 400))
+            p.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
             p.kill()
-    return {"task": name, "returncode": p.returncode, "seconds": round(time.monotonic() - t0, 1), "cwd": str(work)}
+            p.wait()
+        f.write(json.dumps({"_t": round((time.monotonic() - t0) * 1000, 3), "closed": True,
+                            "returncode": p.returncode}) + "\n")
+    return p.returncode
 
 
 if __name__ == "__main__":
