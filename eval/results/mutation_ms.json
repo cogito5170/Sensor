@@ -80,7 +80,7 @@
   "result": "RED"
  },
  {
-  "mutation": "liveness: 시간 기준이 다른 두 시각을 뺀다",
+  "mutation": "liveness: 시간 기준이 섞인 시각을 뺀다",
   "file": "llmsensor/sensing/liveness/__init__.py",
   "result": "RED"
  },
@@ -92,6 +92,21 @@
  {
   "mutation": "liveness: 평가 순간의 값(ACTIVE)을 뒤 시각에 지금 값으로",
   "file": "llmsensor/state/engine.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 차례 끝을 안 내는 원천(cc_jsonl 훅 없음)에서 열림으로 짐작",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: turn.continued 를 차례 끝으로",
+  "file": "llmsensor/sensing/liveness/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 원천 순서 대신 도착 순서로 차례를 견준다",
+  "file": "llmsensor/sensing/liveness/__init__.py",
   "result": "RED"
  },
  {
