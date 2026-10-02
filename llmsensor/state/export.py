@@ -1,13 +1,22 @@
 """상태 내보내기 계약 -- 상태 층 **밖**(Decision Context · 정책 · 다른 저장소)이 이 엔진을 읽는 유일한 길.
 
-    CONTRACT = "llmsensor.state-export/1"
+    CONTRACT = "llmsensor.state-export/2"      (소유: DC 세션, baseline BD-56 · 유일한 소비자: cogito5170/DC SensorSource)
+
+/1 -> /2 (2026-10-02, baseline CMD-D7):
+    entity_ref  {type, scope, local} 를 더했다 -- 실체 id 의 꼴 `<유형>:<범위>:<지역>`(BD-32). scope = 실행 id(원천을 품을 수 있다,
+                예 cc_stream:demo -- 불투명한 문자열로 다룬다), local = 도구 이름(agent · task · runtime 은 실행마다 하나라 null).
+                `entity`(엔진의 id 문자열)는 그대로다 -- 엔진의 id 규칙은 Sensor 세션의 것이다
+    time_base   상태마다 시각 기준(unix_ms · monotonic_ms · null)을 싣는다(BD-33). 모든 시각 칸은 ms
+    reason      뺐다 -- 원 수치가 경계 밖으로 새지 않게(DC 도 결정 문맥에서 뺐다, BD-08). 사람이 읽을 까닭은 엔진의 explain()
+    catalog     근거 종류 8 개(`bases`)와 시각 기준 값(`time_bases`)을 명시한다
 
 엔진 안(current · view · reg · cfg · metrics …)은 바뀔 수 있다. 밖은 이 넷만 본다:
 
     catalog(E)                 상태 정의: 실체 종류 · 값 집합 · 근거 종류 · 규칙 id/판본 · TTL · 뜻 · 돕는 결정
     read(E, entity, name, now) 상태 하나(값 · 유효성 · 신선도 · 근거 참조 · 시각). 없거나 모르는 상태면 UNKNOWN
-    subjects(E, run_id)        실행 하나의 역할 -> 실체(agent · task · runtime · tool 들)
+    subjects(E, run_id)        실행 하나의 역할 -> 실체(agent · task · runtime · tool 들) + scope(실행 id)
     as_of(E, run_id)           그 실행에서 본 가장 늦은 관측 시각과 시각 기준(unix_ms · monotonic_ms · None)
+    entity_ref(entity)         실체 id -> {type, scope, local}
 
 돌려주는 것은 전부 JSON 으로 옮길 수 있는 기본 값의 새 사본이다 -- 받은 쪽이 고쳐도 엔진은 안 바뀐다.
 원 텔레메트리 · 지표 값은 없다(근거는 지표 **id** 만). 판정기(verifier) · 참조 정책(policy) · 결정 문맥(decision)의 출력도 없다 --
@@ -18,12 +27,13 @@
 """
 from __future__ import annotations
 
-from .model import EntityType, Status
+from .model import Basis, EntityType, Status
 from .normalize import entity_id
 
-CONTRACT = "llmsensor.state-export/1"
-FIELDS = ("contract", "entity", "name", "value", "status", "freshness", "age_ms", "basis", "rule_id", "rule_version",
-          "config_version", "evidence_refs", "reason", "observed_at", "since", "ttl_ms", "final")
+CONTRACT = "llmsensor.state-export/2"
+FIELDS = ("contract", "entity", "entity_ref", "name", "value", "status", "freshness", "age_ms", "basis", "rule_id",
+          "rule_version", "config_version", "evidence_refs", "observed_at", "since", "time_base", "ttl_ms", "final")
+TIME_BASES = ("unix_ms", "monotonic_ms", None)
 
 
 def catalog(E) -> dict:
@@ -33,30 +43,45 @@ def catalog(E) -> dict:
                        "rule_version": r.version, "ttl_ms": E.cfg.ttl_ms.get(name), "meaning": r.meaning,
                        "decision": r.decision}
     return {"contract": CONTRACT, "config_version": E.cfg.version, "states": rules,
-            "common_statuses": [s.value for s in Status]}
+            "common_statuses": [s.value for s in Status], "bases": [b.value for b in Basis],
+            "time_bases": list(TIME_BASES)}
+
+
+def entity_ref(entity: str) -> dict:
+    """엔진의 실체 id -> {type, scope, local} (BD-32). 도구: tool:<실행>:<도구>, 나머지: <유형>:<실행>."""
+    kind, rest = entity.split(":", 1)
+    if kind == EntityType.TOOL.value:
+        scope, local = rest.rsplit(":", 1)
+        return {"type": kind, "scope": scope, "local": local}
+    return {"type": kind, "scope": rest, "local": None}
+
+
+def _time_base(E, entity: str):
+    L = E.ledgers.get(entity_ref(entity)["scope"])
+    return L.time_base if L else None
 
 
 def read(E, entity: str, name: str, now=None) -> dict:
     rule = E.reg.rules.get(name)
     st = E.current.get((entity, name))
     if st is None:
-        return {"contract": CONTRACT, "entity": entity, "name": name, "value": None, "status": Status.UNKNOWN.value,
-                "freshness": "UNTIMED", "age_ms": None, "basis": rule.basis.value if rule else None,
-                "rule_id": rule.id if rule else None, "rule_version": rule.version if rule else None,
-                "config_version": E.cfg.version, "evidence_refs": [],
-                "reason": "아직 계산되지 않았다" if rule else "정의되지 않은 상태",
-                "observed_at": None, "since": None, "ttl_ms": E.cfg.ttl_ms.get(name), "final": False}
+        return {"contract": CONTRACT, "entity": entity, "entity_ref": entity_ref(entity), "name": name, "value": None,
+                "status": Status.UNKNOWN.value, "freshness": "UNTIMED", "age_ms": None,
+                "basis": rule.basis.value if rule else None, "rule_id": rule.id if rule else None,
+                "rule_version": rule.version if rule else None, "config_version": E.cfg.version, "evidence_refs": [],
+                "observed_at": None, "since": None, "time_base": _time_base(E, entity),
+                "ttl_ms": E.cfg.ttl_ms.get(name), "final": False}
     sv = E.view(st, now)
-    return {"contract": CONTRACT, "entity": entity, "name": name, "value": st.value, "status": sv.status.value,
-            "freshness": sv.freshness.value, "age_ms": sv.age_ms, "basis": st.basis.value, "rule_id": st.rule_id,
-            "rule_version": st.rule_version, "config_version": st.config_version,
-            "evidence_refs": list(sv.evidence_refs), "reason": st.reason, "observed_at": st.observed_at,
-            "since": st.since, "ttl_ms": E.cfg.ttl_ms.get(name), "final": bool(st.final)}
+    return {"contract": CONTRACT, "entity": entity, "entity_ref": entity_ref(entity), "name": name, "value": st.value,
+            "status": sv.status.value, "freshness": sv.freshness.value, "age_ms": sv.age_ms, "basis": st.basis.value,
+            "rule_id": st.rule_id, "rule_version": st.rule_version, "config_version": st.config_version,
+            "evidence_refs": list(sv.evidence_refs), "observed_at": st.observed_at, "since": st.since,
+            "time_base": _time_base(E, entity), "ttl_ms": E.cfg.ttl_ms.get(name), "final": bool(st.final)}
 
 
 def subjects(E, run_id: str) -> dict:
     tools = sorted({e for (e, _n) in E.current if e.startswith(f"tool:{run_id}:")})
-    return {"agent": entity_id(EntityType.AGENT, run_id), "task": entity_id(EntityType.TASK, run_id),
+    return {"scope": run_id, "agent": entity_id(EntityType.AGENT, run_id), "task": entity_id(EntityType.TASK, run_id),
             "runtime": entity_id(EntityType.RUNTIME, run_id), "tool": tools}
 
 
