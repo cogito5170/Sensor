@@ -5,8 +5,11 @@
 원천 -> L0 사건 -> 꼴 v3 레코드(compat) + L0 묶기 -> 상태 (eval/l1_on_l0.py 와 같은 길). 두 순서로 넣는다:
 
     pipeline   eval/l1_on_l0.py 그대로 -- 레코드(인과 순서: 호출 i, 그 호출의 도구들, ...) 다음 L0 묶기
-    time       묶음을 시각으로 합친 순서(같은 시각 · 시각 없음은 원래 순서 유지) -- 실시간 흐름에 가까운 쪽.
-               SWE-agent 는 시각이 없어(UNTIMED) pipeline 과 같다
+    time       묶음을 시각으로 합친 순서(같은 시각 · 시각 없음은 원래 순서 유지). SWE-agent 는 시각이 없어 pipeline 과 같다.
+               인공물이 있다: tool_call 묶음 시각 = tool.start, model_call 묶음 시각 = 응답 끝 -> 도구가 부모 호출보다 앞에 설 수 있다
+    seq        L0 를 **사건 순서(seq)로 흘려 넣는다**(CMD-S22) -- 실시간 흐름. 사건 n 개를 받은 뒤의 상태 = 앞 n 개 사건만으로
+               지은 엔진의 상태(엔진은 레코드 id 로 멱등이라 자라는 레코드를 다시 받지 못한다 -- 그래서 접두마다 새로 짓는다).
+               첫 tool.start 를 담은 접두까지만 잰다
 
 실행마다 execution_health 의 첫 값(CREATE) · 그 평가를 일으킨 묶음의 종류 · 마지막 값, 그리고 첫 도구 레코드 전에
 NO_TOOL_RUN_YET · UNKNOWN 이 몇 번 평가됐는지를 센다.
@@ -46,10 +49,31 @@ def _key(b):
     return b.at if b.at is not None else float("inf")
 
 
+def _health(evs):
+    from telemetry.compat import to_sensor_records
+    E = StateEngine()
+    E.ingest_all(from_telemetry(to_sensor_records(evs)))
+    E.ingest_all(batches(evs))
+    st = next((s for (ent, n), s in E.current.items() if n == NAME and ent.startswith("agent:")), None)
+    return (st.status.value, st.value) if st is not None else ("NONE", None)
+
+
+def one_seq(evs, cap=400):
+    evs = sorted(evs, key=lambda e: e["seq"])
+    k = next((i for i, e in enumerate(evs) if e["type"] == "tool.start"), len(evs))
+    seq = [_health(evs[:n]) for n in range(1, min(k + 1, len(evs), cap) + 1)]   # k+1 번째 접두가 첫 tool.start 를 담는다
+    before = seq[:k]
+    return {"first": seq[0], "first_kind": evs[0]["type"], "last": seq[-1], "evals": len(seq),
+            "no_tool_before_first_tool": sum(v == "NO_TOOL_RUN_YET" for _, v in before),
+            "unknown_before_first_tool": sum(s == "UNKNOWN" for s, _ in before)}
+
+
 def one(source, path, order):
     from telemetry.compat import to_sensor_records
     run_id = f"{source}:{Path(path).name.split('.')[0]}"
     evs = _events(source, path, run_id)
+    if order == "seq":
+        return one_seq(evs)
     bs = from_telemetry(to_sensor_records(evs)) + list(batches(evs))
     if order == "time" and source != "sweagent":
         bs = sorted(bs, key=_key)                       # 안정 정렬 -- 같은 시각은 인과 순서 그대로
@@ -83,7 +107,7 @@ def main(argv=None):
             cur[1].append(x)
     out = {}
     for source, paths in groups:
-        for order in ("pipeline", "time"):
+        for order in ("pipeline", "time", "seq"):
             rows = [r for r in (one(source, p, order) for p in paths) if r is not None]
             fmt = lambda t: f"{t[0]} {t[1]}" if t[1] is not None else t[0]
             out[f"{source}/{order}"] = {

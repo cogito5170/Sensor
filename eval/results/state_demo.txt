@@ -114,6 +114,8 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- metric:tool_errors
   <- metric:activity  [OBSERVED]
        <- obs:call.stop_reason
+  <- metric:run_last_event  [OBSERVED]
+       <- obs:l0.last_event
 state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error

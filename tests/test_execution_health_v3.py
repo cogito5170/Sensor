@@ -1,6 +1,7 @@
-"""execution-health-v3 (baseline#3 CMD-S19 · BD-84): 도구 호출이 **아직 없음**과 결과를 **볼 수 없음**을 가른다.
+"""execution-health-v3 (baseline#3 CMD-S19 · BD-84 · CMD-S22 · BD-89): 도구 호출이 **아직 없음**과 결과를 **볼 수 없음**을 가른다.
 
-    (a) 모델 호출은 봤고 도구 레코드가 하나도 없다     -> NO_TOOL_RUN_YET (INFERRED, 근거 OBSERVED) -- 건강을 말하지 않는다
+    (a) 그 실행의 사건(L0 사건 · 모델 호출)은 봤고 도구 레코드가 하나도 없다 -> NO_TOOL_RUN_YET (INFERRED, 근거 OBSERVED)
+        -- 건강을 말하지 않는다. 근거 시각은 그 실행에서 가장 늦게 본 관측(BD-74)
     (b) 도구 레코드가 있는데 결과(is_error)를 못 본다  -> UNKNOWN (v2 와 같다 -- SWE-agent · 도는 중인 호출)
 """
 import unittest
@@ -8,11 +9,21 @@ import unittest
 from llmsensor.sensing.execution import EXECUTION_HEALTH_V2, EXECUTION_HEALTH_V3
 from llmsensor.state import REGISTRY, Basis, Status, StateEngine
 from llmsensor.state.export import catalog
-from tests.test_state import A, end, engine, mc, tc, val
+from llmsensor.sensing.l0 import batches
+from tests.test_state import A, RUN, end, engine, mc, tc, val
 
 
 def st(recs):
     return engine(recs).current[(A, "execution_health")]
+
+
+def l0(seq, ty, at, run=RUN):
+    return {"spec": "l0-telemetry/1", "id": f"{run}:{seq}", "type": ty, "run_id": run, "seq": seq, "source": "cc_stream",
+            "at": at, "time_base": "monotonic_ms", "data": {}, "unobserved": [], "reported_null": []}
+
+
+def with_l0(recs, evs):
+    return engine(recs).ingest_all(batches(evs))
 
 
 class Split(unittest.TestCase):
@@ -55,6 +66,32 @@ class Split(unittest.TestCase):
         E = engine([mc(0, 100), tc(0, 0, 110), mc(1, 200)])
         tr = [(t.previous, t.new) for t in E.transitions if t.entity_id == A and t.name == "execution_health"]
         self.assertEqual(tr, [("NO_TOOL_RUN_YET", "NO_FAILURE_OBSERVED")])
+
+
+class AnyRunEvent(unittest.TestCase):
+    """BD-89: '아직 없다' 의 조건은 모델 호출이 아니라 그 실행의 사건 ≥ 1 -- input.received · turn.start 도 시각 있는 관측이다."""
+
+    def test_l0_event_before_any_model_call(self):
+        E = with_l0([], [l0(1, "input.received", 40), l0(2, "turn.start", 50)])
+        s = E.current[(A, "execution_health")]
+        self.assertEqual((s.value, s.status, s.basis), ("NO_TOOL_RUN_YET", Status.INFERRED, Basis.OBSERVED))
+        self.assertEqual(s.observed_at, 50)              # 가장 늦게 본 사건(BD-74)
+        self.assertIn("turn.start", s.reason)
+
+    def test_time_is_the_latest_of_calls_and_events(self):
+        E = with_l0([mc(0, 100)], [l0(1, "turn.start", 50), l0(2, "heartbeat", 500)])
+        self.assertEqual(E.current[(A, "execution_health")].observed_at, 500)
+        E = with_l0([mc(0, 900)], [l0(1, "turn.start", 50)])
+        self.assertEqual(E.current[(A, "execution_health")].observed_at, 900)
+
+    def test_other_runs_events_do_not_count(self):
+        E = with_l0([end()], [l0(1, "turn.start", 50, run="cc_stream:other")])
+        s = E.current[(A, "execution_health")]
+        self.assertEqual((s.value, s.status), (None, Status.UNKNOWN))
+
+    def test_tool_record_still_wins(self):
+        E = with_l0([mc(0, 100), tc(0, 0, 110, known=False)], [l0(1, "turn.start", 50)])
+        self.assertEqual(E.current[(A, "execution_health")].status, Status.UNKNOWN)
 
 
 class Contract(unittest.TestCase):

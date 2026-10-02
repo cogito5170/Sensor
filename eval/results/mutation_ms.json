@@ -225,12 +225,22 @@
   "result": "RED"
  },
  {
-  "mutation": "S19: 모델 호출도 못 봤는데 NO_TOOL_RUN_YET",
+  "mutation": "S22: 그 실행의 사건이 하나도 없는데 NO_TOOL_RUN_YET",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"
  },
  {
-  "mutation": "S19: 없음의 주장에서 마지막 관측을 뺀다(시각 없음)",
+  "mutation": "S22: L0 사건만 있으면 UNKNOWN(BD-89 이전 조건 -- 모델 호출만 센다)",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S22: 근거 시각에서 마지막 L0 사건을 뺀다",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S22: 근거 시각에서 모델 호출을 뺀다",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"
  }

@@ -62,6 +62,14 @@ def m_tool_retries(L, ctx, Mx):
     return _m(ctx, "tool_retries", retries(calls), [t["tool.is_error"].id for t in rows])
 
 
+def m_run_last_event(L, ctx, Mx):
+    """그 실행에서 마지막으로 본 L0 사건(종류 · seq). 시각은 관측이 가진다. L0 묶기를 안 받았으면 None."""
+    o = L.run.get("l0.last_event")
+    if o is None or o.value is None:
+        return _m(ctx, "run_last_event", None, (), reason="그 실행의 L0 사건을 받지 않았다")
+    return _m(ctx, "run_last_event", {"type": o.value.get("type"), "seq": o.value.get("seq")}, [o.id])
+
+
 def m_turns(L, ctx, Mx):
     o = L.run.get("run.num_turns")
     if o is None or o.value is None:
@@ -98,6 +106,8 @@ NEW_METRICS = (
     MetricDefinition("tool_retries", A, ("tool.is_error", "tool.target", "tool.name"), Basis.OBSERVED,
                      "오류 뒤 같은 겨냥 재호출 수", m_tool_retries),
     MetricDefinition("turns", T, ("run.num_turns",), Basis.OBSERVED, "런타임이 보고한 회전 수", m_turns),
+    MetricDefinition("run_last_event", T, ("l0.last_event",), Basis.OBSERVED,
+                     "그 실행에서 마지막으로 본 L0 사건(종류 · seq) -- '아직 없다' 의 근거 시각", m_run_last_event),
 )
 INTERRUPTION = Rule("execution-interruption-v3", 3, "execution_interruption", A, Basis.RUNTIME_DECLARED,
                     ("tool_timeouts", "tool_interruptions"),
@@ -110,25 +120,28 @@ _HEALTH_V2 = _health("")
 
 
 def r_execution_health_v3(Mx, prev, cfg):
-    """v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 본 호출이 있으면(SWE-agent) v2 와 같이 UNKNOWN."""
-    res, unobs, act = Mx["tool_results"], Mx["tool_outcome_unobservable"], Mx["activity"]
+    """v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 본 호출이 있으면(SWE-agent) v2 와 같이 UNKNOWN.
+    '아직 없다' 를 말하려면 그 실행의 사건이 하나라도 있어야 한다(BD-89): L0 사건, 또는 L0 에서 온 모델 호출 레코드."""
+    res, unobs, act, last = Mx["tool_results"], Mx["tool_outcome_unobservable"], Mx["activity"], Mx["run_last_event"]
     if res.value == 0 and unobs.value == 0:          # 둘 다 0 = 도구 레코드(tool.start)가 하나도 없다 -- 도는 중인 호출도 없다
         calls = act.value["model_calls"] if act.value else 0
-        if not calls:
-            return _unk("모델 호출도 도구 호출도 못 봤다 -- '아직 없다' 를 말할 관측이 없다", ["tool_results", "activity"])
-        # 없음의 주장이라 가장 늦은 관측(마지막 모델 호출)의 시각을 쓴다(BD-74)
+        if not calls and last.value is None:
+            return _unk("그 실행의 사건을 하나도 못 봤다 -- '아직 없다' 를 말할 관측이 없다", ["tool_results", "run_last_event"])
+        seen = [x for x, ok in ((f"모델 호출 {calls} 개", calls), (f"L0 사건(마지막 {last.value['type']})" if last.value
+                                                                  else "", last.value is not None)) if ok]
+        # 없음의 주장이라 그 실행에서 가장 늦게 본 관측의 시각을 쓴다(BD-74): decided_by 를 비우면 엔진이 근거 가운데 가장 늦은 시각을 쓴다
         return Result("NO_TOOL_RUN_YET", Status.INFERRED,
-                      f"모델 호출 {calls} 개를 봤고 도구 호출은 아직 없다 -- 건강을 말하는 값이 아니다",
-                      ("tool_results", "tool_outcome_unobservable", "activity"), basis=Basis.OBSERVED,
-                      decided_by=tuple(act.inputs))
+                      f"{' · '.join(seen)} 를 봤고 도구 호출은 아직 없다 -- 건강을 말하는 값이 아니다",
+                      ("tool_results", "tool_outcome_unobservable", "activity", "run_last_event"), basis=Basis.OBSERVED)
     return _HEALTH_V2(Mx, prev, cfg)
 
 
 EXECUTION_HEALTH_V3 = Rule("execution-health-v3", 3, "execution_health", A, Basis.DEFINITIONAL,
-                           ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate", "activity"),
+                           ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate", "activity",
+                            "run_last_event"),
                            HEALTH + ("NO_TOOL_RUN_YET",),
                            "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). "
-                           "모델 호출은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. "
+                           "그 실행의 사건(L0 사건 · 모델 호출)은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. "
                            "도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)",
                            "다시 시도할까 · 사람에게 올릴까", r_execution_health_v3, owner_layer="ASSESS")
 EXECUTION_HEALTH_V2 = R["execution_health"]     # 회귀 시험용으로 남긴다

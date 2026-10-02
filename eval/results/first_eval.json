@@ -24,7 +24,7 @@
   "runs": 14,
   "evaluated": 14,
   "first": {
-   "UNKNOWN": 14
+   "INFERRED NO_TOOL_RUN_YET": 14
   },
   "last": {
    "INFERRED NO_FAILURE_OBSERVED": 8,
@@ -35,11 +35,30 @@
    "run": 14
   },
   "no_tool_evals_before_first_tool": {
+   "5": 13,
+   "6": 1
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 14
+  }
+ },
+ "cc_jsonl/seq": {
+  "runs": 14,
+  "evaluated": 14,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 14
+  },
+  "last": {
+   "UNKNOWN": 14
+  },
+  "first_batch_kind": {
+   "input.received": 14
+  },
+  "no_tool_evals_before_first_tool": {
    "3": 14
   },
   "unknown_evals_before_first_tool": {
-   "2": 13,
-   "3": 1
+   "0": 14
   }
  },
  "cc_stream/pipeline": {
@@ -67,7 +86,7 @@
   "runs": 12,
   "evaluated": 12,
   "first": {
-   "UNKNOWN": 12
+   "INFERRED NO_TOOL_RUN_YET": 12
   },
   "last": {
    "INFERRED NO_FAILURE_OBSERVED": 8,
@@ -78,12 +97,31 @@
    "run": 12
   },
   "no_tool_evals_before_first_tool": {
-   "0": 5,
-   "3": 6,
-   "11": 1
+   "4": 5,
+   "9": 6,
+   "17": 1
   },
   "unknown_evals_before_first_tool": {
+   "0": 12
+  }
+ },
+ "cc_stream/seq": {
+  "runs": 12,
+  "evaluated": 12,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 12
+  },
+  "last": {
+   "UNKNOWN": 12
+  },
+  "first_batch_kind": {
+   "runtime.limits": 12
+  },
+  "no_tool_evals_before_first_tool": {
    "4": 12
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 12
   }
  },
  "sweagent/pipeline": {
@@ -116,6 +154,25 @@
   },
   "first_batch_kind": {
    "model_call": 288
+  },
+  "no_tool_evals_before_first_tool": {
+   "1": 288
+  },
+  "unknown_evals_before_first_tool": {
+   "0": 288
+  }
+ },
+ "sweagent/seq": {
+  "runs": 288,
+  "evaluated": 288,
+  "first": {
+   "INFERRED NO_TOOL_RUN_YET": 288
+  },
+  "last": {
+   "UNKNOWN": 288
+  },
+  "first_batch_kind": {
+   "llm.response": 288
   },
   "no_tool_evals_before_first_tool": {
    "1": 288

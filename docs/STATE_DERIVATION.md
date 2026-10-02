@@ -30,14 +30,15 @@
 
 ### `agent.execution_health` -- `execution-health-v3` (v3, DEFINITIONAL)
 
-- **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). 모델 호출은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. 도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)
+- **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). 그 실행의 사건(L0 사건 · 모델 호출)은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. 도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)
 - **돕는 결정**: 다시 시도할까 · 사람에게 올릴까
 - **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `NO_TOOL_RUN_YET` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`, `activity`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`, `activity`, `run_last_event`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
 
 ```
 v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 본 호출이 있으면(SWE-agent) v2 와 같이 UNKNOWN.
+    '아직 없다' 를 말하려면 그 실행의 사건이 하나라도 있어야 한다(BD-89): L0 사건, 또는 L0 에서 온 모델 호출 레코드.
 ```
 
 ### `tool.tool_execution_health` -- `tool-execution-health-v2` (v2, DEFINITIONAL)
@@ -229,6 +230,7 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 | `tool_interruptions` | agent | OBSERVED | `tool.interrupted` | 중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수 |
 | `tool_retries` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 오류 뒤 같은 겨냥 재호출 수 |
 | `turns` | task | OBSERVED | `run.num_turns` | 런타임이 보고한 회전 수 |
+| `run_last_event` | task | OBSERVED | `l0.last_event` | 그 실행에서 마지막으로 본 L0 사건(종류 · seq) -- '아직 없다' 의 근거 시각 |
 | `call_latency` | agent | OBSERVED | `call.t_start`, `call.t_end` | 모형 호출 구간(첫 ~ 마지막 관측) 분포 {n, p50, p95, p99} -- 표본이 모자란 백분위는 None |
 | `first_chunk_latency` | agent | OBSERVED | `call.first_chunk_ms` | message_start ~ 첫 조각(스트림 수집기에서만) 분포 |
 | `tool_latency` | agent | OBSERVED | `tool.t_issued`, `tool.t_result` | 도구 호출 ~ 결과 분포 |
@@ -308,6 +310,8 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- metric:tool_errors
   <- metric:activity  [OBSERVED]
        <- obs:call.stop_reason
+  <- metric:run_last_event  [OBSERVED]
+       <- obs:l0.last_event
 state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error

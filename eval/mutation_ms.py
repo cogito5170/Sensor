@@ -106,11 +106,16 @@ M = [
      '    if res.value == 0 and unobs.value == 0:', '    if res.value == 0:'),
     ('S19: 도구 결과가 있는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
      '    if res.value == 0 and unobs.value == 0:', '    if unobs.value == 0:'),
-    ('S19: 모델 호출도 못 봤는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
-     '        if not calls:\n', '        if False:\n'),
-    ('S19: 없음의 주장에서 마지막 관측을 뺀다(시각 없음)', 'llmsensor/sensing/execution/__init__.py',
-     '("tool_results", "tool_outcome_unobservable", "activity"), basis=Basis.OBSERVED,\n                      decided_by=tuple(act.inputs))',
-     '("tool_results", "tool_outcome_unobservable"), basis=Basis.OBSERVED)'),
+    ('S22: 그 실행의 사건이 하나도 없는데 NO_TOOL_RUN_YET', 'llmsensor/sensing/execution/__init__.py',
+     '        if not calls and last.value is None:', '        if False:'),
+    ('S22: L0 사건만 있으면 UNKNOWN(BD-89 이전 조건 -- 모델 호출만 센다)', 'llmsensor/sensing/execution/__init__.py',
+     '        if not calls and last.value is None:', '        if not calls:'),
+    ('S22: 근거 시각에서 마지막 L0 사건을 뺀다', 'llmsensor/sensing/execution/__init__.py',
+     '("tool_results", "tool_outcome_unobservable", "activity", "run_last_event"), basis=Basis.OBSERVED)',
+     '("tool_results", "tool_outcome_unobservable", "activity"), basis=Basis.OBSERVED)'),
+    ('S22: 근거 시각에서 모델 호출을 뺀다', 'llmsensor/sensing/execution/__init__.py',
+     '("tool_results", "tool_outcome_unobservable", "activity", "run_last_event"), basis=Basis.OBSERVED)',
+     '("tool_results", "tool_outcome_unobservable", "run_last_event"), basis=Basis.OBSERVED)'),
 ]
 
 
