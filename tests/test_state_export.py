@@ -113,5 +113,92 @@ class Contract(unittest.TestCase):
         self.assertFalse([m for m in mods if m and any(k in m for k in ("decision", "policy", "verifier", "fusion"))])
 
 
+
+class ActionEntity(unittest.TestCase):
+    """/2 에 더함 (baseline CMD-D16 · BD-108 · BD-110): 실행기의 행동 실체 action:<실행>:<command_id>.
+    사건은 Telemetry Recorder 로 짓는다 -- 실행 id · command_id 에 `:` 가 든 경우와, 한 실행 id 가 다른 실행 id 의 접두인 경우까지."""
+
+    RUNS = ("cc_stream:demo", "cc_stream")          # 둘째는 첫째의 접두 -- 접두로 고르면 섞인다
+
+    @classmethod
+    def setUpClass(cls):
+        import itertools
+        from llmsensor.telemetry.l0 import require
+        require()
+        from telemetry.compat import to_sensor_records
+        from telemetry.hashing import Hasher
+        from telemetry.ledger import MemorySink
+        from telemetry.recorder import Recorder
+        from llmsensor.sensing.l0 import batches
+        events = []
+        for run in cls.RUNS:
+            clock, mono, sink = itertools.count(1_790_000_000_000, 1000), itertools.count(0, 10), MemorySink()
+            rec = Recorder(run, sink, source="inproc:ms", wall=lambda c=clock: next(c), mono=lambda m=mono: next(m),
+                           hasher=Hasher(b"k" * 32))
+            with rec.action("RETURN", decision_ref="d1", action_ref="sha:ab:12") as a:     # command_id 에 ':'
+                a.result(is_error=False, exit_code=0)
+            with rec.action("RETRY") as a:                                                 # 기본 ref <실행>/a<n>
+                a.result(is_error=True, exit_code=2)
+            if run == "cc_stream":          # id 가 action:cc_stream:demo:z -- 가장 긴 접두로는 실행 cc_stream:demo 로 잘못 간다
+                with rec.action("RETURN", action_ref="demo:z") as a:
+                    a.result(is_error=False, exit_code=0)
+            events += sink.events
+        cls.E = StateEngine()
+        cls.E.ingest_all(from_telemetry(to_sensor_records(events)))
+        cls.E.ingest_all(batches(events))
+
+    def actions(self, run):
+        return sorted(e for (e, n) in self.E.current if n == "action_state" and self.E._ent_run.get(e) == run)
+
+    def test_read_splits_run_and_command_id(self):
+        for run in self.RUNS:
+            ents = self.actions(run)
+            self.assertEqual(len(ents), 3 if run == "cc_stream" else 2, run)
+            for ent in ents:
+                d = self.E.export_state(ent, "action_state")
+                ref = d["entity_ref"]
+                self.assertEqual((ref["type"], ref["scope"]), ("action", run), ent)
+                self.assertEqual(f"action:{ref['scope']}:{ref['local']}", ent)
+                self.assertIn(ref["local"], ("sha:ab:12", f"{run}/a0", "demo:z"))
+                self.assertEqual(d["time_base"], self.E.as_of(run)["time_base"])          # 실행을 찾았다
+                self.assertIsNotNone(d["time_base"])
+                self.assertEqual(tuple(d), FIELDS)
+                self.assertIn(d["value"], ("COMPLETED", "FAILED"))
+
+    def test_engine_memory_beats_the_longest_prefix(self):
+        ref = self.E.export_state("action:cc_stream:demo:z", "action_state")["entity_ref"]
+        self.assertEqual((ref["scope"], ref["local"]), ("cc_stream", "demo:z"))
+        self.assertIn("action:cc_stream:demo:z", self.E.subjects("cc_stream")["action"])
+        self.assertNotIn("action:cc_stream:demo:z", self.E.subjects("cc_stream:demo")["action"])
+
+    def test_subjects_hold_only_that_runs_actions(self):
+        for run in self.RUNS:
+            s = self.E.subjects(run)
+            self.assertEqual(s["action"], self.actions(run))
+            self.assertTrue(all(self.E.export_state(e, "action_state")["entity_ref"]["scope"] == run for e in s["action"]))
+        self.assertEqual(StateEngine().subjects("nope")["action"], [])
+
+    def test_unseen_action_in_a_known_run_and_no_engine(self):
+        ref = self.E.export_state("action:cc_stream:demo:cmd-9", "action_state")["entity_ref"]
+        self.assertEqual((ref["scope"], ref["local"]), ("cc_stream:demo", "cmd-9"))      # 가장 긴 아는 실행 id
+        self.assertEqual(entity_ref("action:cc_stream:demo:cmd-9"),                        # 엔진 없이는 가르지 않는다
+                         {"type": "action", "scope": None, "local": None})
+        ref = self.E.export_state("action:nowhere:cmd-1", "action_state")["entity_ref"]
+        self.assertEqual((ref["scope"], ref["local"]), (None, None))
+
+    def test_other_entities_unchanged(self):
+        """대조: tool · agent · task · runtime 의 entity_ref 는 엔진이 있든 없든 예전 그대로다."""
+        for ent, want in ((f"tool:{RUN}:Bash", {"type": "tool", "scope": RUN, "local": "Bash"}),
+                          ("tool:cc_stream:demo:Bash", {"type": "tool", "scope": "cc_stream:demo", "local": "Bash"}),
+                          (A, {"type": "agent", "scope": RUN, "local": None}),
+                          ("task:cc_stream:demo", {"type": "task", "scope": "cc_stream:demo", "local": None}),
+                          ("runtime:cc_stream:demo", {"type": "runtime", "scope": "cc_stream:demo", "local": None})):
+            self.assertEqual(entity_ref(ent), want, ent)
+            self.assertEqual(entity_ref(ent, self.E), want, ent)
+        s = self.E.subjects("cc_stream:demo")
+        self.assertEqual((s["scope"], s["agent"], s["task"], s["runtime"]),
+                         ("cc_stream:demo", "agent:cc_stream:demo", "task:cc_stream:demo", "runtime:cc_stream:demo"))
+
+
 if __name__ == "__main__":
     unittest.main()
