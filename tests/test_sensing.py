@@ -94,21 +94,36 @@ class Execution(unittest.TestCase):
         self.assertEqual(val(E, T, "completion_state").value, "ENDED_NORMALLY")
 
     def test_timeout_disposition(self):
-        # S2: 처분 -- L0 tool.end.moved_to_background. 모두 같을 때만 그 처분, 섞였거나 모르면 TIMEOUT_OBSERVED(v2 와 같음)
-        def to(i, t, moved):
-            r = tc(0, i, t, head=f"Bash:{i}", err=moved is not True)
+        # S2: 처분은 L0 tool.end 에서 직접(BD-80). 모두 같을 때만 그 처분, 섞였거나 모르면 TIMEOUT_OBSERVED(v2 와 같음)
+        from llmsensor.sensing.l0 import batches
+
+        def to(i, t):
+            r = tc(0, i, t, head=f"Bash:{i}", err=True)
             r["timed_out"] = True
             r["unobserved"].remove("timed_out")
-            if moved is not None:
-                r["moved_to_background"] = moved           # 꼴 v3 에 아직 없는 칸 -- 정준 입력 계약만으로 시험한다
             return r
+
+        def l0(i, moved):
+            return {"spec": "l0-telemetry/1", "id": f"{RUN}:{100 + i}", "type": "tool.end", "run_id": RUN, "seq": 100 + i,
+                    "source": "cc_stream", "at": 110 + i, "time_base": "monotonic_ms",
+                    "data": {"tool_index": i, "timed_out": True, "moved_to_background": moved}, "unobserved": [],
+                    "reported_null": []}
         cases = {(True,): "TIMEOUT_BACKGROUNDED", (False,): "TIMEOUT_KILLED", (True, True): "TIMEOUT_BACKGROUNDED",
                  (True, False): "TIMEOUT_OBSERVED", (True, None): "TIMEOUT_OBSERVED", (None,): "TIMEOUT_OBSERVED"}
         for moves, want in cases.items():
-            recs = [mc(0, 100)] + [to(i, 110 + i, m) for i, m in enumerate(moves)]
-            v = val(engine(recs), A, "execution_interruption")
+            E = engine([mc(0, 100)] + [to(i, 110 + i) for i in range(len(moves))])
+            E.ingest_all(batches([l0(i, m) for i, m in enumerate(moves)]))
+            v = val(E, A, "execution_interruption")
             self.assertEqual(v.value, want, moves)
             self.assertIn("처분", v.reason)
+        # L0 를 안 받았으면 처분을 모른다 -- v2 와 같은 값
+        self.assertEqual(val(engine([mc(0, 100), to(0, 110)]), A, "execution_interruption").value, "TIMEOUT_OBSERVED")
+        # 두 길의 시간 초과 수가 어긋나면 L0 의 처분을 쓰지 않는다 -- 레코드 2 · L0 3(백그라운드 2 + 모름 1):
+        # 그대로 쓰면 '백그라운드 2 = 시간 초과 2' 로 거짓 TIMEOUT_BACKGROUNDED 가 된다
+        E = engine([mc(0, 100), to(0, 110), to(1, 111)])
+        E.ingest_all(batches([l0(0, True), l0(1, True), l0(2, None)]))
+        v = val(E, A, "execution_interruption")
+        self.assertEqual(v.value, "TIMEOUT_OBSERVED")
 
     def test_retries_metric(self):
         E = engine([mc(0, 100), tc(0, 0, 110, err=True), mc(1, 200), tc(1, 1, 210), mc(2, 300), tc(2, 2, 310)])
@@ -227,13 +242,19 @@ class Quota(unittest.TestCase):
         self.assertIsNone(self._m(E, "quota_headroom").value)
 
     def test_time_to_reset_only_on_unix_time(self):
-        def recs(tb):
-            m, e = mc(0, 1_790_884_000_000), end()
-            m["time_base"] = tb
-            e["rate_limit_resets_at_ms"] = 1_790_884_800_000          # 꼴 v3 에 아직 없는 칸 -- 정준 입력 계약만으로
-            return [m, e]
-        E = engine(recs("unix_ms"))
+        # S4: 리셋 시각은 L0 provider.rate_limit 에서 직접(BD-80)
+        from llmsensor.sensing.l0 import batches
+
+        def rl(tb, resets=1_790_884_800_000, unobserved=()):
+            return {"spec": "l0-telemetry/1", "id": f"{RUN}:1", "type": "provider.rate_limit", "run_id": RUN, "seq": 1,
+                    "source": "cc_jsonl", "at": 1_790_884_000_000, "time_base": tb,
+                    "data": {"resets_at_ms": resets, "declared_status": "rejected"}, "unobserved": list(unobserved),
+                    "reported_null": []}
+        E = engine([]).ingest_all(batches([rl("unix_ms")]))
         self.assertEqual(self._m(E, "quota_time_to_reset_ms").value, 800_000)
-        v = self._m(engine(recs("monotonic_ms")), "quota_time_to_reset_ms")
+        v = self._m(engine([]).ingest_all(batches([rl("monotonic_ms")])), "quota_time_to_reset_ms")
         self.assertIsNone(v.value)
         self.assertIn("unix ms 가 아니다", v.reason)
+        v = self._m(engine([]).ingest_all(batches([rl("unix_ms", None, ["resets_at_ms"])])), "quota_time_to_reset_ms")
+        self.assertIsNone(v.value)
+        self.assertIn("L0 원장이 '원천이 주지 않음(unobserved)' 으로 적었다", v.reason)

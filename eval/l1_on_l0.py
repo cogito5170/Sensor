@@ -4,8 +4,8 @@
 
 내용은 내지 않는다 -- 사건 수 · 상태 값 · 처분 수만. L0 패키지(cogito5170/Telemetry)가 있어야 돈다(선택 의존).
 
-**덧대기 하나(표시해 둔다):** L0 tool.end 의 `moved_to_background` 는 아직 꼴 v3 레코드(compat)에 실리지 않는다(Telemetry
-에 요청). 그동안 이 스크립트가 tool_index 로 L0 사건의 그 칸을 레코드에 이어 붙인다. Telemetry 가 싣게 되면 이 덧대기를 지운다.
+S2 의 처분(tool.end.moved_to_background)과 S4 의 리셋 시각(provider.rate_limit.resets_at_ms)은 L0 묶기가 사건에서 **직접**
+읽는다(BD-80 · CMD-S16). 예전의 tool_index 덧대기는 걷었다.
 """
 from __future__ import annotations
 
@@ -18,7 +18,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from llmsensor.sensing.liveness import batches  # noqa: E402
 from llmsensor.state import StateEngine, from_telemetry  # noqa: E402
 
-CARRY = ("moved_to_background",)        # L0 tool.end -> 꼴 v3 tool_call 에 아직 안 실리는 칸(덧대기)
 
 
 def run(source: str, path: str, run_id: str) -> dict:
@@ -27,16 +26,6 @@ def run(source: str, path: str, run_id: str) -> dict:
     evs = {"cc_jsonl": collect.from_cc_jsonl, "cc_stream": collect.from_cc_stream,
            "sweagent": collect.from_sweagent}[source](path, run_id)
     recs = to_sensor_records(evs)
-    ends = {e["data"]["tool_index"]: e for e in evs if e["type"] == "tool.end"}
-    shimmed = 0
-    for r in recs:
-        if r["kind"] != "tool_call":
-            continue
-        e = ends.get(r.get("tool_index"))
-        for k in CARRY:
-            if k not in r and e is not None and e["data"].get(k) is not None:
-                r[k] = e["data"][k]
-                shimmed += 1
     E = StateEngine()
     E.ingest_all(from_telemetry(recs))
     E.ingest_all(batches(evs))
@@ -50,7 +39,7 @@ def run(source: str, path: str, run_id: str) -> dict:
         label = f"{kind}:{ent.rsplit(':', 1)[1]}" if kind == "dependency" else kind      # 의존 대상은 이름까지
         states[f"{n}@{label}"] = (st.status.value, st.value)
     types = collections.Counter(e["type"] for e in evs)
-    return {"source": source, "events": len(evs), "records": len(recs), "shimmed_fields": shimmed,
+    return {"source": source, "events": len(evs), "records": len(recs),
             "event_types": dict(sorted(types.items())), "states": states}
 
 

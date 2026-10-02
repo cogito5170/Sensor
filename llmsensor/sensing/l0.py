@@ -42,14 +42,20 @@ ACTIONS_CANON = {"l0.runtime_actions": ("l0", "runtime.*", T, Basis.RUNTIME_DECL
 # 결함 원인은 **선언된 것만**: 출처 있는 표로 옮긴 error_code, 또는 HTTP 상태 ≥ 400(RFC 9110 의 정의). 글을 해석하지 않는다
 DEP_PREFIX = "l0.dep:"
 DEPENDENCY_CANON = {DEP_PREFIX + "*": ("l0", "llm.* · dependency.probe", EntityType.DEPENDENCY, Basis.RUNTIME_DECLARED)}
-NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON}
+# S2 · S4 가 L0 를 직접 읽는다(BD-80 · CMD-S16 -- compat 은 넓히지 않는다):
+#   l0.timeouts    런타임이 시간 초과를 선언한 tool.end 의 수와 처분(moved_to_background: true 옮김 · false 죽임 · 없음 모름)
+#   l0.rate_limit  마지막 provider.rate_limit 의 resets_at_ms · declared_status · limit_type · utilization + 원천이 안 준 칸 목록
+TIMEOUTS_CANON = {"l0.timeouts": ("l0", "tool.end", EntityType.TASK, Basis.RUNTIME_DECLARED)}
+RATE_LIMIT_CANON = {"l0.rate_limit": ("l0", "provider.rate_limit", EntityType.TASK, Basis.RUNTIME_DECLARED)}
+RATE_LIMIT_KEYS = ("resets_at_ms", "declared_status", "limit_type", "utilization")
+NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_CANON, **RATE_LIMIT_CANON}
 # 차례 끝을 **늘** 내는 것으로 알려진 원천(Telemetry 보고 baseline#1: cc_stream 의 result). cc_jsonl 은 Stop 훅이 있을 때만이라 넣지 않는다
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
 def batches(events) -> "list[Batch]":
     """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts, deps = [], {}, {}, {}
+    out, pending, acts, deps, tos = [], {}, {}, {}, {}
     for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
         ent = entity_id(T, run)
@@ -70,6 +76,19 @@ def batches(events) -> "list[Batch]":
         if a is not None:
             obs.append(Observation(f"{rid}#l0.runtime_actions", ent, "l0.runtime_actions", dict(a, **val), False, at, tb,
                                    src, Basis.RUNTIME_DECLARED))
+        data = ev.get("data") or {}
+        if ev["type"] == "tool.end" and data.get("timed_out") is True:
+            c = tos.setdefault(run, {"timeouts": 0, "backgrounded": 0, "killed": 0, "unknown": 0})
+            m = data.get("moved_to_background")
+            c["timeouts"] += 1
+            c["unknown" if m is None else "backgrounded" if m else "killed"] += 1
+            obs.append(Observation(f"{rid}#l0.timeouts", ent, "l0.timeouts", dict(c, **val), False, at, tb, src,
+                                   Basis.RUNTIME_DECLARED))
+        if ev["type"] == "provider.rate_limit":
+            v = {k: data.get(k) for k in RATE_LIMIT_KEYS}
+            v["unobserved"] = sorted(k for k in ev.get("unobserved", ()) if k in RATE_LIMIT_KEYS)
+            obs.append(Observation(f"{rid}#l0.rate_limit", ent, "l0.rate_limit", dict(v, **val), False, at, tb, src,
+                                   Basis.RUNTIME_DECLARED))
         d = _dependency(deps.setdefault(run, {}), ev)
         if d is not None:
             name, v = d

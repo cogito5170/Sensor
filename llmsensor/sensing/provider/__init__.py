@@ -11,14 +11,15 @@ from ...state.model import Basis, EntityType
 from ...state.rules import Rule, _inf, _unk, r_rate_limit
 from .. import SensingPack
 from .._base import M, R, _m, canon
+from ..l0 import RATE_LIMIT_CANON
 
 RT = EntityType.RUNTIME
 NEW_CANON = {
     "runtime.rate_limit_status": ("run", "rate_limit_status", RT, Basis.RUNTIME_DECLARED),
     "runtime.rate_limit_threshold": ("run", "rate_limit_threshold", RT, Basis.RUNTIME_DECLARED),
-    # S4: 한도 창이 다시 차는 시각(unix ms) -- L0 provider.rate_limit.resets_at_ms. 꼴 v3 에 아직 안 실린다(Telemetry 요청)
-    "runtime.rate_limit_resets_at_ms": ("run", "rate_limit_resets_at_ms", RT, Basis.RUNTIME_DECLARED),
 }
+# S4: 한도 창이 다시 차는 시각은 L0 provider.rate_limit 에서 **직접** 읽는다(BD-80 · CMD-S16) -- l0.rate_limit
+NEW_CANON.update(RATE_LIMIT_CANON)
 # 런타임 상태 문자열 -> 값. **이 수집에서 본 값만** 넣었다. 모르는 문자열은 추측하지 않는다
 DECLARED_STATUS = {"allowed_warning": "WARNING"}
 # v3: 'rejected' 를 실데이터에서 봤다(이 세션의 5 시간 한도 거절, 2026-10-01 20:45 -- 재고 D2 · L0 provider.rate_limit)
@@ -48,14 +49,20 @@ def m_quota_headroom(L, ctx, Mx):
 
 
 def m_quota_time_to_reset(L, ctx, Mx):
-    r = L.run.get("runtime.rate_limit_resets_at_ms")
+    r = L.run.get("l0.rate_limit")
     if r is None or r.value is None:
-        return _m(ctx, "quota_time_to_reset_ms", None, (), reason="런타임이 한도 창이 다시 차는 시각을 주지 않았다")
+        return _m(ctx, "quota_time_to_reset_ms", None, (), reason="L0 provider.rate_limit 사건을 받지 않았다")
+    t = r.value.get("resets_at_ms")
+    if t is None:
+        # L0 원장의 말을 옮긴다 -- 원천을 직접 본 것이 아니다(실측: 원천 줄에 resetsAt 가 있는데 L0 가 unobserved 로 적은 일이 있었다)
+        why = ("L0 원장이 '원천이 주지 않음(unobserved)' 으로 적었다" if "resets_at_ms" in r.value.get("unobserved", ())
+               else "L0 사건에 그 칸이 비었다")
+        return _m(ctx, "quota_time_to_reset_ms", None, [r.id], reason="한도 창이 다시 차는 시각이 없다 -- " + why)
     now = ctx.get("now")
-    if now is None or L.time_base != "unix_ms":
+    if now is None or r.time_base != "unix_ms":
         return _m(ctx, "quota_time_to_reset_ms", None, [r.id],
-                  reason=f"평가 시각이 unix ms 가 아니다(time_base={L.time_base}) -- 다시 차는 시각(unix ms)에서 빼지 않는다")
-    return _m(ctx, "quota_time_to_reset_ms", max(0, r.value - now), [r.id], Basis.RUNTIME_DECLARED)
+                  reason=f"평가 시각이 unix ms 가 아니다(time_base={r.time_base}) -- 다시 차는 시각(unix ms)에서 빼지 않는다")
+    return _m(ctx, "quota_time_to_reset_ms", max(0, t - now), [r.id], Basis.RUNTIME_DECLARED)
 
 
 def r_rate_limit_v2(Mx, prev, cfg, table=DECLARED_STATUS):
@@ -79,7 +86,7 @@ NEW_METRICS = (MetricDefinition("rate_limit_declared", RT, ("runtime.rate_limit_
                                 Basis.RUNTIME_DECLARED, "런타임이 선언한 요금 한도 상태와 그 문턱", m_declared),
                MetricDefinition("quota_headroom", RT, ("runtime.rate_limit_utilization",), Basis.RUNTIME_DECLARED,
                                 "1 − 선언된 한도 사용률(계정 범위 -- 이 실행의 소모가 아니다)", m_quota_headroom),
-               MetricDefinition("quota_time_to_reset_ms", RT, ("runtime.rate_limit_resets_at_ms",), Basis.RUNTIME_DECLARED,
+               MetricDefinition("quota_time_to_reset_ms", RT, ("l0.rate_limit",), Basis.RUNTIME_DECLARED,
                                 "선언된 한도 창이 다시 차기까지(평가 시각이 unix ms 일 때만)", m_quota_time_to_reset))
 RATE_LIMIT_V2 = Rule("rate-limit-state-v2", 2, "rate_limit_state", RT, Basis.RUNTIME_DECLARED,
                      ("rate_limit_utilization", "rate_limit_declared", "api_error"),

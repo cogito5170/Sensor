@@ -10,16 +10,16 @@ from ...trace import ToolCall, retries
 from .. import SensingPack
 from .._base import M, R, _m, canon
 from ...state.metrics import MetricDefinition
+from ..l0 import TIMEOUTS_CANON
 
 A, T = EntityType.AGENT, EntityType.TASK
 NEW_CANON = {
     "tool.timed_out": ("tool_call", "timed_out", EntityType.TOOL, Basis.RUNTIME_DECLARED),
     "tool.interrupted": ("tool_call", "interrupted", EntityType.TOOL, Basis.OBSERVED),
-    # S2: 시간 초과의 처분 -- L0 tool.end.moved_to_background 와 같은 이름(BD-47). 런타임이 죽이지 않고 백그라운드로 옮겼나.
-    # true = 옮김, false(보고된 거짓) = 옮기지 않음(죽임), 없음 = 처분을 모른다. 꼴 v3 레코드에 아직 안 실린다(Telemetry 요청)
-    "tool.moved_to_background": ("tool_call", "moved_to_background", EntityType.TOOL, Basis.OBSERVED),
     "run.num_turns": ("run", "num_turns", EntityType.TASK, Basis.OBSERVED),
 }
+# S2: 시간 초과의 처분은 L0 tool.end 에서 **직접** 읽는다(BD-80 · CMD-S16) -- l0.timeouts(llmsensor/sensing/l0.py)
+NEW_CANON.update(TIMEOUTS_CANON)
 
 
 def _flag(L, field):
@@ -32,12 +32,16 @@ def m_tool_timeouts(L, ctx, Mx):
     rows, hit = _flag(L, "tool.timed_out")
     if not rows:
         return _m(ctx, "tool_timeouts", None, (), reason="시간 초과를 판정할 수 있는 도구 결과가 없다(Bash 문구만 안다)")
-    disp = {"backgrounded": 0, "killed": 0, "unknown": 0}
-    for t in hit:
-        o = t.get("tool.moved_to_background")
-        disp["unknown" if o is None or o.value is None else "backgrounded" if o.value else "killed"] += 1
+    disp, refs = {"backgrounded": 0, "killed": 0, "unknown": len(hit)}, []
+    l0 = L.run.get("l0.timeouts")
+    if l0 is not None and l0.value is not None:
+        if l0.value["timeouts"] == len(hit):      # 두 길이 같은 시간 초과를 세었을 때만 L0 의 처분을 쓴다
+            disp = {k: l0.value[k] for k in ("backgrounded", "killed", "unknown")}
+            refs = [l0.id]
+        else:
+            disp["mismatch"] = {"records": len(hit), "l0": l0.value["timeouts"]}
     return _m(ctx, "tool_timeouts", {"timeouts": len(hit), "covered": len(rows), **disp},
-              [t["tool.timed_out"].id for t in (hit or rows[-1:])], Basis.RUNTIME_DECLARED)
+              [t["tool.timed_out"].id for t in (hit or rows[-1:])] + refs, Basis.RUNTIME_DECLARED)
 
 
 def m_tool_interruptions(L, ctx, Mx):
@@ -87,7 +91,7 @@ def r_interruption(Mx, prev, cfg):
 
 
 NEW_METRICS = (
-    MetricDefinition("tool_timeouts", A, ("tool.timed_out", "tool.moved_to_background"), Basis.RUNTIME_DECLARED,
+    MetricDefinition("tool_timeouts", A, ("tool.timed_out", "l0.timeouts"), Basis.RUNTIME_DECLARED,
                      "런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 · 그 처분(백그라운드 · 죽임 · 모름)", m_tool_timeouts),
     MetricDefinition("tool_interruptions", A, ("tool.interrupted",), Basis.OBSERVED,
                      "중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수", m_tool_interruptions),

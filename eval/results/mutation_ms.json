@@ -161,6 +161,11 @@
  },
  {
   "mutation": "S2: 처분을 모르면 백그라운드로 짐작",
+  "file": "llmsensor/sensing/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S2: 두 길의 시간 초과 수가 어긋나도 L0 처분을 쓴다",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"
  },

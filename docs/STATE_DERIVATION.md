@@ -225,7 +225,7 @@
 | `rate_limit_utilization` | runtime | OBSERVED | `runtime.rate_limit_utilization` | 요금 한도 사용률(런타임 사건) |
 | `termination` | task | RUNTIME_DECLARED | `run.result_subtype`, `run.terminal_reason`, `run.is_error` | 런타임이 선언한 종료(성공 여부가 **아니다**) |
 | `activity` | task | OBSERVED | `call.stop_reason` | 본 호출 · 도구 결과 수 |
-| `tool_timeouts` | agent | RUNTIME_DECLARED | `tool.timed_out`, `tool.moved_to_background` | 런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 · 그 처분(백그라운드 · 죽임 · 모름) |
+| `tool_timeouts` | agent | RUNTIME_DECLARED | `tool.timed_out`, `l0.timeouts` | 런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 · 그 처분(백그라운드 · 죽임 · 모름) |
 | `tool_interruptions` | agent | OBSERVED | `tool.interrupted` | 중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수 |
 | `tool_retries` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 오류 뒤 같은 겨냥 재호출 수 |
 | `turns` | task | OBSERVED | `run.num_turns` | 런타임이 보고한 회전 수 |
@@ -237,7 +237,7 @@
 | `api_retry_time` | task | OBSERVED | `run.api_duration_ms`, `run.api_duration_without_retries_ms` | API 재시도에 쓴 시간 |
 | `rate_limit_declared` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_status`, `runtime.rate_limit_threshold` | 런타임이 선언한 요금 한도 상태와 그 문턱 |
 | `quota_headroom` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_utilization` | 1 − 선언된 한도 사용률(계정 범위 -- 이 실행의 소모가 아니다) |
-| `quota_time_to_reset_ms` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_resets_at_ms` | 선언된 한도 창이 다시 차기까지(평가 시각이 unix ms 일 때만) |
+| `quota_time_to_reset_ms` | runtime | RUNTIME_DECLARED | `l0.rate_limit` | 선언된 한도 창이 다시 차기까지(평가 시각이 unix ms 일 때만) |
 | `call_cost` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 마지막 호출의 비용 성분($) -- 토큰 × 공급자 단가 |
 | `cost_estimate` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 실행 누적 비용 추정($) |
 | `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |
@@ -365,7 +365,7 @@ state:runtime_reliability  [runtime-reliability-v2, DEFINITIONAL]
 state:execution_interruption  [execution-interruption-v3, RUNTIME_DECLARED]
   <- metric:tool_timeouts  [RUNTIME_DECLARED]
        <- obs:tool.timed_out
-       <- obs:tool.moved_to_background
+       <- obs:l0.timeouts
   <- metric:tool_interruptions  [OBSERVED]
        <- obs:tool.interrupted
 state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]

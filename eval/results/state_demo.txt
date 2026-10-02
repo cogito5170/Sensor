@@ -171,7 +171,7 @@ state:runtime_reliability  [runtime-reliability-v2, DEFINITIONAL]
 state:execution_interruption  [execution-interruption-v3, RUNTIME_DECLARED]
   <- metric:tool_timeouts  [RUNTIME_DECLARED]
        <- obs:tool.timed_out
-       <- obs:tool.moved_to_background
+       <- obs:l0.timeouts
   <- metric:tool_interruptions  [OBSERVED]
        <- obs:tool.interrupted
 state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
