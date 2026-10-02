@@ -230,7 +230,7 @@
 | `cost_bounds` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd`, `run.snapshot_at_ms` | 비용 하한(보고 · 단가 있는 호출의 합 중 큰 것)과, 알면 합(덮는 보고 > 완전한 추정) · 단가표 판본 |
 | `external_outcome` | task | EXTERNAL_LABEL | `task.external_outcome` | 외부 평가 라벨(그대로) |
 | `stream_end` | task | OBSERVED | `l0.run_end`, `l0.source_closed` | 종료 사건(run.end)을 받았나 · 흐름이 닫혔나(source.closed) |
-| `turn_open` | task | OBSERVED | `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None |
+| `turn_open` | task | OBSERVED | `l0.turn_start`, `l0.turn_end`, `l0.pending_inputs` | 차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None |
 | `silence_ms` | task | OBSERVED | `l0.last_event`, `l0.heartbeat`, `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 평가 시각 − 마지막 활동(어떤 사건 또는 런타임 heartbeat) |
 
 ## 정준 관측 (층 1)
@@ -372,9 +372,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
        <- obs:run.terminal_reason
        <- obs:run.is_error
   <- metric:turn_open  [OBSERVED]
-       <- obs:l0.input_received
        <- obs:l0.turn_start
        <- obs:l0.turn_end
+       <- obs:l0.pending_inputs
   <- metric:silence_ms  [OBSERVED]
        <- obs:l0.last_event
        <- obs:l0.heartbeat

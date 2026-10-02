@@ -5,8 +5,9 @@
 
     종료 사건을 받았나        <- run.end
     원천의 흐름이 닫혔나      <- source.closed (닫힘 줄이 있을 때만 -- 파일 끝은 닫힘이 아니다)
-    차례가 열려 있나          <- input.received · turn.start (열림) 대 turn.end (닫힘), 원천 순서(seq)로 견준다.
-                                 입력을 **받은 순간부터** 차례가 끝날 때까지 열림. turn.continued(훅이 끝을 막음)는 닫지 않는다
+    차례가 열려 있나          <- 돌고 있는 차례(turn.start 뒤 turn.end 없음, 원천 순서 seq) 또는 처리하지 않은 입력
+                                 (input.received − input.removed, turn.start 가 소비). 입력을 **받은 순간부터** 열림.
+                                 turn.continued(훅이 끝을 막음)는 닫지 않는다
     마지막 활동 시각          <- 모든 사건의 at
     런타임 진행 신호          <- heartbeat
 
@@ -46,20 +47,22 @@ def m_stream_end(L, ctx, Mx):
 
 
 def m_turn_open(L, ctx, Mx):
-    opens = [o for o in (_ev(L, "l0.input_received"), _ev(L, "l0.turn_start")) if o]
-    end = _ev(L, "l0.turn_end")
-    if not opens and end is None:
+    """차례가 열려 있나 = 차례가 돌고 있다(turn.start 뒤 turn.end 없음) 또는 받아 놓고 처리하지 않은 입력이 있다."""
+    start, end, pend = _ev(L, "l0.turn_start"), _ev(L, "l0.turn_end"), _ev(L, "l0.pending_inputs")
+    if start is None and end is None and pend is None:
         return _m(ctx, "turn_open", None, (), reason="차례 경계 사건을 받지 않았다")
-    last_open = max(opens, key=lambda o: o.value["seq"]) if opens else None
-    if last_open is None or (end is not None and end.value["seq"] > last_open.value["seq"]):
-        return _m(ctx, "turn_open", False, [end.id], reason=f"turn.end(seq {end.value['seq']}) 뒤 새 입력 없음")
-    src = last_open.source
+    running = start is not None and (end is None or start.value["seq"] > end.value["seq"])
+    waiting = pend is not None and pend.value["n"] > 0
+    refs = [o.id for o in (start, end, pend) if o]
+    if not running and not waiting:
+        return _m(ctx, "turn_open", False, refs, reason="돌고 있는 차례도, 처리하지 않은 입력도 없다")
+    src = (start or pend).source
     if end is None and src not in ENDS_ALWAYS:
-        return _m(ctx, "turn_open", None, [last_open.id],
+        return _m(ctx, "turn_open", None, refs,
                   reason=f"{src} 이 차례 끝을 낸다는 근거가 없다(이 실행에서 turn.end 를 한 번도 못 봤다 -- "
                          "cc_jsonl 은 Stop 훅이 있을 때만 낸다). 열려 있다고 짐작하지 않는다")
-    return _m(ctx, "turn_open", True, [last_open.id] + ([end.id] if end else []),
-              reason=f"{last_open.field.split('.', 1)[1]}(seq {last_open.value['seq']}) 뒤 turn.end 없음")
+    why = "차례가 돌고 있다" if running else f"처리하지 않은 입력 {pend.value['n']} 개"
+    return _m(ctx, "turn_open", True, refs, reason=why)
 
 
 def m_silence(L, ctx, Mx):
@@ -109,7 +112,8 @@ def r_liveness(M, prev, cfg):
                     Basis.OBSERVED)
     timeout = cfg.liveness_timeout_ms
     if timeout is None:
-        return _res("IN_TURN", "차례가 열려 있다. 무음 문턱(liveness_timeout_ms)이 설정되지 않아 멈춤 여부는 판정하지 않는다",
+        return _res("IN_TURN", f"차례가 열려 있다({turn.reason}). 무음 문턱(liveness_timeout_ms)이 설정되지 않아 멈춤 여부는 "
+                    "판정하지 않는다",
                     ["turn_open"], Basis.OBSERVED)
     if sil.value is None:
         return _unk("차례가 열려 있는데 무음을 잴 수 없다: " + sil.reason, ["turn_open", "silence_ms"])
@@ -124,7 +128,7 @@ def r_liveness(M, prev, cfg):
 NEW_METRICS = (
     MetricDefinition("stream_end", T, ("l0.run_end", "l0.source_closed"), Basis.OBSERVED,
                      "종료 사건(run.end)을 받았나 · 흐름이 닫혔나(source.closed)", m_stream_end),
-    MetricDefinition("turn_open", T, ("l0.input_received", "l0.turn_start", "l0.turn_end"), Basis.OBSERVED,
+    MetricDefinition("turn_open", T, ("l0.turn_start", "l0.turn_end", "l0.pending_inputs"), Basis.OBSERVED,
                      "차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None", m_turn_open),
     MetricDefinition("silence_ms", T, ("l0.last_event", "l0.heartbeat", "l0.input_received", "l0.turn_start", "l0.turn_end"),
                      Basis.OBSERVED,

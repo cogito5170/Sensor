@@ -194,9 +194,9 @@ state:liveness_state  [liveness-state-v2, DEFINITIONAL]
        <- obs:run.terminal_reason
        <- obs:run.is_error
   <- metric:turn_open  [OBSERVED]
-       <- obs:l0.input_received
        <- obs:l0.turn_start
        <- obs:l0.turn_end
+       <- obs:l0.pending_inputs
   <- metric:silence_ms  [OBSERVED]
        <- obs:l0.last_event
        <- obs:l0.heartbeat
