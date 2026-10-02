@@ -8,8 +8,6 @@
 from __future__ import annotations
 
 from .metrics import METRICS
-from .normalize import CANONICAL
-from .rules import RULES
 
 
 CANDIDATES = [   # (이름, 왜 넣지 않았나)
@@ -23,7 +21,11 @@ CANDIDATES = [   # (이름, 왜 넣지 않았나)
     ("tool.availability", "실패와 '쓸 수 없음' 을 관측으로 가르지 못한다(같은 is_error)"),
     ("tool.recent_failure", "tool_execution_health 의 UNRESOLVED_FAILURES 와 거의 같다 -- 중복"),
     ("progress_state = ACTIVE/SLOW", "활동(호출 수)은 진행이 아니다. 진행을 재는 검증된 근거가 없다"),
-    ("timeout_state", "시간 초과에 전용 관측이 없다(앞 실험: is_error + 지연 + 글). 글을 꼴에 안 담으니 판정 불가 -> 넣지 않음"),
+    ("timeout_state", "꼴 v3 의 timed_out(런타임 문구)으로 관측할 수 있게 되어 execution_interruption 이 맡는다 -- 따로 두지 않는다"),
+    ("execution_state(합성 열거)", "completion_state · execution_health · execution_interruption · rate_limit_state 를 한 값으로 접으면 "
+                                  "정보가 사라진다(t11: 도구 시간 초과, 실행은 정상 종료) -- docs/MS_SENSING_REVIEW.md C2"),
+    ("provider_health", "runtime_reliability 와 같은 개념 -- HEALTHY 는 '관측 없음 ≠ 건강' 원칙에 어긋난다(리뷰 C4)"),
+    ("quality_score", "외부 라벨 없이 수를 만들지 않는다 -- quality_state 는 외부 평가 라벨을 옮길 뿐"),
     ("token_budget_state", "토큰 예산 설정이 없다. 필요하면 resource_state 와 같은 꼴로 더한다"),
     ("interaction_state", "사람 말 · 턴 관측이 텔레메트리 꼴에 없다"),
     ("uncertainty_state", "저장하지 않는다 -- 질의 때 상태들의 유효성에서 투영한다(decision_context.uncertain)"),
@@ -32,10 +34,33 @@ CANDIDATES = [   # (이름, 왜 넣지 않았나)
 
 
 class Registry:
+    """센싱 팩을 조립한다. 기존 지표 · 규칙은 원래 순서 그대로 먼저(생애 사건 순서 보존), 새 것은 팩 순서로 뒤에."""
+
     def __init__(self):
-        self.rules = {r.state: r for r in RULES}
+        from ..sensing import BASELINE_ORDER, canonical_all, packs
+        self.packs = packs()
+        rules = {}
+        for p in self.packs:
+            for r in p.rules:
+                if r.state in rules:
+                    raise ValueError(f"상태 {r.state} 를 두 팩이 정의한다")
+                rules[r.state] = r
+        order = [n for n in BASELINE_ORDER if n in rules] + [r.state for p in self.packs for r in p.rules
+                                                             if r.state not in BASELINE_ORDER]
+        self.rules = {n: rules[n] for n in order}
+        pack_metrics = {m.name: m for p in self.packs for m in p.metrics}
+        lost = {m.name for m in METRICS} - set(pack_metrics)
+        if lost:
+            raise ValueError(f"어느 팩에도 묶이지 않은 기존 지표 {sorted(lost)}")
         self.metrics = {m.name: m for m in METRICS}
+        for p in self.packs:
+            for m in p.metrics:
+                self.metrics.setdefault(m.name, m)
+        self.canonical = canonical_all()
         self.candidates = CANDIDATES
+
+    def pack_of(self, state: str) -> "str | None":
+        return next((p.name for p in self.packs if any(r.state == state for r in p.rules)), None)
 
     def state_definition(self, name, config=None) -> dict:
         r = self.rules[name]
@@ -61,7 +86,7 @@ class Registry:
         errs = []
         for a, b in self.graph():
             kind, name = a.split(":", 1)
-            if kind == "obs" and name not in CANONICAL:
+            if kind == "obs" and name not in self.canonical:
                 errs.append(f"{b}: 없는 관측 {name}")
             if kind == "metric" and name not in self.metrics:
                 errs.append(f"{b}: 없는 지표 {name}")

@@ -41,6 +41,9 @@ class Basis(str, Enum):
     RUNTIME_DECLARED = "RUNTIME_DECLARED"    # 경계를 런타임이 선언했다(자동 압축 문턱 · 종료 사유)
     OPERATOR_ASSUMED = "OPERATOR_ASSUMED"    # 운영자가 설정에 준 문턱 -- 잰 것이 아니다
     ESTIMATE = "ESTIMATE"                    # 런타임의 추정치(권위가 없다)
+    PROVIDER_DECLARED = "PROVIDER_DECLARED"  # 공급자가 선언한 값(단가표 · retry-after)
+    VALIDATED_EXPERIMENT = "VALIDATED_EXPERIMENT"  # 실험으로 확인한 문턱 · 계산(무엇으로 확인했는지 같이 적는다)
+    EXTERNAL_LABEL = "EXTERNAL_LABEL"        # 외부 평가(숨은 시험 등)의 판정 -- 우리가 만든 점수가 아니다
 
 
 class Freshness(str, Enum):

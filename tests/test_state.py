@@ -325,7 +325,9 @@ class Registry(unittest.TestCase):
         self.assertEqual(REGISTRY.check(), [])
         for r in REGISTRY.rules.values():
             self.assertTrue(r.meaning and r.decision and r.id.endswith(f"-v{r.version}"))
-            self.assertIn(r.basis, (Basis.DEFINITIONAL, Basis.RUNTIME_DECLARED, Basis.OPERATOR_ASSUMED))
+            # 문턱 출처는 과제가 허용한 넷(런타임 · 공급자 · 운영자 · 검증 실험) + 정의상 + 외부 라벨뿐
+            self.assertIn(r.basis, (Basis.DEFINITIONAL, Basis.RUNTIME_DECLARED, Basis.OPERATOR_ASSUMED,
+                                    Basis.PROVIDER_DECLARED, Basis.VALIDATED_EXPERIMENT, Basis.EXTERNAL_LABEL))
             d = REGISTRY.state_definition(r.state, DEFAULT_CONFIG)
             self.assertIn("UNKNOWN", d["allowed_values"])
         self.assertGreaterEqual(len(REGISTRY.candidates), 10)

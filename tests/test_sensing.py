@@ -1,0 +1,176 @@
+import unittest
+
+from llmsensor.providers import ErrorKind, error
+from llmsensor.sensing import BASELINE_ORDER, packs
+from llmsensor.sensing._base import min_samples, percentile
+from llmsensor.sensing.cost import pricing
+from llmsensor.sensing.provider import RATE_LIMIT_V1, RATE_LIMIT_V2
+from llmsensor.sensing.quality import external_label_batch
+from llmsensor.state import DEFAULT_CONFIG, REGISTRY, Basis, Status, StateEngine, from_telemetry
+from llmsensor.state.config import Band
+from llmsensor.state.rules import RULES
+from llmsensor.telemetry.schema import record
+from tests.test_state import RUN, A, R, T, end, mc, tc, val
+
+
+def mc3(i, t, w1h=100, w5m=0, model="claude-haiku-4-5-20251001", **kw):
+    r = mc(i, t, **kw)
+    r.update(cache_creation_1h_input_tokens=w1h, cache_creation_5m_input_tokens=w5m, model=model)
+    for k in ("cache_creation_1h_input_tokens", "cache_creation_5m_input_tokens", "model"):
+        if r[k] is not None and k in r["unobserved"]:
+            r["unobserved"].remove(k)
+    return r
+
+
+def engine(recs, cfg=DEFAULT_CONFIG):
+    return StateEngine(cfg).ingest_all(from_telemetry(recs))
+
+
+class Packs(unittest.TestCase):
+    def test_baseline_rules_are_the_same_objects(self):
+        old = {r.state: r for r in RULES}
+        for n in BASELINE_ORDER:
+            if n == "rate_limit_state":
+                self.assertIs(REGISTRY.rules[n], RATE_LIMIT_V2)
+            else:
+                self.assertIs(REGISTRY.rules[n], old[n], n)      # 뜻 불변 -- 같은 객체
+        self.assertEqual(list(REGISTRY.rules)[:len(BASELINE_ORDER)], list(BASELINE_ORDER))
+        self.assertEqual({p.name for p in packs()}, {"token", "execution", "latency", "provider", "cost", "quality"})
+        self.assertEqual(REGISTRY.check(), [])
+
+    def test_every_rule_has_threshold_source(self):
+        for r in REGISTRY.rules.values():
+            self.assertNotIn(r.basis, (Basis.OBSERVED, Basis.ESTIMATE), r.id)
+
+
+class RateLimitV2(unittest.TestCase):
+    def test_v2_equals_v1_without_new_observations(self):
+        for u in (0.3, 0.99, 1.0, None):
+            kw = {"rate_limit_utilization": u} if u is not None else {"rate_limit_utilization": None}
+            E = engine([mc(0, 100), end(**kw)])
+            v2 = val(E, R, "rate_limit_state")
+            Mx = {m.name: m for m in E.metrics.values() if m.entity_id == R}
+            v1 = RATE_LIMIT_V1.fn(Mx, None, DEFAULT_CONFIG)
+            self.assertEqual((v2.value, v2.status), (v1.value, v1.status), u)
+
+    def test_declared_warning_and_429(self):
+        E = engine([mc(0, 100), end(rate_limit_utilization=0.8, rate_limit_status="allowed_warning",
+                                    rate_limit_threshold=0.75)])
+        self.assertEqual(val(E, R, "rate_limit_state").value, "WARNING")
+        E = engine([mc(0, 100), end(rate_limit_status="some_new_status")])
+        v = val(E, R, "rate_limit_state")
+        self.assertEqual(v.value, "AVAILABLE")
+        self.assertIn("추측 안 함", v.reason)
+        self.assertEqual(val(engine([mc(0, 100), end(api_error_status="429")]), R, "rate_limit_state").value, "LIMITED")
+        self.assertEqual(val(engine([mc(0, 100), end(rate_limit_utilization=1.0)]), R, "rate_limit_state").value,
+                         "EXHAUSTED")
+
+
+class Execution(unittest.TestCase):
+    def test_interruption(self):
+        t = tc(0, 0, 110, err=True)
+        t["timed_out"] = True
+        t["unobserved"].remove("timed_out")
+        self.assertEqual(val(engine([mc(0, 100), t]), A, "execution_interruption").value, "TIMEOUT_OBSERVED")
+        ok = tc(0, 0, 110)
+        ok["timed_out"] = False
+        ok["unobserved"].remove("timed_out")
+        v = val(engine([mc(0, 100), ok]), A, "execution_interruption")
+        self.assertEqual(v.value, "NONE_OBSERVED")
+        self.assertIn("못 본다", v.reason)
+        self.assertEqual(val(engine([mc(0, 100), tc(0, 0, 110)]), A, "execution_interruption").status, Status.UNKNOWN)
+
+    def test_timeout_is_not_a_run_failure(self):
+        # t11 처럼: 도구는 시간 초과, 실행은 정상 종료 -- 두 상태가 따로 말한다(합성 열거를 만들지 않은 까닭)
+        t = tc(0, 0, 110, err=True)
+        t["timed_out"] = True
+        t["unobserved"].remove("timed_out")
+        E = engine([mc(0, 100), t, mc(1, 200, stop="end_turn"), end()])
+        self.assertEqual(val(E, A, "execution_interruption").value, "TIMEOUT_OBSERVED")
+        self.assertEqual(val(E, T, "completion_state").value, "ENDED_NORMALLY")
+
+    def test_retries_metric(self):
+        E = engine([mc(0, 100), tc(0, 0, 110, err=True), mc(1, 200), tc(1, 1, 210), mc(2, 300), tc(2, 2, 310)])
+        m = [m for m in E.metrics.values() if m.name == "tool_retries"][-1]
+        self.assertEqual(m.value, 1)
+
+
+class Latency(unittest.TestCase):
+    def test_percentile_needs_samples(self):
+        self.assertEqual((min_samples(0.5), min_samples(0.95), min_samples(0.99)), (2, 20, 100))
+        self.assertIsNone(percentile(list(range(19)), 0.95))
+        self.assertEqual(percentile(list(range(1, 21)), 0.95), 19)
+        self.assertEqual(percentile([5, 1], 0.5), 1)
+
+    def test_state_needs_slo(self):
+        recs = [mc(i, 100 + 100 * i) for i in range(25)]
+        self.assertEqual(val(engine(recs), A, "latency_state").status, Status.NOT_APPLICABLE)
+        slo = {"metric": "call_latency", "percentile": "p95", "bands": (Band("ELEVATED", 8, 6), Band("DEGRADED", 20, 15))}
+        cfg = DEFAULT_CONFIG.with_(version="l", latency_slo=slo)
+        v = val(engine(recs, cfg), A, "latency_state")          # 호출 구간은 모두 10 ms
+        self.assertEqual((v.value, v.basis), ("ELEVATED", Basis.OPERATOR_ASSUMED))
+        self.assertEqual(val(engine(recs[:5], cfg), A, "latency_state").status, Status.UNKNOWN)   # 표본 5 < 20
+
+
+class Cost(unittest.TestCase):
+    def test_call_cost_matches_provider_table(self):
+        E = engine([mc3(0, 100, inp=10, cr=1000, out=50, w1h=100, w5m=0)])
+        m = [m for m in E.metrics.values() if m.name == "call_cost"][-1]
+        self.assertAlmostEqual(m.value["total"], (10 * 1 + 50 * 5 + 1000 * 0.1 + 100 * 2) / 1e6)
+        self.assertEqual(m.basis, Basis.PROVIDER_DECLARED)
+
+    def test_unknown_model_or_missing_split_is_unknown(self):
+        E = engine([mc3(0, 100, model="some-new-model")])
+        m = [m for m in E.metrics.values() if m.name == "cost_estimate"][-1]
+        self.assertEqual(m.status, Status.UNKNOWN)
+        E = engine([mc(0, 100)])                                   # 5m/1h 나눔을 못 봤다
+        m = [m for m in E.metrics.values() if m.name == "cost_estimate"][-1]
+        self.assertEqual(m.status, Status.UNKNOWN)
+
+    def test_estimate_error_uses_calls_up_to_report_time(self):
+        calls = [mc3(0, 100, inp=10, cr=1000, out=50), mc3(1, 200, inp=10, cr=1000, out=50)]
+        one = pricing.call_cost("claude-haiku-4-5", 10, 50, 1000, 0, 100)["total"]
+        snap = end(cost_usd=one)
+        snap["snapshot_at_ms"] = 150                                # 첫 호출 뒤의 스냅숏
+        snap["unobserved"].remove("snapshot_at_ms")
+        E = engine(calls + [snap])
+        m = [m for m in E.metrics.values() if m.name == "cost_estimate_error"][-1]
+        self.assertAlmostEqual(m.value, 0.0)
+
+    def test_pricing_has_source_and_validation(self):
+        self.assertIn("prompt-caching", pricing.SOURCE)
+        for p in pricing.PRICES.values():
+            self.assertTrue(p["validated"])
+        self.assertIsNone(pricing.lookup("gpt-5"))
+
+
+class Quality(unittest.TestCase):
+    def test_external_label_only(self):
+        E = engine([mc(0, 100), end()])
+        self.assertEqual(val(E, T, "quality_state").status, Status.UNKNOWN)
+        E.ingest(external_label_batch(RUN, True, "hidden tests", "x1"))
+        v = val(E, T, "quality_state")
+        self.assertEqual((v.value, v.basis), ("PASSED", Basis.EXTERNAL_LABEL))
+        E2 = engine([mc(0, 100)])
+        E2.ingest(external_label_batch(RUN, False, "hidden tests", "x1"))
+        self.assertEqual(val(E2, T, "quality_state").value, "FAILED")
+
+
+class Providers(unittest.TestCase):
+    def test_errors_normalize(self):
+        a = error("anthropic", 429, {"error": {"type": "rate_limit_error"}}, {"Retry-After": "12"})
+        g = error("gemini", 429, {"error": {"status": "RESOURCE_EXHAUSTED", "details": [
+            {"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": "30s"}]}})
+        o = error("openai", 429)
+        self.assertEqual({a.kind, g.kind, o.kind}, {ErrorKind.RATE_LIMITED})
+        self.assertEqual((a.retry_after_ms, g.retry_after_ms, o.retry_after_ms), (12000.0, 30000.0, None))
+        self.assertEqual(error("anthropic", 529).kind, ErrorKind.OVERLOADED)
+        self.assertEqual(error("gemini", 504).kind, ErrorKind.DEADLINE_EXCEEDED)
+        self.assertEqual(error("openai", 503).kind, ErrorKind.UNKNOWN)          # 출처 없는 대응은 하지 않는다
+        self.assertEqual(error("anthropic", 418).kind, ErrorKind.UNKNOWN)
+        with self.assertRaises(ValueError):
+            error("mystery", 429)
+
+
+if __name__ == "__main__":
+    unittest.main()

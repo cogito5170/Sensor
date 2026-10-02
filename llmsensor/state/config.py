@@ -36,6 +36,9 @@ class StateConfig:
     stall_repeat_threshold: "int | None" = None    # 같은 (도구, 인자)가 이 횟수 이상 -> STALLED 후보
     min_consecutive: dict = field(default_factory=dict)   # 상태 이름 -> 새 값이 이 횟수 이어져야 전이(Prometheus 'for')
     context_window_override: "int | None" = None   # 런타임이 창을 안 주면(Claude Code JSONL) 문서 값으로 채운다
+    # 지연 SLO -- {"metric": "call_latency"|"first_chunk_latency"|"tool_latency", "percentile": "p50"|"p95"|"p99",
+    #             "bands": (Band("ELEVATED", ..), Band("DEGRADED", ..))}. 없으면 latency_state 는 NOT_APPLICABLE
+    latency_slo: "dict | None" = None
 
     def with_(self, **kw) -> "StateConfig":
         return replace(self, **kw)
@@ -43,7 +46,8 @@ class StateConfig:
     def assumptions(self) -> dict:
         """이 설정이 담은 가정들 -- 상태 설명에 붙인다."""
         a = {"ttl_ms": dict(self.ttl_ms)}
-        for k in ("cost_budget_usd", "resource_bands", "stall_repeat_threshold", "context_window_override"):
+        for k in ("cost_budget_usd", "resource_bands", "stall_repeat_threshold", "context_window_override",
+                  "latency_slo"):
             v = getattr(self, k)
             if v is not None:
                 a[k] = v

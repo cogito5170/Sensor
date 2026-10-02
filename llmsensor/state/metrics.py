@@ -20,6 +20,7 @@ class Ledger:
         self.calls: list = []        # 호출마다 {정준 이름: Observation}
         self.tools: list = []        # 도구 결과마다 {정준 이름: Observation} + "_tool"
         self.run: dict = {}          # 끝 요약 {정준 이름: Observation}
+        self.external: dict = {}     # 외부 평가(품질 라벨 등) {정준 이름: Observation}
         self.seq = 0
         self.seen: set = set()       # 받은 record_id -- 멱등 받아들이기
         self.last_at = None

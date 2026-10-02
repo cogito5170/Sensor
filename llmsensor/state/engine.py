@@ -55,6 +55,8 @@ class StateEngine:
                          entity_id(EntityType.TOOL, L.run_id, batch.tool), batch.at, batch.record_id)
         elif batch.kind == "run":
             L.run.update(row)
+        elif batch.kind == "external":
+            L.external.update(row)
         self._relate(entity_id(EntityType.TASK, L.run_id), "executed_by", entity_id(EntityType.AGENT, L.run_id),
                      batch.at, batch.record_id)
         self._relate(entity_id(EntityType.AGENT, L.run_id), "runs_on", entity_id(EntityType.RUNTIME, L.run_id),

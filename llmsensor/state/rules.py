@@ -160,9 +160,9 @@ def r_resource_pressure(M, prev, cfg):
                 ["cost_fraction"])
 
 
-def band(x, bands, prev):
+def band(x, bands, prev, base="LOW"):
     """흔들림 억제가 있는 띠 판정. 들어가려면 enter 이상, 이미 그 띠(또는 위)면 exit 밑으로 내려가야 나간다."""
-    order = ["LOW"] + [b.label for b in bands]
+    order = [base] + [b.label for b in bands]
     cur = 0
     for i, b in enumerate(bands, 1):
         if x >= b.enter:

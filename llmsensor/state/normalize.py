@@ -70,13 +70,13 @@ class Batch:
         self.call_index, self.tool = call_index, tool
 
 
-def _batch(rec, idx, at) -> Batch:
+def _batch(rec, idx, at, canonical=None) -> Batch:
     run = rec["run_id"]
     rid = f"{run}/{rec['kind']}/{idx}"
     tool = rec.get("tool_name") if rec["kind"] == "tool_call" else None
     rn = set(rec.get("reported_null", ()))
     obs = []
-    for name, (kind, fld, et, basis) in CANONICAL.items():
+    for name, (kind, fld, et, basis) in (canonical or CANONICAL).items():
         if kind != rec["kind"] or fld not in rec:
             continue
         v = rec[fld]
@@ -92,6 +92,8 @@ def _batch(rec, idx, at) -> Batch:
 def from_telemetry(records) -> "list[Batch]":
     """텔레메트리 레코드(꼴 v2) -> 인과 순서의 관측 묶음. 실행마다: 호출 i, 그 호출의 도구 결과들, ..., 끝 요약.
     시각이 없어도(SWE-agent) 순서는 인과로 정해진다. 실행 끝 요약의 시각 = 그 실행에서 본 가장 늦은 시각."""
+    from ..sensing import canonical_all          # 센싱 팩들이 더한 정준 관측까지(늦은 가져오기 -- 순환 피함)
+    can = canonical_all()
     runs: dict = {}
     for r in records:
         runs.setdefault(r["run_id"], []).append(r)
@@ -104,14 +106,14 @@ def from_telemetry(records) -> "list[Batch]":
         for m in mcs:
             t = _time(m)
             last = max(last, t) if (t is not None and last is not None) else (t if t is not None else last)
-            out.append(_batch(m, m["call_index"], t))
+            out.append(_batch(m, m["call_index"], t, can))
             for tc in (x for x in tcs if x["call_index"] == m["call_index"]):
                 t2 = _time(tc)
                 last = max(last, t2) if (t2 is not None and last is not None) else (t2 if t2 is not None else last)
-                out.append(_batch(tc, tc["tool_index"], t2))
+                out.append(_batch(tc, tc["tool_index"], t2, can))
         for i, rr in enumerate(r for r in rs if r["kind"] == "run"):
             # 중간 스냅숏(snapshot_at_ms)이면 그 시각, 아니면 그 실행에서 본 가장 늦은 시각(하한)
-            out.append(_batch(rr, i, rr.get("snapshot_at_ms") if rr.get("snapshot_at_ms") is not None else last))
+            out.append(_batch(rr, i, rr.get("snapshot_at_ms") if rr.get("snapshot_at_ms") is not None else last, can))
     return out
 
 
