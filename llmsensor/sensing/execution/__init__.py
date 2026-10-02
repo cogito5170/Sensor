@@ -62,9 +62,10 @@ def r_interruption(Mx, prev, cfg):
     to, it = Mx["tool_timeouts"], Mx["tool_interruptions"]
     if to.value and to.value["timeouts"]:
         return _inf("TIMEOUT_OBSERVED", f"도구 시간 초과 {to.value['timeouts']} 회(런타임 문구) / 판정 가능 {to.value['covered']}",
-                    ["tool_timeouts"])
+                    ["tool_timeouts"], decided_by=to.inputs)          # 입력 = 시간 초과가 선 결과들(BD-57)
     if it.value and it.value["interrupted"]:
-        return _inf("INTERRUPTED_OBSERVED", f"도구 중단 {it.value['interrupted']} 회(런타임 깃발)", ["tool_interruptions"])
+        return _inf("INTERRUPTED_OBSERVED", f"도구 중단 {it.value['interrupted']} 회(런타임 깃발)", ["tool_interruptions"],
+                    decided_by=it.inputs)
     covered = [n for n, m in (("tool_timeouts", to), ("tool_interruptions", it)) if m.value]
     if covered:
         return _inf("NONE_OBSERVED", "판정 가능한 결과에서 시간 초과 · 중단 없음 -- 다른 도구의 시간 초과는 문구를 몰라 못 본다",
@@ -81,7 +82,7 @@ NEW_METRICS = (
                      "오류 뒤 같은 겨냥 재호출 수", m_tool_retries),
     MetricDefinition("turns", T, ("run.num_turns",), Basis.OBSERVED, "런타임이 보고한 회전 수", m_turns),
 )
-INTERRUPTION = Rule("execution-interruption-v1", 1, "execution_interruption", A, Basis.RUNTIME_DECLARED,
+INTERRUPTION = Rule("execution-interruption-v2", 2, "execution_interruption", A, Basis.RUNTIME_DECLARED,
                     ("tool_timeouts", "tool_interruptions"), ("TIMEOUT_OBSERVED", "INTERRUPTED_OBSERVED", "NONE_OBSERVED"),
                     "런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다",
                     "시간 제한을 늘릴까 · 배경으로 돌릴까", r_interruption)

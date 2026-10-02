@@ -72,6 +72,10 @@ M = [
      '["cost_bounds"], final=True)', '["cost_bounds"])'),
     ('cost v2: 단가표 판본을 근거에서 뺀다', 'llmsensor/sensing/cost/__init__.py',
      '"pricing": pricing.VERSION}', '"pricing": None}'),
+    ('BD-57: 값을 정한 근거 중 가장 늦은 시각을 쓴다', 'llmsensor/state/engine.py',
+     '        return min(ts) if ts else None', '        return max(ts) if ts else None'),
+    ('BD-57: 미해결 실패의 시각 대신 모든 근거의 가장 늦은 시각', 'llmsensor/state/rules.py',
+     '[prefix + "tool_targets", prefix + "tool_failure_rate"], decided_by=tg.inputs[:nu])', '[prefix + "tool_targets", prefix + "tool_failure_rate"])'),
 ]
 
 

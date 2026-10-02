@@ -28,7 +28,7 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.execution_health` -- `execution-health-v1` (v1, DEFINITIONAL)
+### `agent.execution_health` -- `execution-health-v2` (v2, DEFINITIONAL)
 
 - **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)
 - **돕는 결정**: 다시 시도할까 · 사람에게 올릴까
@@ -40,7 +40,7 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `tool.tool_execution_health` -- `tool-execution-health-v1` (v1, DEFINITIONAL)
+### `tool.tool_execution_health` -- `tool-execution-health-v2` (v2, DEFINITIONAL)
 
 - **뜻**: 도구 하나에 대한 execution_health -- 도구마다 따로
 - **돕는 결정**: 이 도구를 계속 쓸까
@@ -112,7 +112,7 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `runtime.runtime_reliability` -- `runtime-reliability-v1` (v1, DEFINITIONAL)
+### `runtime.runtime_reliability` -- `runtime-reliability-v2` (v2, DEFINITIONAL)
 
 - **뜻**: API 오류 보고 · 한도에 잘린 생성이 있었나. '실패를 못 봤다' 와 '건강하다' 를 가른다
 - **돕는 결정**: 다른 공급자로 돌릴까
@@ -124,7 +124,7 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.execution_interruption` -- `execution-interruption-v1` (v1, RUNTIME_DECLARED)
+### `agent.execution_interruption` -- `execution-interruption-v2` (v2, RUNTIME_DECLARED)
 
 - **뜻**: 런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다
 - **돕는 결정**: 시간 제한을 늘릴까 · 배경으로 돌릴까
@@ -274,7 +274,7 @@ state:context_pressure  [context-pressure-v1, RUNTIME_DECLARED]
        <- obs:call.context_window
   <- metric:compaction_threshold  [RUNTIME_DECLARED]
        <- obs:run.compaction_threshold
-state:execution_health  [execution-health-v1, DEFINITIONAL]
+state:execution_health  [execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -290,7 +290,7 @@ state:execution_health  [execution-health-v1, DEFINITIONAL]
   <- metric:tool_failure_rate  [OBSERVED]
        <- metric:tool_results
        <- metric:tool_errors
-state:tool_execution_health  [tool-execution-health-v1, DEFINITIONAL]
+state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
   <- metric:tool_results  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -341,12 +341,12 @@ state:rate_limit_state  [rate-limit-state-v2, RUNTIME_DECLARED]
        <- obs:runtime.rate_limit_threshold
   <- metric:api_error  [OBSERVED]
        <- obs:runtime.api_error_status
-state:runtime_reliability  [runtime-reliability-v1, DEFINITIONAL]
+state:runtime_reliability  [runtime-reliability-v2, DEFINITIONAL]
   <- metric:api_error  [OBSERVED]
        <- obs:runtime.api_error_status
   <- metric:stop_reasons  [OBSERVED]
        <- obs:call.stop_reason
-state:execution_interruption  [execution-interruption-v1, RUNTIME_DECLARED]
+state:execution_interruption  [execution-interruption-v2, RUNTIME_DECLARED]
   <- metric:tool_timeouts  [RUNTIME_DECLARED]
        <- obs:tool.timed_out
   <- metric:tool_interruptions  [OBSERVED]

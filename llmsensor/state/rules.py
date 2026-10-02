@@ -26,6 +26,9 @@ class Result:
     evidence: tuple            # 근거로 삼은 지표 이름들
     final: bool = False
     basis: "Basis | None" = None   # 이 값의 근거가 규칙 근거와 다를 때(예: 값 하나만 운영자 문턱에 기댄다). None = 규칙 근거
+    # 이 값을 **정한** 관측 id 들(BD-57 · BD-63). 주면 상태의 근거 시각 = 그 가운데 **가장 이른** 시각 -- 값을 정하지 않은
+    # 새 근거가 낡은 결론을 신선하게 보이게 하지 않는다. 비우면 예전대로(근거 지표의 관측 중 가장 늦은 시각)
+    decided_by: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -44,8 +47,8 @@ class Rule:
     clock_values: tuple = ()
 
 
-def _inf(v, reason, ev, final=False):
-    return Result(v, Status.INFERRED, reason, tuple(ev), final)
+def _inf(v, reason, ev, final=False, decided_by=()):
+    return Result(v, Status.INFERRED, reason, tuple(ev), final, None, tuple(decided_by))
 
 
 def _unk(reason, ev=()):
@@ -81,12 +84,13 @@ def _health(prefix):
                             [prefix + "tool_outcome_unobservable"])
             return _unk("본 도구 실행이 없다 -- 실패가 없었다는 증거도 없다", [prefix + "tool_results"])
         t = tg.value
+        nu = len(t["unresolved"])     # tool_targets 의 입력 순서: 미해결 겨냥의 마지막 결과들, 그다음 회복된 겨냥의 마지막 결과들
         if t["unresolved"]:
-            return _inf("UNRESOLVED_FAILURES", f"겨냥 {len(t['unresolved'])}/{t['targets']} 의 마지막 결과가 실패",
-                        [prefix + "tool_targets", prefix + "tool_failure_rate"])
+            return _inf("UNRESOLVED_FAILURES", f"겨냥 {nu}/{t['targets']} 의 마지막 결과가 실패",
+                        [prefix + "tool_targets", prefix + "tool_failure_rate"], decided_by=tg.inputs[:nu])
         if t["recovered"]:
             return _inf("RECOVERED_FAILURES", f"실패했던 겨냥 {len(t['recovered'])} 개가 뒤에 성공",
-                        [prefix + "tool_targets", prefix + "tool_failure_rate"])
+                        [prefix + "tool_targets", prefix + "tool_failure_rate"], decided_by=tg.inputs[nu:])
         extra = f" (결과를 못 본 호출 {unobs.value} 개 제외)" if unobs.value else ""
         return _inf("NO_FAILURE_OBSERVED", f"결과 {res.value} 개 중 실패 없음{extra} -- 건강이 증명된 것은 아니다",
                     [prefix + "tool_results", prefix + "tool_failure_rate"])
@@ -192,9 +196,10 @@ def r_rate_limit(M, prev, cfg):
 def r_reliability(M, prev, cfg):
     api, st = M["api_error"], M["stop_reasons"]
     if api.value is not None and api.value["reported"]:
-        return _inf("FAILURE_OBSERVED", f"API 오류 보고 {api.value['value']!r}", ["api_error"])
+        return _inf("FAILURE_OBSERVED", f"API 오류 보고 {api.value['value']!r}", ["api_error"], decided_by=api.inputs)
     if st.value is not None and st.value["abnormal"]:
-        return _inf("FAILURE_OBSERVED", f"한도에 잘린 생성 {st.value['abnormal']}", ["stop_reasons"])
+        return _inf("FAILURE_OBSERVED", f"한도에 잘린 생성 {st.value['abnormal']}", ["stop_reasons"],
+                    decided_by=st.inputs)
     covered = []
     if api.value is not None:
         covered.append("API 오류 보고 없음(보고된 null)")
@@ -215,11 +220,11 @@ RULES = [
          ("BELOW_CONTEXT_LIMIT", "BELOW_COMPACTION_THRESHOLD", "ABOVE_COMPACTION_THRESHOLD", "AT_CONTEXT_LIMIT"),
          "맥락이 런타임이 선언한 경계(자동 압축 문턱 · 창)의 어느 쪽에 있나. 경계는 런타임 것이지 우리 것이 아니다",
          "다음 호출 전에 맥락을 줄일까", r_context_pressure),
-    Rule("execution-health-v1", 1, "execution_health", A, Basis.DEFINITIONAL,
+    Rule("execution-health-v2", 2, "execution_health", A, Basis.DEFINITIONAL,
          ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
          "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)",
          "다시 시도할까 · 사람에게 올릴까", _health("")),
-    Rule("tool-execution-health-v1", 1, "tool_execution_health", TL, Basis.DEFINITIONAL,
+    Rule("tool-execution-health-v2", 2, "tool_execution_health", TL, Basis.DEFINITIONAL,
          ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
          "도구 하나에 대한 execution_health -- 도구마다 따로", "이 도구를 계속 쓸까", _health("")),
     Rule("completion-state-v1", 1, "completion_state", T, Basis.RUNTIME_DECLARED, ("termination", "activity"),
@@ -237,7 +242,7 @@ RULES = [
          "싼 경로로 바꿀까", r_resource_pressure),
     Rule("rate-limit-state-v1", 1, "rate_limit_state", R, Basis.DEFINITIONAL, ("rate_limit_utilization",),
          ("AVAILABLE", "EXHAUSTED"), "요금 한도 사용률이 1 에 닿았나", "늦출까", r_rate_limit),
-    Rule("runtime-reliability-v1", 1, "runtime_reliability", R, Basis.DEFINITIONAL, ("api_error", "stop_reasons"),
+    Rule("runtime-reliability-v2", 2, "runtime_reliability", R, Basis.DEFINITIONAL, ("api_error", "stop_reasons"),
          ("NO_FAILURE_OBSERVED", "FAILURE_OBSERVED"),
          "API 오류 보고 · 한도에 잘린 생성이 있었나. '실패를 못 봤다' 와 '건강하다' 를 가른다",
          "다른 공급자로 돌릴까", r_reliability),
