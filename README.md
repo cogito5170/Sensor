@@ -28,7 +28,7 @@ L1 의 일이라 `llmsensor/telemetry/derive.py` 에서 `llmsensor/sensing/token
 
 **상태 층(State): [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md)** -- 텔레메트리를 받아 실체(agent · task · runtime ·
 tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`). 규칙마다 근거 종류(정의상 · 런타임 선언 · 운영자 가정)가
-붙고, 경험적 근거가 없는 문턱은 기본 설정에 없다. 질의 · 설명(상태 → 규칙 → 지표 → 관측) · 최소 결정 문맥 ·
+붙고, 경험적 근거가 없는 문턱은 기본 설정에 없다. 질의 · 설명(상태 → 규칙 → 지표 → 관측) · 내보내기 계약 ·
 신선도(STALE) · UNKNOWN 을 일급으로. 도출: [`docs/STATE_DERIVATION.md`](docs/STATE_DERIVATION.md) ·
 생애: [`docs/STATE_LIFECYCLE.md`](docs/STATE_LIFECYCLE.md) · 시연: `python3 eval/state_demo.py`.
 
@@ -36,8 +36,8 @@ tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`)
 `E.state_catalog()` · `E.export_state(entity, name, now)` · `E.subjects(run)` · `E.as_of(run)`. 자세히: [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md) 6.1 절.
 
 **MS 센싱 확장 · 결정 문맥: [`docs/MS_SENSING.md`](docs/MS_SENSING.md)** -- 센싱 팩 여섯(`llmsensor/sensing/`: token ·
-execution · latency · provider · cost · quality), 공급자 어댑터(`llmsensor/providers/`), Decision Context(`llmsensor/decision/context/`,
-목적별 투영 · 얼림 · explain), 참조 정책(`llmsensor/policy/`, MS 정책 아님). 결과: [`eval/RESULTS_ms_sensing.md`](eval/RESULTS_ms_sensing.md).
+execution · latency · provider · cost · quality), 공급자 어댑터(`llmsensor/providers/`). 결과: [`eval/RESULTS_ms_sensing.md`](eval/RESULTS_ms_sensing.md).
+결정 문맥과 참조 정책은 **cogito5170/DC 로 합쳤다**(baseline PC-08) -- DC 는 아래 내보내기 계약으로 이 저장소를 읽는다.
 건강 차원 센서 설계(설계만 · 텔레메트리와 분리된 입력 계약): [`docs/SENSOR_HEALTH_DESIGN.md`](docs/SENSOR_HEALTH_DESIGN.md).
 
 ## 센서 다섯 (진실에 가까운 순)

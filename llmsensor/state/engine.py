@@ -274,42 +274,6 @@ class StateEngine:
             walk(n)
         return out
 
-    def decision_context(self, run_id, now=None) -> dict:
-        """정책에 줄 가장 작은 의미 표현. 원 텔레메트리 · 지표 값은 넣지 않는다(이유 문자열 안의 수는 예외)."""
-        A, T, R = (entity_id(k, run_id) for k in (EntityType.AGENT, EntityType.TASK, EntityType.RUNTIME))
-
-        def v(ent, name):
-            sv = self.query(ent, [name], now)[0]
-            return {"value": sv.value, "status": sv.status.value, "freshness": sv.freshness.value,
-                    "age_ms": sv.age_ms, "why": sv.reason}
-
-        tools = {}
-        for (e, n), st in sorted(self.current.items()):
-            if n == TOOL_RULE and e.startswith(f"tool:{run_id}:") and st.value in ("UNRESOLVED_FAILURES",
-                                                                                   "RECOVERED_FAILURES"):
-                tools[e.rsplit(":", 1)[1]] = st.value
-        ctx = {"run": run_id, "as_of": self._now(A, now), "config": self.cfg.version,
-               "context": {"pressure": v(A, "context_pressure")},
-               "execution": {"health": v(A, "execution_health"), "tools_with_failures": tools},
-               "task": {"completion": v(T, "completion_state"), "progress": v(T, "progress_state")},
-               "resources": {"budget": v(A, "resource_state"), "pressure": v(A, "resource_pressure")},
-               "runtime": {"rate_limit": v(R, "rate_limit_state"), "reliability": v(R, "runtime_reliability")}}
-        unc, na = [], []
-        for grp, d in ctx.items():
-            if not isinstance(d, dict):
-                continue
-            for k, x in d.items():
-                if isinstance(x, dict) and "status" in x:
-                    if x["status"] == "NOT_APPLICABLE":
-                        na.append(f"{grp}.{k}")
-                    elif x["status"] in ("UNKNOWN", "STALE", "INVALID"):
-                        unc.append(f"{grp}.{k}={x['status']}")
-        for grp in ("context", "execution", "task", "resources", "runtime"):    # 정의되지 않은 것은 빼서 작게
-            ctx[grp] = {k: x for k, x in ctx[grp].items() if not (isinstance(x, dict) and x.get("status") == "NOT_APPLICABLE")}
-        ctx["uncertain"] = unc
-        ctx["not_applicable"] = na
-        return ctx
-
     # ---------------- 내보내기 계약(상태 층 밖이 읽는 길) ----------------
     EXPORT_CONTRACT = _export.CONTRACT
 

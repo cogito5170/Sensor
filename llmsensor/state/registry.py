@@ -28,7 +28,7 @@ CANDIDATES = [   # (이름, 왜 넣지 않았나)
     ("quality_score", "외부 라벨 없이 수를 만들지 않는다 -- quality_state 는 외부 평가 라벨을 옮길 뿐"),
     ("token_budget_state", "토큰 예산 설정이 없다. 필요하면 resource_state 와 같은 꼴로 더한다"),
     ("interaction_state", "사람 말 · 턴 관측이 텔레메트리 꼴에 없다"),
-    ("uncertainty_state", "저장하지 않는다 -- 질의 때 상태들의 유효성에서 투영한다(decision_context.uncertain)"),
+    ("uncertainty_state", "저장하지 않는다 -- 결정 문맥이 상태들의 유효성에서 투영한다(cogito5170/DC 의 validity.uncertain)"),
     ("generation_state(stop_reason)", "멈춤 사유를 이름만 바꾼 상태가 된다. 한도에 잘린 것만 runtime_reliability 의 근거로 쓴다"),
 ]
 
