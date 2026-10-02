@@ -178,3 +178,13 @@ class Providers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OwnerLayer(unittest.TestCase):
+    def test_assess_marks_follow_bd35_bd52(self):
+        # 이름 · 값은 그대로, 소유 층 표시만 -- BD-35(건강 성격 넷) + BD-52(liveness). 나머지는 상태 층(None)
+        marked = {n for n, r in REGISTRY.rules.items() if r.owner_layer == "ASSESS"}
+        self.assertEqual(marked, {"execution_health", "tool_execution_health", "execution_interruption",
+                                  "runtime_reliability", "liveness_state"})
+        self.assertEqual({r.owner_layer for n, r in REGISTRY.rules.items() if n not in marked}, {None})
+        self.assertEqual(REGISTRY.state_definition("liveness_state")["owner_layer"], "ASSESS")

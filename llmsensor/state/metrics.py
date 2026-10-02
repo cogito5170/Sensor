@@ -153,7 +153,7 @@ def _tool_metrics(prefix, tool):
                 failed_once.add(k)
         unresolved = sorted(k for k, t in last.items() if t["tool.is_error"].value)
         recovered = sorted(k for k in failed_once if not last[k]["tool.is_error"].value)
-        ids = [last[k]["tool.is_error"].id for k in unresolved + recovered]
+        ids = [last[k]["tool.is_error"].id for k in unresolved + recovered]   # 이 순서에 _health 규칙이 기댄다(BD-57 decided_by)
         return _m(ctx, prefix + "tool_targets", {"unresolved": unresolved, "recovered": recovered,
                                                  "targets": len(last)}, ids)
 

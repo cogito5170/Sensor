@@ -254,7 +254,7 @@ class Provenance(unittest.TestCase):
                 self.assertTrue(ids, (ent, name))
                 self.assertTrue(ids <= set(E.observations), (ent, name))
         ex = E.explain(A, "execution_health")
-        self.assertEqual(ex["rule"]["id"], "execution-health-v1")
+        self.assertEqual(ex["rule"]["id"], "execution-health-v2")
         self.assertEqual(ex["state"]["config_version"], "default-v1")
 
     def test_proposal_never_becomes_state(self):

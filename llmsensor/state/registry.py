@@ -70,7 +70,7 @@ class Registry:
         return {"id": name, "entity": r.entity.value, "value_type": "enum",
                 "allowed_values": list(r.values) + ["UNKNOWN", "NOT_APPLICABLE"], "basis": r.basis.value,
                 "dependencies": list(r.inputs), "rule": f"{r.id}", "version": r.version, "meaning": r.meaning,
-                "decision_supported": r.decision, "ttl_ms": ttl}
+                "decision_supported": r.decision, "ttl_ms": ttl, "owner_layer": r.owner_layer}
 
     def graph(self) -> "list[tuple[str, str]]":
         """(from, to) 간선. 관측 이름은 'obs:', 지표 'metric:', 상태 'state:'."""

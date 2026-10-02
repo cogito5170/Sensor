@@ -23,7 +23,7 @@
    "UNKNOWN:None": 288
   },
   "execution_health/cc_jsonl_self": {
-   "INFERRED:UNRESOLVED_FAILURES": 1
+   "STALE:UNRESOLVED_FAILURES": 1
   },
   "execution_health/cc_stream": {
    "INFERRED:NO_FAILURE_OBSERVED": 8,
