@@ -25,6 +25,7 @@ class Result:
     reason: str
     evidence: tuple            # 근거로 삼은 지표 이름들
     final: bool = False
+    basis: "Basis | None" = None   # 이 값의 근거가 규칙 근거와 다를 때(예: 값 하나만 운영자 문턱에 기댄다). None = 규칙 근거
 
 
 @dataclass(frozen=True)
@@ -39,6 +40,8 @@ class Rule:
     meaning: str
     decision: str              # 이 상태가 돕는 결정(§32 질문 1)
     fn: Callable = field(compare=False, repr=False)
+    # 평가 시각(now)에 기대는 값 -- 그 순간에만 참이다. 평가 뒤 시각으로 질의하면 STALE(엔진 view), 다시 재려면 advance()
+    clock_values: tuple = ()
 
 
 def _inf(v, reason, ev, final=False):

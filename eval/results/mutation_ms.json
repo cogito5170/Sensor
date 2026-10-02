@@ -88,5 +88,50 @@
   "mutation": "수집기: 스트림의 캐시 쓰기 나눔을 버린다",
   "file": "llmsensor/telemetry/collect.py",
   "result": "RED"
+ },
+ {
+  "mutation": "liveness: 운영자 timeout 없이 문턱을 지어낸다",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 차례를 모르면 입력 대기로 짐작",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 런타임 heartbeat 를 무음으로 센다",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 차례 밖 공백(사람 대기)을 멈춤으로",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 종료 사건 없이 닫힌 흐름을 ENDED 로",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 전부 null 인 종료 요약을 끝으로",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 시간 기준이 다른 두 시각을 뺀다",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 센서가 시계를 읽는다",
+  "file": "llmsensor/sensing/liveness/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "liveness: 평가 순간의 값(ACTIVE)을 뒤 시각에 지금 값으로",
+  "file": "llmsensor/state/engine.py",
+  "result": "RED"
  }
 ]

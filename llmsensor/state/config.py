@@ -29,6 +29,7 @@ class StateConfig:
         "context_pressure": 10 * 60_000, "execution_health": 10 * 60_000, "tool_execution_health": 10 * 60_000,
         "completion_state": 10 * 60_000, "progress_state": 10 * 60_000, "resource_state": 10 * 60_000,
         "resource_pressure": 10 * 60_000, "rate_limit_state": 5 * 60_000, "runtime_reliability": 10 * 60_000,
+        "liveness_state": 10 * 60_000,
     })
     # 아래는 전부 OPERATOR_ASSUMED. 기본은 없음
     cost_budget_usd: "float | None" = None
@@ -39,6 +40,9 @@ class StateConfig:
     # 지연 SLO -- {"metric": "call_latency"|"first_chunk_latency"|"tool_latency", "percentile": "p50"|"p95"|"p99",
     #             "bands": (Band("ELEVATED", ..), Band("DEGRADED", ..))}. 없으면 latency_state 는 NOT_APPLICABLE
     latency_slo: "dict | None" = None
+    # liveness 의 무음 문턱(ms) -- 차례가 열려 있는데 이만큼 아무 사건도 없으면 STALLED. 없으면 ACTIVE/STALLED 를 내지 않는다
+    # (F´ Svc::Health: 핑 timeout 은 포트마다 운영자 설정 -- 관측된 heartbeat 간격은 '선언' 이 아니다)
+    liveness_timeout_ms: "int | None" = None
 
     def with_(self, **kw) -> "StateConfig":
         return replace(self, **kw)
@@ -47,7 +51,7 @@ class StateConfig:
         """이 설정이 담은 가정들 -- 상태 설명에 붙인다."""
         a = {"ttl_ms": dict(self.ttl_ms)}
         for k in ("cost_budget_usd", "resource_bands", "stall_repeat_threshold", "context_window_override",
-                  "latency_slo"):
+                  "latency_slo", "liveness_timeout_ms"):
             v = getattr(self, k)
             if v is not None:
                 a[k] = v

@@ -79,10 +79,11 @@ class StateEngine:
         r.evidence.append(ev)
 
     # ---------------- 계산 ----------------
-    def _metrics(self, L, defs, entity_for, at):
+    def _metrics(self, L, defs, entity_for, at, now=None, seq=None):
         M = {}
         for md in defs:
-            ctx = {"entity": entity_for(md), "seq": L.seq, "at": at, "config": self.cfg}
+            ctx = {"entity": entity_for(md), "seq": L.seq if seq is None else seq, "at": at, "config": self.cfg,
+                   "now": at if now is None else now}
             m = md.fn(L, ctx, M)
             M[md.name] = m
             self.metrics[m.id] = m
@@ -136,7 +137,7 @@ class StateEngine:
                 prev.updated_at, prev.seq = at, prev.seq + 1
                 return
         self._pending.pop(key, None)
-        st = State(entity_id=ent, name=rule.state, value=res.value, status=res.status, basis=rule.basis,
+        st = State(entity_id=ent, name=rule.state, value=res.value, status=res.status, basis=res.basis or rule.basis,
                    rule_id=rule.id, rule_version=rule.version, config_version=self.cfg.version, reason=res.reason,
                    evidence=ev, observed_at=obs_at, updated_at=at, since=at, seq=(prev.seq + 1 if prev else 1),
                    final=res.final)
@@ -156,6 +157,30 @@ class StateEngine:
 
     def _life(self, ent, name, ev, at, detail=""):
         self.lifecycle.append(LifecycleEvent(ent, name, ev, at, detail))
+
+    # ---------------- 시각에 기대는 규칙 다시 재기 ----------------
+    def advance(self, run_id, now) -> bool:
+        """'지금' 을 주면 평가 시각에 기대는 규칙(clock_values 가 있는 규칙)만 그 시각으로 다시 잰다.
+
+        엔진은 시계를 읽지 않는다 -- now 는 **호출자가** 준다(관측과 같은 시간 기준이어야 한다). 같은 관측 + 같은 now
+        -> 같은 상태. 관측보다 이른 now 는 받지 않는다(시간이 거꾸로 간다). 다시 잰 것이 있으면 True."""
+        L = self.ledgers.get(run_id)
+        if L is None or now is None:
+            return False
+        if L.last_at is not None and now < L.last_at:
+            raise ValueError(f"now={now} 가 마지막 관측 {L.last_at} 보다 이르다")
+        rules = [r for r in self.reg.rules.values() if r.clock_values]
+        need, todo = set(), [i for r in rules for i in r.inputs]
+        while todo:                                       # 규칙 입력이 기대는 지표까지
+            n = todo.pop()
+            if n in self.reg.metrics and n not in need:
+                need.add(n)
+                todo += list(self.reg.metrics[n].inputs)
+        defs = [md for md in self.reg.metrics.values() if md.name in need]       # 등록 순서 그대로
+        M = self._metrics(L, defs, lambda md: entity_id(md.entity, L.run_id), now, now, f"{L.seq}+{now}")
+        for rule in rules:
+            self._apply(entity_id(rule.entity, L.run_id), rule, M, now, f"advance@{now}", L.run_id)
+        return bool(rules)
 
     # ---------------- 명시적 무효화 · 제안 ----------------
     def invalidate(self, ent, name, reason, at=None):
@@ -208,7 +233,12 @@ class StateEngine:
 
     # ---------------- 질의 ----------------
     def view(self, st: State, now=None) -> StateView:
-        fr, age = self._freshness(st, self._now(st.entity_id, now))
+        t = self._now(st.entity_id, now)
+        fr, age = self._freshness(st, t)
+        r = self.reg.rules.get(st.name)
+        if (r is not None and st.value in r.clock_values and not st.final and t is not None
+                and st.updated_at is not None and t > st.updated_at):
+            fr = Freshness.STALE              # 그 값은 평가 순간의 것이다 -- 뒤 시각에 지금 값으로 쓰지 않는다
         status = Status.STALE if fr is Freshness.STALE and st.status.usable else st.status
         return StateView(st.entity_id, st.name, st.value, status, fr, age, st.basis, f"{st.rule_id}", st.reason,
                          tuple(e.ref for e in st.evidence), st.since)

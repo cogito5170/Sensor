@@ -35,7 +35,8 @@ class Packs(unittest.TestCase):
             else:
                 self.assertIs(REGISTRY.rules[n], old[n], n)      # 뜻 불변 -- 같은 객체
         self.assertEqual(list(REGISTRY.rules)[:len(BASELINE_ORDER)], list(BASELINE_ORDER))
-        self.assertEqual({p.name for p in packs()}, {"token", "execution", "latency", "provider", "cost", "quality"})
+        self.assertEqual({p.name for p in packs()}, {"token", "execution", "latency", "provider", "cost", "quality",
+                                                      "liveness"})
         self.assertEqual(REGISTRY.check(), [])
 
     def test_every_rule_has_threshold_source(self):
