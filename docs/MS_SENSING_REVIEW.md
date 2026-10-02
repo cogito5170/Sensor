@@ -1,5 +1,7 @@
 # Phase 1 -- 기존 구조 검토와 과제 지시와의 충돌 (2026-10-02)
 
+> 기록 문서다. 여기서 정한 `llmsensor/decision/` · `llmsensor/policy/` 는 뒤에 cogito5170/DC 로 합쳐졌다(baseline PC-08, 2026-10-02).
+
 과제(MS Sensing Expansion)를 짓기 전에 저장소를 읽고 충돌을 적는다. **기존 Token/State 의 뜻은 바꾸지 않는다** --
 충돌은 아래처럼 풀거나 사용자에게 묻는다.
 

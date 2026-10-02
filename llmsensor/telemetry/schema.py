@@ -19,14 +19,18 @@ import json
 import sys
 from pathlib import Path
 
-SOURCES = ["cc_jsonl", "cc_stream", "sweagent"]
+SOURCES = ["cc_jsonl", "cc_stream", "sweagent"]      # 로그 원천(수집기 셋)
+# 프로세스 안 계측(L0 Telemetry Recorder 원장, 예: MS 런타임의 inproc:ms) -- 이름은 낸 쪽이 붙인다
+INPROC = r"inproc:[A-Za-z0-9_.-]+"
+SOURCE_PATTERN = "^(" + "|".join(SOURCES) + "|" + INPROC + ")$"
 INT = {"type": ["integer", "null"], "minimum": 0}
 NUM = {"type": ["number", "null"]}
 STR = {"type": ["string", "null"]}
 BOOL = {"type": ["boolean", "null"]}
-SCHEMA_VERSION = 3   # v3: 덧붙이기만 -- timed_out · 캐시 쓰기 5m/1h · 요금 한도 상태/문턱
+SCHEMA_VERSION = 4   # v3: 덧붙이기만 -- timed_out · 캐시 쓰기 5m/1h · 요금 한도 상태/문턱
+#                      v4: source 에 inproc:<이름> 을 받는다(칸은 그대로 -- v3 레코드는 모두 v4 에도 맞다)
 COMMON = {"kind": {"type": "string"}, "run_id": {"type": "string", "minLength": 1},
-          "source": {"enum": SOURCES}, "unobserved": {"type": "array", "items": {"type": "string"}},
+          "source": {"type": "string", "pattern": SOURCE_PATTERN}, "unobserved": {"type": "array", "items": {"type": "string"}},
           "reported_null": {"type": "array", "items": {"type": "string"}}}
 
 MODEL_CALL_FIELDS = {

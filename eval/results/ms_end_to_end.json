@@ -1,14 +1,9 @@
 {
  "runs": 301,
  "deterministic": true,
- "decision_digest": "d806c73bc600b3bc",
+ "state_digest": "41e970b501aa64c6",
  "assumptions": {
-  "capabilities": {
-   "compaction": true,
-   "providers": 2
-  },
-  "external_labels": "swe_lite_20240620_sweagent_claude35sonnet_results.json",
-  "policies": "reference-*-v1 (not MS)"
+  "external_labels": "swe_lite_20240620_sweagent_claude35sonnet_results.json"
  },
  "packs": {
   "token": {
@@ -420,80 +415,5 @@
    }
   }
  },
- "policy_usefulness": {
-  "points": 57873,
-  "material_context_changes": 639,
-  "decision_changes": 483,
-  "by_state": {
-   "continue_or_stop/completion_state": {
-    "state_changes": 300,
-    "with_decision_change": 300,
-    "state_impact_rate": 1.0,
-    "used_impact_rate": 1.0,
-    "alone_changes": 0,
-    "alone_impact_rate": null
-   },
-   "continue_or_stop/execution_health": {
-    "state_changes": 17,
-    "with_decision_change": 6,
-    "state_impact_rate": 0.35294117647058826,
-    "used_impact_rate": 0.35294117647058826,
-    "alone_changes": 12,
-    "alone_impact_rate": 0.25
-   },
-   "continue_or_stop/execution_interruption": {
-    "state_changes": 8,
-    "with_decision_change": 3,
-    "state_impact_rate": 0.375,
-    "used_impact_rate": 0.375,
-    "alone_changes": 3,
-    "alone_impact_rate": 0.0
-   },
-   "continue_or_stop/progress_state": {
-    "state_changes": 300,
-    "with_decision_change": 300,
-    "state_impact_rate": 1.0,
-    "used_impact_rate": 0.0,
-    "alone_changes": 0,
-    "alone_impact_rate": null
-   },
-   "continue_or_stop/quality_state": {
-    "state_changes": 287,
-    "with_decision_change": 177,
-    "state_impact_rate": 0.6167247386759582,
-    "used_impact_rate": 0.6167247386759582,
-    "alone_changes": 287,
-    "alone_impact_rate": 0.6167247386759582
-   },
-   "manage_context/context_pressure": {
-    "state_changes": 12,
-    "with_decision_change": 0,
-    "state_impact_rate": 0.0,
-    "used_impact_rate": 0.0,
-    "alone_changes": 12,
-    "alone_impact_rate": 0.0
-   },
-   "manage_context/execution_interruption": {
-    "state_changes": 8,
-    "with_decision_change": 0,
-    "state_impact_rate": 0.0,
-    "used_impact_rate": 0.0,
-    "alone_changes": 8,
-    "alone_impact_rate": 0.0
-   },
-   "select_provider/rate_limit_state": {
-    "state_changes": 12,
-    "with_decision_change": 0,
-    "state_impact_rate": 0.0,
-    "used_impact_rate": 0.0,
-    "alone_changes": 12,
-    "alone_impact_rate": 0.0
-   }
-  },
-  "decision_changes_by_purpose": {
-   "manage_context": 0,
-   "select_provider": 0,
-   "continue_or_stop": 483
-  }
- }
+ "policy_usefulness": "moved to cogito5170/DC eval/policy_impact.py (baseline PC-08)"
 }

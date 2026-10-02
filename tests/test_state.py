@@ -288,19 +288,6 @@ class Idempotent(unittest.TestCase):
         self.assertEqual(m.value["observed"], 1)
 
 
-class DecisionContext(unittest.TestCase):
-    def test_minimal_and_semantic_only(self):
-        E = engine([mc(0, 100, cr=150000, win=200000), tc(0, 0, 110, err=True)])
-        d = E.decision_context(RUN)
-        s = json.dumps(d, ensure_ascii=False)
-        for raw in ("cache_read", "input_tokens", "tokens.", "tool_targets", "observation"):
-            self.assertNotIn(raw, s)
-        self.assertEqual(d["execution"]["health"]["value"], "UNRESOLVED_FAILURES")
-        self.assertIn("task.progress=UNKNOWN", d["uncertain"])
-        self.assertIn("resources.budget", d["not_applicable"])
-        self.assertNotIn("budget", d["resources"])
-
-
 class Providers(unittest.TestCase):
     def test_same_meaning_across_providers(self):
         a, _ = canonical_usage("anthropic", {"input_tokens": 100, "cache_read_input_tokens": 900,

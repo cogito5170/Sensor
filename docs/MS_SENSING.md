@@ -14,10 +14,10 @@ LLM / Tool / Runtime ──► Telemetry (llmsensor/telemetry, 꼴 v3)
         Observation(state/normalize) → Metric → State(state/rules, 근거 종류 · 버전) → 이력 · 근거 사슬
                               │
                               ▼
-        Decision Context (llmsensor/decision/context): Select → Filter → Validate → Project → Freeze
+        내보내기 계약 llmsensor.state-export/1 (state/export.py) -- 이 저장소의 끝
                               │
                               ▼
-        Policy (llmsensor/policy -- 참조 정책, MS 아님) → LLM Context(정책의 일) → LLM → WALP → Action → Telemetry
+        Decision Context (cogito5170/DC, baseline BD-05) → Policy → … → Arbiter/Guard → Action → Telemetry
 ```
 
 | 층 | 묻는 것 | 하지 않는 것 |
@@ -62,35 +62,21 @@ p95 는 20, p99 는 100), `end_to_end_latency` · `api_time_share` · `api_retry
 | resource_state NORMAL/NEAR_BUDGET/EXHAUSTED | `resource_state` = WITHIN_BUDGET · BUDGET_EXHAUSTED, `resource_pressure`(설정 띠) | 예산 없으면 N/A(**결정 필요 -- 아래**) |
 | quality_state | `quality_state` = PASSED · FAILED · UNKNOWN | 외부 라벨만 |
 
-## 3. Decision Context
+## 3. Decision Context · 4. 참조 정책 -- DC 저장소로 합쳤다 (2026-10-02, baseline PC-08)
 
-목적 표(`decision/context.PURPOSES`):
+이 저장소에 있던 결정 문맥(`llmsensor/decision/context` -- 목적 넷 · 얼림 · explain)과 참조 정책(`llmsensor/policy`)은
+cogito5170/DC 로 합쳤다. baseline 이 DC 저장소를 결정 문맥의 기준 구현으로 정했다(BD-05 · DUP-04 · BV-11).
 
-| 목적 | 필요 상태(필수) | 선택 상태 | 행동 목록 |
-|---|---|---|---|
-| `manage_context` | context_pressure | execution_interruption | KEEP_CONTEXT · REDUCE_CONTEXT · COMPACT_CONTEXT |
-| `select_provider` | runtime_reliability · rate_limit_state | latency_state · resource_state · resource_pressure | STAY_PROVIDER · SWITCH_PROVIDER · WAIT |
-| `continue_or_stop` | completion_state · execution_health | execution_interruption · progress_state · resource_state · quality_state | CONTINUE · RETRY · STOP · ESCALATE |
-| `optimize_llm_request` | context_pressure | execution_health · execution_interruption · latency_state · rate_limit_state · runtime_reliability · resource_state | KEEP · REDUCE · COMPACT · SWITCH_PROVIDER · RETRY · STOP |
-
-| 단계 | 하는 일 |
+| 옮겨 간 것 | DC 에서 |
 |---|---|
-| Select | 목적이 필요로 하는 (실체, 상태)만 질의 |
-| Filter | 선택 상태가 NOT_APPLICABLE 이면 빼서 `omitted` 에 |
-| Validate | 쓸 수 있음 = INFERRED/DERIVED/OBSERVED 이고 STALE 아님. 필수 상태가 못 쓰면 `DEGRADED`, 정의 없으면 `INVALID`. STALE 은 `allow_stale` 로 **정책이 명시해야만** |
-| Project | StateView: 이름 · 값 · status · freshness · observed_at · age · ttl · basis · rule_id · rule_version · evidence_refs · usable. **이유 문자열 · 지표 값 · 원 텔레메트리 없음** |
-| Freeze | 얼린 dataclass, 내용 해시 `context_id`(나이 · as_of 포함 -- 같은 입력이면 같은 id), 근거 사슬을 그때 떠서 JSON 문자열로 -> `explain()` |
+| `allow_stale`(낡은 값은 정책이 명시해야만) | `DecisionContext.value(key, allow_stale=True)` -- STALE 만 풀고 UNKNOWN · INVALID 는 그대로 |
+| `ContextStore`(id 로 다시 꺼냄) | `dc.ContextStore` -- 근거 사슬은 복사하지 않고 `evidence_refs` 참조로(BD-06) |
+| 목적 `manage_context` · `select_provider` · `continue_or_stop` | DC 이름(BD-30): `context_policy` · `provider_selection`(+`WAIT`) · `execution_control`(+`execution_interruption` · `quality_state`) |
+| 참조 정책 셋 | `DC/refpolicy/` -- DC 기반 시험 정책(MS 아님, `dc` 패키지 밖) |
+| Phase 8 의 정책 쓸모 측정 | `DC/eval/policy_impact.py` -- 같은 레코드에서 결정 변화 483 번으로 같다 |
 
-- `available_actions` 는 **사실**로만 거른다: 런타임 압축 능력, 설정된 공급자 수, 실행이 끝났나. 선호는 없다.
-- `constraints` 는 `max_cost_usd` · `max_latency_ms` · `required_capabilities` · `permission_requirements` 만, 꼴을 검사하고
-  **평가하지 않는다.** 목표(`minimize` 등)는 거절한다.
-- LLM Context 와 다르다: 결정 문맥을 프롬프트에 넣는 함수가 없다. LLM 이 무엇을 볼지는 Context Policy 의 일이다.
-
-## 4. 참조 정책 -- MS 정책이 아니다
-
-이 세션의 네 저장소에서 MS 정책 런타임을 찾지 못했다. 결정 문맥이 결정을 바꾸는지 재려고 `llmsensor/policy/` 에 최소
-결정론 정책 셋(context · provider · execution)을 지었다. 입력은 결정 문맥뿐이고 범주 값만 본다(문턱 없음). 모르는 상태로는
-행동을 바꾸지 않는다(예: 맥락 압력 UNKNOWN -> KEEP). 가능하지 않은 행동은 고르지 않는다(시험).
+DC 는 이 저장소를 **내보내기 계약으로만** 읽는다(`docs/STATE_MODEL.md` 6.1). 남은 차이: 런타임 압축(`COMPACT_CONTEXT`)에 해당하는
+행동이 DC 어휘에 없다 -- baseline 에 물었다.
 
 ## 5. 설계 결정과 근거
 
