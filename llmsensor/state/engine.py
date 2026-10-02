@@ -130,7 +130,7 @@ class StateEngine:
         if prev is not None and prev.final:
             return                                       # 끝난 일에 대한 사실은 다시 계산하지 않는다
         res = rule.fn(M, prev.value if prev else None, self.cfg)
-        ev = tuple(Evidence(M[n].id, Level.METRIC, n, M[n].value) for n in res.evidence if n in M)
+        ev = tuple(Evidence(M[n].id, Level.METRIC, n) for n in res.evidence if n in M)
         obs_at = self._decided_time(res.decided_by) if res.decided_by else self._evidence_time(M, res.evidence)
         # 흔들림 억제(Prometheus 'for' 와 같은 생각): 새 값이 min_consecutive 번 이어져야 바뀐다
         k = self.cfg.min_consecutive.get(rule.state, 1)
