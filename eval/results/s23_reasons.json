@@ -1,0 +1,57 @@
+{
+ "cc_jsonl": {
+  "runs": 14,
+  "end_agent": {
+   "value:NO_FAILURE_OBSERVED": 8,
+   "value:UNRESOLVED_FAILURES": 5,
+   "value:RECOVERED_FAILURES": 1
+  },
+  "end_tool_entities": {
+   "value:NO_FAILURE_OBSERVED": 34,
+   "value:UNRESOLVED_FAILURES": 6,
+   "value:RECOVERED_FAILURES": 2
+  },
+  "at_first_tool_start": {
+   "waiting": 14
+  },
+  "at_its_tool_end": {
+   "value:NO_FAILURE_OBSERVED": 9,
+   "value:UNRESOLVED_FAILURES": 5
+  }
+ },
+ "cc_stream": {
+  "runs": 12,
+  "end_agent": {
+   "value:NO_FAILURE_OBSERVED": 8,
+   "value:UNRESOLVED_FAILURES": 3,
+   "value:RECOVERED_FAILURES": 1
+  },
+  "end_tool_entities": {
+   "value:NO_FAILURE_OBSERVED": 18,
+   "value:UNRESOLVED_FAILURES": 3,
+   "value:RECOVERED_FAILURES": 1
+  },
+  "at_first_tool_start": {
+   "waiting": 12
+  },
+  "at_its_tool_end": {
+   "value:NO_FAILURE_OBSERVED": 8,
+   "value:UNRESOLVED_FAILURES": 4
+  }
+ },
+ "sweagent": {
+  "runs": 288,
+  "end_agent": {
+   "source_gives_none": 288
+  },
+  "end_tool_entities": {
+   "source_gives_none": 2417
+  },
+  "at_first_tool_start": {
+   "waiting": 288
+  },
+  "at_its_tool_end": {
+   "source_gives_none": 288
+  }
+ }
+}

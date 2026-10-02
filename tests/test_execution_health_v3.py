@@ -37,7 +37,7 @@ class Split(unittest.TestCase):
     def test_b_unobservable_outcome_stays_unknown(self):
         s = st([mc(0, 100), tc(0, 0, 110, known=False)])
         self.assertEqual((s.value, s.status), (None, Status.UNKNOWN))
-        self.assertIn("볼 수 없다", s.reason)
+        self.assertIn("결과(is_error)를 못 봤다", s.reason)
 
     def test_b_with_many_calls_still_unknown(self):
         recs = [mc(0, 100)] + [tc(0, j, 110 + j, head=f"edit:{j}", known=False) for j in range(5)]

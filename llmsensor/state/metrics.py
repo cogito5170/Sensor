@@ -132,6 +132,23 @@ def _tool_metrics(prefix, tool):
         return _m(ctx, prefix + "tool_outcome_unobservable", len(blind),
                   [t["tool.name"].id for t in blind if t.get("tool.name")])
 
+    def pending(L, ctx, M):
+        """결과(is_error)를 못 본 호출 가운데 **tool.end 가 아직 없는** 것(도는 중). 나머지는 원천이 결과를 주지 않은 것.
+        L0 묶기를 받지 않았거나 호출의 tool_index 를 모르면 None -- 둘을 가를 근거가 없다(S23)."""
+        _, blind = _outcomes(_tool_rows(L, tool))
+        if not blind:
+            return _m(ctx, prefix + "tool_outcome_pending", 0, [])
+        if L.run.get("l0.last_event") is None:
+            return _m(ctx, prefix + "tool_outcome_pending", None, [],
+                      reason="L0 사건을 받지 않았다 -- 결과가 아직 안 왔는지 원천이 주지 않는지 모른다")
+        if any(t.get("tool.index") is None for t in blind):
+            return _m(ctx, prefix + "tool_outcome_pending", None, [], reason="tool_index 를 모르는 호출이 있다")
+        e = L.run.get("l0.tool_ends")
+        done = set(e.value["indices"]) if e is not None and e.value is not None else set()   # L0 를 받았고 tool.end 가 없다 = 0 개
+        wait = [t for t in blind if t["tool.index"].value not in done]
+        return _m(ctx, prefix + "tool_outcome_pending", len(wait),
+                  [t["tool.index"].id for t in wait] + ([e.id] if e is not None else []))
+
     def errors(L, ctx, M):
         seen, _ = _outcomes(_tool_rows(L, tool))
         bad = [t for t in seen if t["tool.is_error"].value]
@@ -158,10 +175,10 @@ def _tool_metrics(prefix, tool):
         return _m(ctx, prefix + "tool_targets", {"unresolved": unresolved, "recovered": recovered,
                                                  "targets": len(last)}, ids)
 
-    return results, unobservable, errors, rate, targets
+    return results, unobservable, errors, rate, targets, pending
 
 
-A_RES, A_UNOBS, A_ERR, A_RATE, A_TGT = _tool_metrics("", None)
+A_RES, A_UNOBS, A_ERR, A_RATE, A_TGT, A_PEND = _tool_metrics("", None)
 
 
 def m_identical_call_max(L, ctx, M):
@@ -285,6 +302,8 @@ METRICS = [
     MetricDefinition("tool_results", AGENT, _TC, Basis.OBSERVED, "결과(is_error)를 본 도구 호출 수", A_RES),
     MetricDefinition("tool_outcome_unobservable", AGENT, _TC, Basis.OBSERVED,
                      "결과를 볼 수 없는 도구 호출 수(SWE-agent 추적 등)", A_UNOBS),
+    MetricDefinition("tool_outcome_pending", AGENT, _TC + ("tool.index", "l0.tool_ends"), Basis.OBSERVED,
+                     "결과를 못 본 호출 가운데 tool.end 가 아직 없는 것(도는 중). L0 를 안 받았으면 모름", A_PEND),
     MetricDefinition("tool_errors", AGENT, _TC, Basis.OBSERVED, "is_error=true 인 결과 수", A_ERR),
     MetricDefinition("tool_failure_rate", AGENT, ("tool_results", "tool_errors"), Basis.OBSERVED,
                      "tool_errors / tool_results", A_RATE),
@@ -313,9 +332,11 @@ METRICS = [
 
 
 def tool_metric_defs(tool: str) -> "list[MetricDefinition]":
-    r, u, e, rate, tg = _tool_metrics("", tool)
+    r, u, e, rate, tg, pend = _tool_metrics("", tool)
     return [MetricDefinition("tool_results", TOOL, _TC, Basis.OBSERVED, "이 도구의 결과 수", r),
             MetricDefinition("tool_outcome_unobservable", TOOL, _TC, Basis.OBSERVED, "결과를 볼 수 없는 호출", u),
             MetricDefinition("tool_errors", TOOL, _TC, Basis.OBSERVED, "이 도구의 오류 결과", e),
             MetricDefinition("tool_failure_rate", TOOL, ("tool_results", "tool_errors"), Basis.OBSERVED, "", rate),
-            MetricDefinition("tool_targets", TOOL, _TC, Basis.OBSERVED, "이 도구의 겨냥별 최근 결과", tg)]
+            MetricDefinition("tool_targets", TOOL, _TC, Basis.OBSERVED, "이 도구의 겨냥별 최근 결과", tg),
+            MetricDefinition("tool_outcome_pending", TOOL, _TC + ("tool.index", "l0.tool_ends"), Basis.OBSERVED,
+                             "결과를 기다리는 이 도구의 호출", pend)]

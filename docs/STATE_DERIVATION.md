@@ -33,7 +33,7 @@
 - **뜻**: 도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). 그 실행의 사건(L0 사건 · 모델 호출)은 봤는데 도구 호출이 아직 없으면 NO_TOOL_RUN_YET -- 건강을 말하지 않는다. 도구 호출이 있는데 결과를 볼 수 없으면 UNKNOWN(v2 와 같다)
 - **돕는 결정**: 다시 시도할까 · 사람에게 올릴까
 - **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `NO_TOOL_RUN_YET` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`, `activity`, `run_last_event`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_outcome_pending`, `tool_targets`, `tool_failure_rate`, `activity`, `run_last_event`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
 
 ```
@@ -46,7 +46,7 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 - **뜻**: 도구 하나에 대한 execution_health -- 도구마다 따로
 - **돕는 결정**: 이 도구를 계속 쓸까
 - **값**: `NO_FAILURE_OBSERVED` · `RECOVERED_FAILURES` · `UNRESOLVED_FAILURES` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_targets`, `tool_failure_rate`
+- **입력 지표**: `tool_results`, `tool_outcome_unobservable`, `tool_outcome_pending`, `tool_targets`, `tool_failure_rate`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
 
 ```
@@ -212,6 +212,7 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 | `context_growth` | agent | OBSERVED | `tokens.input_uncached`, `tokens.cache_read`, `tokens.cache_write` | 마지막 두 호출의 context_tokens 차 (캐시 런타임에서는 ≡ cache_write) |
 | `tool_results` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과(is_error)를 본 도구 호출 수 |
 | `tool_outcome_unobservable` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 결과를 볼 수 없는 도구 호출 수(SWE-agent 추적 등) |
+| `tool_outcome_pending` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name`, `tool.index`, `l0.tool_ends` | 결과를 못 본 호출 가운데 tool.end 가 아직 없는 것(도는 중). L0 를 안 받았으면 모름 |
 | `tool_errors` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | is_error=true 인 결과 수 |
 | `tool_failure_rate` | agent | OBSERVED | `tool_results`, `tool_errors` | tool_errors / tool_results |
 | `tool_targets` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 겨냥별 최근 결과: 미해결(마지막이 실패) · 회복(실패 뒤 성공) |
@@ -303,6 +304,12 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+  <- metric:tool_outcome_pending  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+       <- obs:tool.index
+       <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -323,6 +330,12 @@ state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+  <- metric:tool_outcome_pending  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+       <- obs:tool.index
+       <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target

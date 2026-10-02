@@ -105,6 +105,12 @@ state:execution_health  [execution-health-v3, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+  <- metric:tool_outcome_pending  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+       <- obs:tool.index
+       <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target
@@ -125,6 +131,12 @@ state:tool_execution_health  [tool-execution-health-v2, DEFINITIONAL]
        <- obs:tool.is_error
        <- obs:tool.target
        <- obs:tool.name
+  <- metric:tool_outcome_pending  [OBSERVED]
+       <- obs:tool.is_error
+       <- obs:tool.target
+       <- obs:tool.name
+       <- obs:tool.index
+       <- obs:l0.tool_ends
   <- metric:tool_targets  [OBSERVED]
        <- obs:tool.is_error
        <- obs:tool.target

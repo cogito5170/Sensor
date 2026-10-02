@@ -80,13 +80,27 @@ def r_context_pressure(M, prev, cfg):
 
 
 # ---- 실행 ----
+def _blind(prefix, n, pend):
+    """결과를 못 본 호출 n 개의 까닭(S23) -- 기다리는 중(tool.end 아직 없음)과 원천이 주지 않음(tool.end 는 왔다)을 가른다.
+    값은 둘 다 UNKNOWN 이고 이유 · 근거만 다르다. 가를 근거(L0 tool.end)가 없으면 그렇다고 말한다."""
+    p = pend.value if pend is not None else None
+    U, P = prefix + "tool_outcome_unobservable", prefix + "tool_outcome_pending"
+    if p is None:
+        return (f"도구 호출 {n} 개의 결과(is_error)를 못 봤다 -- 아직 안 왔는지 원천이 주지 않는지 모른다"
+                f"({pend.reason if pend is not None and pend.reason else 'L0 tool.end 를 받지 않았다'})", [U])
+    if p == n:
+        return f"도구 호출 {n} 개가 결과를 기다리는 중이다(tool.end 가 아직 없다)", [P]
+    if p == 0:
+        return f"도구 호출 {n} 개의 결과(is_error)를 원천이 주지 않는다(tool.end 는 왔다) -- 이 런타임 추적의 한계", [U]
+    return f"결과를 기다리는 호출 {p} 개 · 원천이 결과(is_error)를 주지 않은 호출 {n - p} 개", [P, U]
+
+
 def _health(prefix):
     def fn(M, prev, cfg):
         res, unobs, tg = M[prefix + "tool_results"], M[prefix + "tool_outcome_unobservable"], M[prefix + "tool_targets"]
         if res.value == 0:
             if unobs.value:
-                return _unk(f"도구 호출 {unobs.value} 개의 결과(is_error)를 이 런타임 추적에서 볼 수 없다",
-                            [prefix + "tool_outcome_unobservable"])
+                return _unk(*_blind(prefix, unobs.value, M.get(prefix + "tool_outcome_pending")))
             return _unk("본 도구 실행이 없다 -- 실패가 없었다는 증거도 없다", [prefix + "tool_results"])
         t = tg.value
         nu = len(t["unresolved"])     # tool_targets 의 입력 순서: 미해결 겨냥의 마지막 결과들, 그다음 회복된 겨냥의 마지막 결과들
@@ -226,11 +240,11 @@ RULES = [
          "맥락이 런타임이 선언한 경계(자동 압축 문턱 · 창)의 어느 쪽에 있나. 경계는 런타임 것이지 우리 것이 아니다",
          "다음 호출 전에 맥락을 줄일까", r_context_pressure),
     Rule("execution-health-v2", 2, "execution_health", A, Basis.DEFINITIONAL,
-         ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
+         ("tool_results", "tool_outcome_unobservable", "tool_outcome_pending", "tool_targets", "tool_failure_rate"), HEALTH,
          "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)",
          "다시 시도할까 · 사람에게 올릴까", _health(""), owner_layer="ASSESS"),
     Rule("tool-execution-health-v2", 2, "tool_execution_health", TL, Basis.DEFINITIONAL,
-         ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
+         ("tool_results", "tool_outcome_unobservable", "tool_outcome_pending", "tool_targets", "tool_failure_rate"), HEALTH,
          "도구 하나에 대한 execution_health -- 도구마다 따로", "이 도구를 계속 쓸까", _health(""), owner_layer="ASSESS"),
     Rule("completion-state-v1", 1, "completion_state", T, Basis.RUNTIME_DECLARED, ("termination", "activity"),
          ("RUNNING", "ENDED_NORMALLY", "ENDED_BY_LIMIT", "ENDED_WITH_ERROR"),

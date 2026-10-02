@@ -19,7 +19,7 @@
 | 경우 | 값 | 까닭 |
 |---|---|---|
 | (a) 그 실행의 사건(L0 사건 · 모델 호출)은 봤고 도구 레코드가 **하나도 없다** | `NO_TOOL_RUN_YET` (INFERRED, 근거 OBSERVED) | "도구 실행이 아직 없다" 는 관측된 사실이다. **건강을 말하지 않는다.** 시각은 그 실행에서 가장 늦게 본 관측(없음의 주장 -- BD-74). `input.received` · `turn.start` 도 그 관측이다(BD-89) |
-| (b) 도구 레코드가 있는데 결과(`is_error`)를 **못 본다** -- SWE-agent · 아직 도는 호출 | `UNKNOWN` | 판정할 근거가 없다(v2 와 같다). `observation` 글에서 오류를 읽어 내지 않는다(BD-10) |
+| (b) 도구 레코드가 있는데 결과(`is_error`)를 **못 본다** | `UNKNOWN` | 판정할 근거가 없다(v2 와 같다). `observation` 글에서 오류를 읽어 내지 않는다(BD-10). 이유 · 근거는 셋으로 갈린다(S23): **기다리는 중**(L0 에 그 호출의 `tool.end` 가 아직 없다 -- 근거 `tool_outcome_pending`) · **원천이 주지 않음**(`tool.end` 는 왔다 -- SWE-agent, 근거 `tool_outcome_unobservable`) · **모른다**(L0 를 받지 않았다). 시각(`t_result_ms`)으로 가르지 않는다 -- 시각이 없는 SWE-agent 가 모두 '기다리는 중' 이 된다 |
 | 그 실행의 사건을 하나도 못 봤다 | `UNKNOWN` | "아직 없다" 를 말할 관측이 없다 |
 
 `NOT_APPLICABLE` 로 쓰지 않는다 -- 실행 건강은 이 배치에서 **정의되고**, 아직 잴 근거가 없을 뿐이다. 실데이터의 첫 평가점: `eval/first_eval.py`.

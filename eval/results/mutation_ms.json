@@ -250,6 +250,31 @@
   "result": "RED"
  },
  {
+  "mutation": "S23: tool.end 를 보지 않는다(모두 기다리는 중)",
+  "file": "llmsensor/state/metrics.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S23: L0 없이도 기다리는 중으로 짐작",
+  "file": "llmsensor/state/metrics.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S23: 결과를 본 호출도 기다리는 중으로 센다",
+  "file": "llmsensor/state/metrics.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S23: 두 이유를 바꿔 단다",
+  "file": "llmsensor/state/rules.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S23: 근거를 가르지 않는다",
+  "file": "llmsensor/state/rules.py",
+  "result": "RED"
+ },
+ {
   "mutation": "S19: 결과를 못 본 도구가 있는데 NO_TOOL_RUN_YET",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"

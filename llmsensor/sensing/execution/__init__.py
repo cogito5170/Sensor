@@ -10,16 +10,18 @@ from ...trace import ToolCall, retries
 from .. import SensingPack
 from .._base import M, R, _m, canon
 from ...state.metrics import MetricDefinition
-from ..l0 import TIMEOUTS_CANON
+from ..l0 import TIMEOUTS_CANON, TOOL_ENDS_CANON
 
 A, T = EntityType.AGENT, EntityType.TASK
 NEW_CANON = {
     "tool.timed_out": ("tool_call", "timed_out", EntityType.TOOL, Basis.RUNTIME_DECLARED),
     "tool.interrupted": ("tool_call", "interrupted", EntityType.TOOL, Basis.OBSERVED),
+    "tool.index": ("tool_call", "tool_index", EntityType.TOOL, Basis.OBSERVED),     # S23: L0 tool.end 와 맞대는 열쇠
     "run.num_turns": ("run", "num_turns", EntityType.TASK, Basis.OBSERVED),
 }
 # S2: 시간 초과의 처분은 L0 tool.end 에서 **직접** 읽는다(BD-80 · CMD-S16) -- l0.timeouts(llmsensor/sensing/l0.py)
 NEW_CANON.update(TIMEOUTS_CANON)
+NEW_CANON.update(TOOL_ENDS_CANON)
 
 
 def _flag(L, field):
@@ -137,7 +139,8 @@ def r_execution_health_v3(Mx, prev, cfg):
 
 
 EXECUTION_HEALTH_V3 = Rule("execution-health-v3", 3, "execution_health", A, Basis.DEFINITIONAL,
-                           ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate", "activity",
+                           ("tool_results", "tool_outcome_unobservable", "tool_outcome_pending", "tool_targets",
+                            "tool_failure_rate", "activity",
                             "run_last_event"),
                            HEALTH + ("NO_TOOL_RUN_YET",),
                            "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다). "
@@ -150,6 +153,6 @@ PACK = SensingPack(
     "execution", "실행이 어떻게 끝났나 · 도구 결과에 풀리지 않은 실패 · 시간 초과 · 중단이 있었나",
     {**canon("tool.name", "tool.target", "tool.signature", "tool.is_error", "tool.output_chars", "call.stop_reason",
              "run.terminal_reason", "run.result_subtype", "run.is_error"), **NEW_CANON},
-    tuple(M[n] for n in ("tool_results", "tool_outcome_unobservable", "tool_errors", "tool_failure_rate", "tool_targets",
+    tuple(M[n] for n in ("tool_results", "tool_outcome_unobservable", "tool_outcome_pending", "tool_errors", "tool_failure_rate", "tool_targets",
                          "identical_call_max", "termination", "activity")) + NEW_METRICS,
     (EXECUTION_HEALTH_V3, R["tool_execution_health"], R["completion_state"], R["progress_state"], INTERRUPTION))

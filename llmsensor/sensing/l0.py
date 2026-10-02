@@ -54,15 +54,17 @@ RATE_LIMIT_KEYS = ("resets_at_ms", "declared_status", "limit_type", "utilization
 RATE_LIMIT_WINDOWS_CANON = {"l0.rate_limit_windows": ("l0", "provider.rate_limit_window", EntityType.TASK,
                                                       Basis.RUNTIME_DECLARED)}
 WINDOW_KEYS = ("utilization", "resets_at_ms")
+# S23: 도구 결과를 기다리는 중인가, 원천이 결과를 주지 않는가 -- tool.end 를 본 tool_index 들(시각과 무관하다: SWE-agent 는 시각이 없다)
+TOOL_ENDS_CANON = {"l0.tool_ends": ("l0", "tool.end", EntityType.TASK, Basis.OBSERVED)}
 NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_CANON, **RATE_LIMIT_CANON,
-             **RATE_LIMIT_WINDOWS_CANON}
+             **RATE_LIMIT_WINDOWS_CANON, **TOOL_ENDS_CANON}
 # 차례 끝을 **늘** 내는 것으로 알려진 원천(Telemetry 보고 baseline#1: cc_stream 의 result). cc_jsonl 은 Stop 훅이 있을 때만이라 넣지 않는다
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
 def batches(events) -> "list[Batch]":
     """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts, deps, tos, wins = [], {}, {}, {}, {}, {}
+    out, pending, acts, deps, tos, wins, ends = [], {}, {}, {}, {}, {}, {}
     for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
         ent = entity_id(T, run)
@@ -84,6 +86,11 @@ def batches(events) -> "list[Batch]":
             obs.append(Observation(f"{rid}#l0.runtime_actions", ent, "l0.runtime_actions", dict(a, **val), False, at, tb,
                                    src, Basis.RUNTIME_DECLARED))
         data = ev.get("data") or {}
+        if ev["type"] == "tool.end" and data.get("tool_index") is not None:
+            e = ends.setdefault(run, set())
+            e.add(data["tool_index"])
+            obs.append(Observation(f"{rid}#l0.tool_ends", ent, "l0.tool_ends", dict(val, indices=sorted(e)), False, at, tb,
+                                   src, Basis.OBSERVED))
         if ev["type"] == "tool.end" and data.get("timed_out") is True:
             c = tos.setdefault(run, {"timeouts": 0, "backgrounded": 0, "killed": 0, "unknown": 0})
             m = data.get("moved_to_background")

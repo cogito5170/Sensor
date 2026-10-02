@@ -56,7 +56,7 @@ class Unknown(unittest.TestCase):
         E = engine([mc(0, 100), tc(0, 0, 110, known=False)])
         v = val(E, A, "execution_health")
         self.assertEqual(v.status, Status.UNKNOWN)
-        self.assertIn("볼 수 없다", v.reason)
+        self.assertIn("모른다", v.reason)            # L0 없이 레코드만 -- 기다리는 중인지 원천 한계인지 가를 근거가 없다(S23)
 
     def test_missing_field_not_filled_from_older_call(self):
         bad = mc(1, 200)
