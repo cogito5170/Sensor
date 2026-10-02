@@ -32,6 +32,9 @@ tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`)
 신선도(STALE) · UNKNOWN 을 일급으로. 도출: [`docs/STATE_DERIVATION.md`](docs/STATE_DERIVATION.md) ·
 생애: [`docs/STATE_LIFECYCLE.md`](docs/STATE_LIFECYCLE.md) · 시연: `python3 eval/state_demo.py`.
 
+**상태 내보내기 계약(`llmsensor.state-export/1`)**: 상태 층 밖(cogito5170/DC 등)이 읽는 유일한 길 --
+`E.state_catalog()` · `E.export_state(entity, name, now)` · `E.subjects(run)` · `E.as_of(run)`. 자세히: [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md) 6.1 절.
+
 **MS 센싱 확장 · 결정 문맥: [`docs/MS_SENSING.md`](docs/MS_SENSING.md)** -- 센싱 팩 여섯(`llmsensor/sensing/`: token ·
 execution · latency · provider · cost · quality), 공급자 어댑터(`llmsensor/providers/`), Decision Context(`llmsensor/decision/context/`,
 목적별 투영 · 얼림 · explain), 참조 정책(`llmsensor/policy/`, MS 정책 아님). 결과: [`eval/RESULTS_ms_sensing.md`](eval/RESULTS_ms_sensing.md).

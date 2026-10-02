@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+from . import export as _export
 from .config import DEFAULT_CONFIG, StateConfig
 from .metrics import Ledger, tool_metric_defs
 from .model import (Basis, EntityType, Evidence, Freshness, Level, Lifecycle, LifecycleEvent, Proposal,
@@ -308,6 +309,21 @@ class StateEngine:
         ctx["uncertain"] = unc
         ctx["not_applicable"] = na
         return ctx
+
+    # ---------------- 내보내기 계약(상태 층 밖이 읽는 길) ----------------
+    EXPORT_CONTRACT = _export.CONTRACT
+
+    def state_catalog(self) -> dict:
+        return _export.catalog(self)
+
+    def export_state(self, ent, name, now=None) -> dict:
+        return _export.read(self, ent, name, now)
+
+    def subjects(self, run_id) -> dict:
+        return _export.subjects(self, run_id)
+
+    def as_of(self, run_id) -> dict:
+        return _export.as_of(self, run_id)
 
     # ---------------- 결정성 ----------------
     def snapshot(self) -> dict:

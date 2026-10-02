@@ -108,6 +108,27 @@ E.snapshot()                                      # 결정성 비교용
 `decision_context()` 에는 원 텔레메트리와 지표 값이 없다(시험이 `cache_read` · `tokens.` · `observation` 등이
 들어가지 않음을 본다). 상태 값 · 유효성 · 신선도 · 나이 · 한 줄 이유, 그리고 `uncertain` · `not_applicable` 목록뿐이다.
 
+### 6.1 내보내기 계약 -- 상태 층 밖이 읽는 유일한 길 (`llmsensor/state/export.py`)
+
+```python
+E.EXPORT_CONTRACT                          # "llmsensor.state-export/1"
+E.state_catalog()                          # 상태 정의: 실체 · 값 집합 · 근거 종류 · 규칙 id/판본 · TTL · 뜻 · 돕는 결정
+E.export_state(entity, name, now=None)     # 상태 하나 -- 기본 값의 새 사본(JSON 가능). 없으면 UNKNOWN
+E.subjects(run_id)                         # 역할 -> 실체(agent · task · runtime · tool 들)
+E.as_of(run_id)                            # 그 실행에서 본 가장 늦은 관측 시각 + 시각 기준
+```
+
+엔진 안(`current` · `view` · `reg` · `cfg` · `metrics`)은 바뀔 수 있고, 밖은 이 넷만 본다. 원 텔레메트리 · 지표 값은 없고(근거는
+지표 **id**), 판정기 · 참조 정책 · 결정 문맥(`llmsensor/decision`)의 출력도, LLM 제안도 없다. 칸을 빼거나 뜻을 바꾸면 판본을 올린다
+(`tests/test_state_export.py` 가 칸 · 판본을 붙든다).
+
+읽는 쪽: [cogito5170/DC](https://github.com/cogito5170/DC) 의 `SensorSource` 가 이 계약**만** 읽는다(엔진 안을 감추고 계약 넷만
+남겨도 같은 결정 문맥이 나오는지 DC 쪽 시험이 본다). Sensor 는 DC 를 import 하지 않는다. DC 는 아직 바뀌는 중이라, 두 저장소가
+맞물리는 자리를 이 계약 하나로 좁혀 두었다.
+
+**겹침:** 이 저장소의 `llmsensor/decision/context`(목적 넷 · 얼림 · explain)는 DC 저장소와 같은 일을 한다. 어느 쪽을 정본으로 둘지는
+아직 정하지 않았다 -- 그때까지 둘 다 이 계약(또는 같은 엔진)만 읽으면 서로를 깨지 않는다.
+
 ## 7. 예 -- 과제 §40 의 수로
 
 [`eval/results/state_demo.txt`](../eval/results/state_demo.txt) 전체. 줄이면:
