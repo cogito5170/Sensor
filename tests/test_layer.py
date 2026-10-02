@@ -90,6 +90,25 @@ class WithL0(unittest.TestCase):
             r = l0.compare("cc_jsonl", p)
             self.assertTrue(r["same"], r)
 
+    def test_inproc_ledger_passes_v4_schema(self):
+        """CMD-T3: 프로세스 안 계측 원장(source = inproc:<이름>)도 꼴 v4 를 통과한다. 이름 없는 inproc 는 아니다."""
+        from llmsensor.telemetry.schema import check, record
+        from telemetry import MemorySink, Recorder
+        from telemetry.compat import to_sensor_records
+        sink = MemorySink()
+        rec = Recorder("r1", sink, source="inproc:ms")
+        rec.run_start(model="m", provider="sim")
+        with rec.llm_call(0, "sim") as c:
+            c.response(usage={"input_tokens": 10, "output_tokens": 2}, usage_format="otel", finish_reason="stop")
+        with rec.tool("throttle", {"target": "srv07"}, call_index=0) as t:
+            t.result(is_error=False, output="ok")
+        rec.run_end(terminal_reason="executed", decision_ref="dec-1")
+        recs = to_sensor_records(sink.events)
+        self.assertEqual({r["source"] for r in recs}, {"inproc:ms"})
+        self.assertEqual([check(r) for r in recs], [[]] * len(recs))
+        self.assertTrue(check(record("run", "r", "inproc:")))
+        self.assertTrue(check(record("run", "r", "inproc:ms; rm")))
+
     def test_ledger_to_state(self):
         """L0 원장 -> 꼴 v3 -> State 정규화 묶음."""
         from llmsensor.state.normalize import from_telemetry
