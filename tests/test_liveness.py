@@ -65,9 +65,28 @@ class NoGuessing(unittest.TestCase):
         E = eng([ev("turn.start", 0, 0), ev("turn.continued", 1, 10)])
         self.assertEqual(lv(E).value, "IN_TURN")
 
-    def test_input_received_mid_turn_then_end_is_closed(self):
-        E = eng([ev("turn.start", 0, 0), ev("input.received", 1, 5), ev("turn.end", 2, 10)])
+    def test_input_absorbed_mid_turn_then_end_is_closed(self):
+        # 실데이터의 꼴: 차례 중 받은 알림이 그 차례에 흡수됐다(input.removed absorbed_mid_turn)
+        E = eng([ev("turn.start", 0, 0), ev("input.received", 1, 5), ev("input.removed", 2, 6), ev("turn.end", 3, 10)])
         self.assertEqual(lv(E).value, "AWAITING_INPUT")
+
+    def test_input_queued_mid_turn_keeps_it_open_after_end(self):
+        # 흡수되지 않고 줄에 남은 입력 -- 받은 순간부터 열림이므로 차례가 끝나도 그 입력이 기다린다
+        E = eng([ev("turn.start", 0, 0), ev("input.received", 1, 5), ev("turn.end", 2, 10)])
+        self.assertEqual(lv(E).value, "IN_TURN")
+        self.assertIn("처리하지 않은 입력 1", lv(E).reason)
+        E.ingest(batches([ev("turn.start", 3, 12)])[0])          # 그 입력을 받아 차례가 섰다
+        E.ingest(batches([ev("turn.end", 4, 20)])[0])
+        self.assertEqual(lv(E).value, "AWAITING_INPUT")
+
+    def test_removed_pending_input_closes(self):
+        E = eng([ev("turn.start", 0, 0), ev("turn.end", 1, 10), ev("input.received", 2, 20), ev("input.removed", 3, 25)])
+        self.assertEqual(lv(E).value, "AWAITING_INPUT")
+
+    def test_one_of_two_pending_inputs_removed_stays_open(self):
+        E = eng([ev("turn.start", 0, 0), ev("turn.end", 1, 10), ev("input.received", 2, 20), ev("input.received", 3, 21),
+                 ev("input.removed", 4, 25)])
+        self.assertEqual(lv(E).value, "IN_TURN")
 
     def test_pending_input_opens_the_turn(self):
         # 입력을 받은 순간부터 열림 -- 받아 놓고 처리를 시작하지 않은 입력의 침묵도 잰다
