@@ -2,11 +2,12 @@
 
 - 호출마다 토큰 × 공급자 단가표(pricing.py, PROVIDER_DECLARED, 두 모형 모두 런타임 보고값과 정확히 같음을 확인)
 - 실행 누적 추정 · 런타임 보고값과의 차(보고 시각까지의 호출만 -- Claude Code cost-state 는 중간 스냅숏이다)
-- 상태: resource_state **v2**(baseline BD-39) · resource_pressure(v1, 뜻 그대로). **예산 문턱을 기본값으로 넣지 않는다.**
+- 상태: resource_state **v3**(baseline BD-39 · BD-64) · resource_pressure(v1, 뜻 그대로). **예산 문턱을 기본값으로 넣지 않는다.**
 
-resource-state-v2 (BD-39, baseline#3 CMD-S3):
+resource-state-v3 (BD-39 · BD-64, baseline#3 CMD-S3):
     예산 없음                         -> NOT_APPLICABLE (v1 과 같다. UNKNOWN 이 아니다 -- 예산은 상태를 정의하는 문턱이다)
-    하한 ≥ 예산                       -> BUDGET_EXHAUSTED, permanent(비용은 줄지 않는다)
+    보고된 비용 ≥ 예산                -> BUDGET_EXHAUSTED, permanent(비용은 줄지 않는다) -- v3, BD-64
+    하한 ≥ 예산                       -> BUDGET_EXHAUSTED, 영구 아님(단가표 추정이 들었다. 더 낮은 덮는 보고가 오면 뒤집힌다)
         하한 = max(런타임 보고 비용, 단가가 있는 호출의 합) -- 단가 ≥ 0 이라 부분 합도 하한이다
                (보고가 모든 호출을 덮으면 하한 = 보고. 추정과 어긋나면 그 차는 cost_estimate_error 가 말한다)
     합을 안다 그리고 합 < 예산         -> WITHIN_BUDGET
@@ -138,19 +139,27 @@ def r_resource_state_v2(Mx, prev, cfg):
     if cb.value is None:
         return _unk("비용을 아직 못 봤다: " + cb.reason, ["cost_bounds"])
     v = cb.value
+    if v["reported"] is not None and v["reported"] >= b:
+        # 영구는 되돌릴 수 없는 사실에만(BD-64): 런타임이 **보고한** 비용 ≥ 예산. 비용은 줄지 않는다
+        return _inf("BUDGET_EXHAUSTED", f"보고된 비용 ${v['reported']:.6f} ≥ 예산 ${b} -- 이후에도 참", ["cost_bounds"],
+                    final=True)
     if v["lower"] >= b:
-        return _inf("BUDGET_EXHAUSTED", f"비용 하한 ${v['lower']:.6f} ≥ 예산 ${b} -- 비용은 줄지 않으므로 이후에도 참"
-                    f" (단가표 {v['pricing']})", ["cost_bounds"], final=True)
+        # 단가표 추정으로 선 소진은 영구가 아니다 -- 증명은 단가가 정확하다는 전제 위에 있다(BD-64)
+        return _inf("BUDGET_EXHAUSTED", f"비용 하한 ${v['lower']:.6f}(단가표 {v['pricing']} 추정 포함) ≥ 예산 ${b}",
+                    ["cost_bounds"])
     if v["total"] is not None:
-        return _inf("WITHIN_BUDGET", f"비용 ${v['total']:.6f}({v['source']}) < 예산 ${b}", ["cost_bounds"])
+        why = f"비용 ${v['total']:.6f}({v['source']}) < 예산 ${b}"
+        if prev == "BUDGET_EXHAUSTED":    # 추정 소진을 더 낮은 보고가 뒤집었다 -- 단가표가 과대였다(ASSESS 의 일로 남김)
+            why += (f" -- 앞선 추정 소진을 보고가 뒤집었다: 단가표 {v['pricing']} 과대 의심(cost_estimate_error 를 볼 것)")
+        return _inf("WITHIN_BUDGET", why, ["cost_bounds"])
     why = (f"단가 없는 호출 {v['unpriced_calls']} 개" if v["unpriced_calls"] else "보고 비용이 모든 호출을 덮는지 모른다")
     return _unk(f"{why} -- 합을 모른다. 하한 ${v['lower']:.6f} < 예산 ${b} 이라 소진도 증명되지 않는다", ["cost_bounds"])
 
 
-RESOURCE_V2 = Rule("resource-state-v2", 2, "resource_state", A, Basis.DEFINITIONAL, ("cost_bounds",),
+RESOURCE_V3 = Rule("resource-state-v3", 3, "resource_state", A, Basis.DEFINITIONAL, ("cost_bounds",),
                    ("WITHIN_BUDGET", "BUDGET_EXHAUSTED"),
-                   "비용이 설정 예산 안인가 -- 실행 중에도(공급자 단가 × 토큰). 하한 ≥ 예산이면 소진(영구), 합을 알 때만 예산 안. "
-                   "예산이 없으면 NOT_APPLICABLE (BD-39)", "멈출까", r_resource_state_v2)
+                   "비용이 설정 예산 안인가 -- 실행 중에도(공급자 단가 × 토큰). 하한 ≥ 예산이면 소진, 보고된 비용 ≥ 예산일 때만 영구. "
+                   "합을 알 때만 예산 안. 예산이 없으면 NOT_APPLICABLE (BD-39 · BD-64)", "멈출까", r_resource_state_v2)
 RESOURCE_V1 = R["resource_state"]       # 회귀 시험용으로 남긴다
 
 NEW_METRICS = (
@@ -167,4 +176,4 @@ PACK = SensingPack(
     "cost", "그 사용이 청구 기준으로 얼마인가(공급자 단가표) · 설정 예산에 대해 어디인가",
     {**canon("run.cost_usd"), **NEW_CANON},
     tuple(M[n] for n in ("cost_usd", "cost_fraction", "cost_margin")) + NEW_METRICS,
-    (RESOURCE_V2, R["resource_pressure"]))
+    (RESOURCE_V3, R["resource_pressure"]))

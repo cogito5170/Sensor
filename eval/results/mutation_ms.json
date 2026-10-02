@@ -135,7 +135,12 @@
   "result": "RED"
  },
  {
-  "mutation": "cost v2: 소진을 영구로 두지 않는다",
+  "mutation": "cost v3: 보고된 소진을 영구로 두지 않는다",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost v3: 추정 소진을 영구로(BD-64 위반)",
   "file": "llmsensor/sensing/cost/__init__.py",
   "result": "RED"
  },

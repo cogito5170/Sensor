@@ -76,9 +76,9 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `agent.resource_state` -- `resource-state-v2` (v2, DEFINITIONAL)
+### `agent.resource_state` -- `resource-state-v3` (v3, DEFINITIONAL)
 
-- **뜻**: 비용이 설정 예산 안인가 -- 실행 중에도(공급자 단가 × 토큰). 하한 ≥ 예산이면 소진(영구), 합을 알 때만 예산 안. 예산이 없으면 NOT_APPLICABLE (BD-39)
+- **뜻**: 비용이 설정 예산 안인가 -- 실행 중에도(공급자 단가 × 토큰). 하한 ≥ 예산이면 소진, 보고된 비용 ≥ 예산일 때만 영구. 합을 알 때만 예산 안. 예산이 없으면 NOT_APPLICABLE (BD-39 · BD-64)
 - **돕는 결정**: 멈출까
 - **값**: `WITHIN_BUDGET` · `BUDGET_EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
 - **입력 지표**: `cost_bounds`
@@ -320,7 +320,7 @@ state:progress_state  [progress-state-v1, OPERATOR_ASSUMED]
        <- obs:run.result_subtype
        <- obs:run.terminal_reason
        <- obs:run.is_error
-state:resource_state  [resource-state-v2, DEFINITIONAL]
+state:resource_state  [resource-state-v3, DEFINITIONAL]
   <- metric:cost_bounds  [PROVIDER_DECLARED]
        <- obs:call.model
        <- obs:tokens.input_uncached
