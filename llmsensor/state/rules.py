@@ -45,6 +45,8 @@ class Rule:
     fn: Callable = field(compare=False, repr=False)
     # 평가 시각(now)에 기대는 값 -- 그 순간에만 참이다. 평가 뒤 시각으로 질의하면 STALE(엔진 view), 다시 재려면 advance()
     clock_values: tuple = ()
+    # 소유 층 표시(BD-35 · BD-52). 건강 성격 상태는 "ASSESS" -- 이름 · 값은 그대로, Health 저장소가 서면 옮긴다. None = 상태 층(L2)
+    owner_layer: "str | None" = None
 
 
 def _inf(v, reason, ev, final=False, decided_by=()):
@@ -223,10 +225,10 @@ RULES = [
     Rule("execution-health-v2", 2, "execution_health", A, Basis.DEFINITIONAL,
          ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
          "도구 실행 결과에 풀리지 않은 실패가 있나. 겨냥마다 마지막 결과로 본다(실패율 문턱이 아니다)",
-         "다시 시도할까 · 사람에게 올릴까", _health("")),
+         "다시 시도할까 · 사람에게 올릴까", _health(""), owner_layer="ASSESS"),
     Rule("tool-execution-health-v2", 2, "tool_execution_health", TL, Basis.DEFINITIONAL,
          ("tool_results", "tool_outcome_unobservable", "tool_targets", "tool_failure_rate"), HEALTH,
-         "도구 하나에 대한 execution_health -- 도구마다 따로", "이 도구를 계속 쓸까", _health("")),
+         "도구 하나에 대한 execution_health -- 도구마다 따로", "이 도구를 계속 쓸까", _health(""), owner_layer="ASSESS"),
     Rule("completion-state-v1", 1, "completion_state", T, Basis.RUNTIME_DECLARED, ("termination", "activity"),
          ("RUNNING", "ENDED_NORMALLY", "ENDED_BY_LIMIT", "ENDED_WITH_ERROR"),
          "런타임이 실행을 어떻게 끝냈다고 선언했나. **과업 성공이 아니다**(SWE-bench: 정상 제출 243 중 해결 69 이하)",
@@ -245,5 +247,5 @@ RULES = [
     Rule("runtime-reliability-v2", 2, "runtime_reliability", R, Basis.DEFINITIONAL, ("api_error", "stop_reasons"),
          ("NO_FAILURE_OBSERVED", "FAILURE_OBSERVED"),
          "API 오류 보고 · 한도에 잘린 생성이 있었나. '실패를 못 봤다' 와 '건강하다' 를 가른다",
-         "다른 공급자로 돌릴까", r_reliability),
+         "다른 공급자로 돌릴까", r_reliability, owner_layer="ASSESS"),
 ]

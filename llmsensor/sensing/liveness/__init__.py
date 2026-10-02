@@ -29,7 +29,6 @@ from .._base import _m
 from .l0 import ENDS_ALWAYS, NEW_CANON, batches  # noqa: F401  (batches: L0 사건 -> 관측 묶음)
 
 T = EntityType.TASK
-OWNER_LAYER = "ASSESS"      # BD-35 · BD-52: 건강 성격 상태. Health 저장소가 서면 옮긴다
 
 
 def _ev(L, name):
@@ -134,9 +133,9 @@ NEW_METRICS = (
 LIVENESS = Rule("liveness-state-v2", 2, "liveness_state", T, Basis.DEFINITIONAL,
                 ("stream_end", "termination", "turn_open", "silence_ms"),
                 ("ENDED", "ENDED_WITHOUT_TERMINAL", "AWAITING_INPUT", "IN_TURN", "ACTIVE", "STALLED"),
-                "[ASSESS] 대상이 아직 움직이나 -- L0 차례 경계 사건에서. 끝남 · 끝 신호 없이 닫힘 · 입력 대기 · 차례 중은 문턱 없이, "
+                "대상이 아직 움직이나 -- L0 차례 경계 사건에서. 끝남 · 끝 신호 없이 닫힘 · 입력 대기 · 차례 중은 문턱 없이, "
                 "ACTIVE · STALLED 는 운영자 무음 문턱이 있을 때만(값마다 근거가 따로 남는다). DEAD 는 내지 않는다",
-                "기다릴까 · 끊고 다시 띄울까", r_liveness, clock_values=("ACTIVE", "STALLED"))
+                "기다릴까 · 끊고 다시 띄울까", r_liveness, clock_values=("ACTIVE", "STALLED"), owner_layer="ASSESS")
 
 PACK = SensingPack("liveness", "대상이 지금 움직이고 있나 -- 끝났나 · 입력을 기다리나 · 차례 중 멈췄나(멈춤은 운영자 문턱이 있을 때만)",
                    NEW_CANON, NEW_METRICS, (LIVENESS,))

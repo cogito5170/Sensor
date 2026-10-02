@@ -85,7 +85,7 @@ NEW_METRICS = (
 INTERRUPTION = Rule("execution-interruption-v2", 2, "execution_interruption", A, Basis.RUNTIME_DECLARED,
                     ("tool_timeouts", "tool_interruptions"), ("TIMEOUT_OBSERVED", "INTERRUPTED_OBSERVED", "NONE_OBSERVED"),
                     "런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다",
-                    "시간 제한을 늘릴까 · 배경으로 돌릴까", r_interruption)
+                    "시간 제한을 늘릴까 · 배경으로 돌릴까", r_interruption, owner_layer="ASSESS")
 
 PACK = SensingPack(
     "execution", "실행이 어떻게 끝났나 · 도구 결과에 풀리지 않은 실패 · 시간 초과 · 중단이 있었나",
