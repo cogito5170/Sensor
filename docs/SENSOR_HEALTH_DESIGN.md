@@ -13,6 +13,20 @@
 
 근거는 `docs/MS_HEALTH_INVENTORY.md` 의 재고(원천에 무엇이 실제로 있었나)다. 이 문서의 판정 규칙은 그 재고 결과에 맞춘다.
 
+## 구현 현황 (2026-10-02, baseline#3 지시대로)
+
+| # | 상태 · 지표 | 커밋 | 입력(L0 이름, BD-47) | 실데이터에서 본 값 |
+|---|---|---|---|---|
+| S1 | `liveness_state` v2 | `d2ae4d7` · `55ee2c3` | `input.received` · `input.removed` · `turn.start` · `turn.end` · `turn.continued` · `source.closed` · `run.end` · `heartbeat` | IN_TURN · AWAITING_INPUT · ENDED · UNKNOWN |
+| S2 | `execution_interruption` v3 | `bc53dbb` | `tool.end.timed_out` · `tool.end.moved_to_background`(꼴 v3 에 아직 안 실림 -- 평가 덧대기) | TIMEOUT_BACKGROUNDED · TIMEOUT_OBSERVED |
+| S3 | `dependency_fault` v1 | `a61ee64` | `llm.response` · `llm.error`(error_code · http_status) · `dependency.probe` | NO_FAULT_DECLARED |
+| S4 | `quota_headroom` · `quota_time_to_reset_ms`, `rate_limit_state` v3 | `6b9b095` · `8c7062b` | `provider.rate_limit`(utilization · declared_status · resets_at_ms -- 마지막 것은 꼴 v3 에 아직 안 실림) | LIMITED · WARNING |
+| S5 | `runtime_actions`(지표) | `64288ce` | `runtime.compaction` · `tool.end.moved_to_background` · `input.removed` · `run.end.permission_denials` | 압축 1 · 백그라운드 1 · 입력 빼기 10 |
+| S6 | `action_state` -- **입력 계약만**(아래) | -- | `action.dispatch` · `action.result` | -- |
+| S7 | `resource_state` v3 | `597e74b` · `21c9113` | 기존(토큰 × 단가표, 보고 비용) | 기본 NOT_APPLICABLE |
+
+실데이터 확인은 `eval/l1_on_l0.py`(L0 사건 -> 꼴 v3 레코드 + L0 묶기 -> 상태, 내용 없이 수만)로 한다.
+
 ## 0. 무엇을 짓고 무엇을 안 짓나
 
 | # | 센서 | 꼴 | 새 상태? |
@@ -206,6 +220,17 @@ v1 값은 `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UN
 - **모델이 쓴 요약**(예: `post_turn_summary.status_category`)은 관측이 아니라 판단이다. 이 지표에 넣지 않는다.
 
 ### S6 `action_state` -- 우리 정책의 행동이 실제로 어떻게 됐나
+
+> **입력 계약을 L0 이름으로 바꿨다(X-4, baseline#3).** 실행 주체는 Action 저장소의 실행기다(BD-25).
+>
+> - 입력: `action.dispatch {action_ref, decision_ref, action_type, target(해시)}` · `action.result {action_ref, is_error, exit_code, status_code, exception(종류), output_chars, elapsed_ms}`
+> - 옛 가칭 `action.decision_id` 는 `action.dispatch.decision_ref`(= MS `DecisionRecord.id`)로 바뀐다.
+> - L0 에는 PROPOSED · ACCEPTED 사건이 없다(그것은 결정 원장의 일). 그래서 L1 이 이 사건들에서 낼 수 있는 값은 셋과 UNKNOWN 뿐이다.
+>   - STARTED(dispatch 만)
+>   - COMPLETED(result, is_error=false)
+>   - FAILED(result, is_error=true)
+> - 아래 원안의 값 PROPOSED · ACCEPTED · CANCELLED 는 L0 사건이 생기기 전에는 내지 않는다.
+> - **짓지 않았다**(CMD-S4: 입력 계약만).
 
 **지금은 우리 정책의 결정을 실행하는 주체가 없다.** 그래서 센서는 **실행 주체가 내야 할 기록의 꼴**(§1 `action.*`)만 정하고 판정한다. 실행 주체는 누구든 그 꼴만 맞추면 된다.
 
