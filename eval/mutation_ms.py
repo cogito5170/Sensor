@@ -54,11 +54,11 @@ M = [
      '            fr = Freshness.STALE              # 그 값은', '            pass  # fr = Freshness.STALE              # 그 값은'),
     ('liveness: 차례 끝을 안 내는 원천(cc_jsonl 훅 없음)에서 열림으로 짐작', 'llmsensor/sensing/liveness/__init__.py',
      '    if end is None and src not in ENDS_ALWAYS:', '    if False:'),
-    ('liveness: turn.continued 를 차례 끝으로', 'llmsensor/sensing/liveness/l0.py',
+    ('liveness: turn.continued 를 차례 끝으로', 'llmsensor/sensing/l0.py',
      '    "turn.continued": ("l0.turn_continued", Basis.OBSERVED),', '    "turn.continued": ("l0.turn_end", Basis.OBSERVED),'),
     ('liveness: turn.end 를 보지 않고 차례가 돈다고', 'llmsensor/sensing/liveness/__init__.py',
      '    running = start is not None and (end is None or start.value["seq"] > end.value["seq"])', '    running = start is not None'),
-    ('liveness: input.removed(흡수 · 취소)를 무시한다', 'llmsensor/sensing/liveness/l0.py',
+    ('liveness: input.removed(흡수 · 취소)를 무시한다', 'llmsensor/sensing/l0.py',
      'max(0, n - 1) if ev["type"] == "input.removed"', 'n if ev["type"] == "input.removed"'),
     ('cost v2: 예산 없음을 UNKNOWN 으로(BD-39 위반)', 'llmsensor/sensing/cost/__init__.py',
      'return Result(None, Status.NOT_APPLICABLE, "예산이 설정되지 않았다", ("cost_bounds",))', 'return _unk("예산이 설정되지 않았다", ["cost_bounds"])'),
@@ -90,6 +90,10 @@ M = [
      'return _m(ctx, "quota_headroom", None, (), reason=', 'return _m(ctx, "quota_headroom", 1.0, (), reason='),
     ('S4: 시간 기준이 다른 시각에서 뺀다', 'llmsensor/sensing/provider/__init__.py',
      '    if now is None or L.time_base != "unix_ms":', '    if now is None:'),
+    ('S5: 본 적 없는 행동을 0 회로 미리 채운다', 'llmsensor/sensing/l0.py',
+     '        a = _action(acts.setdefault(run, {}), ev)', '        a = _action(acts.setdefault(run, {"compaction": 0}), ev)'),
+    ('S5: 행동 사건이 없으면 빈 값(0)으로', 'llmsensor/sensing/actions/__init__.py',
+     'return _m(ctx, "runtime_actions", None, (), reason=', 'return _m(ctx, "runtime_actions", {}, (), reason='),
 ]
 
 

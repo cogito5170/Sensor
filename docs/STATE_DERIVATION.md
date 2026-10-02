@@ -234,6 +234,7 @@
 | `stream_end` | task | OBSERVED | `l0.run_end`, `l0.source_closed` | 종료 사건(run.end)을 받았나 · 흐름이 닫혔나(source.closed) |
 | `turn_open` | task | OBSERVED | `l0.turn_start`, `l0.turn_end`, `l0.pending_inputs` | 차례가 열려 있나(입력 받음 ~ 차례 끝, 원천 순서로). 끝을 낸다는 근거 없는 원천에서는 None |
 | `silence_ms` | task | OBSERVED | `l0.last_event`, `l0.heartbeat`, `l0.input_received`, `l0.turn_start`, `l0.turn_end` | 평가 시각 − 마지막 활동(어떤 사건 또는 런타임 heartbeat) |
+| `runtime_actions` | task | RUNTIME_DECLARED | `l0.runtime_actions` | 런타임 자신의 행동 수(압축 · 백그라운드 이동 · 입력 빼기 · 권한 거부) · 마지막 압축 전후 토큰 |
 
 ## 정준 관측 (층 1)
 

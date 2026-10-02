@@ -101,7 +101,7 @@
  },
  {
   "mutation": "liveness: turn.continued 를 차례 끝으로",
-  "file": "llmsensor/sensing/liveness/l0.py",
+  "file": "llmsensor/sensing/l0.py",
   "result": "RED"
  },
  {
@@ -111,7 +111,7 @@
  },
  {
   "mutation": "liveness: input.removed(흡수 · 취소)를 무시한다",
-  "file": "llmsensor/sensing/liveness/l0.py",
+  "file": "llmsensor/sensing/l0.py",
   "result": "RED"
  },
  {
@@ -187,6 +187,16 @@
  {
   "mutation": "S4: 시간 기준이 다른 시각에서 뺀다",
   "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S5: 본 적 없는 행동을 0 회로 미리 채운다",
+  "file": "llmsensor/sensing/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S5: 행동 사건이 없으면 빈 값(0)으로",
+  "file": "llmsensor/sensing/actions/__init__.py",
   "result": "RED"
  }
 ]

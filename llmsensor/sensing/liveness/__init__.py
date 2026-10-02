@@ -27,7 +27,8 @@ from ...state.model import Basis, EntityType, Status
 from ...state.rules import Result, Rule, _unk
 from .. import SensingPack
 from .._base import _m
-from .l0 import ENDS_ALWAYS, NEW_CANON, batches  # noqa: F401  (batches: L0 사건 -> 관측 묶음)
+from ..l0 import ENDS_ALWAYS, batches  # noqa: F401  (batches: L0 사건 -> 관측 묶음)
+from ..l0 import LIVENESS_CANON as NEW_CANON
 
 T = EntityType.TASK
 
