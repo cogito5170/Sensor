@@ -1,0 +1,258 @@
+{
+ "cc_stream": {
+  "runs": 12,
+  "with_windows": 12,
+  "window_sets": {
+   "five_hour,seven_day": 12
+  },
+  "headroom_valued": 12,
+  "deciding_window": {
+   "seven_day": 12
+  },
+  "headroom_differs_from_v1": 0,
+  "time_to_reset_valued": 0,
+  "resets_at_valued": 12,
+  "resets_at_agrees_with_window_event": 12,
+  "time_to_reset_none_why": {
+   "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)": 12
+  },
+  "declared_resets_carried": 24,
+  "per_run": {
+   "t01_create_test": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t02_fix_bug": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t03_search": {
+    "window_events": 4,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t04_impossible": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t05_long_write": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t06_csv_mean": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t07_flaky_retry": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t08_max_turns": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t09_big_read": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t10_rename": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t11_timeout": {
+    "window_events": 4,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   },
+   "t12_bad_args": {
+    "window_events": 2,
+    "windows": [
+     "five_hour",
+     "seven_day"
+    ],
+    "headroom": 0.2,
+    "deciding": [
+     "seven_day"
+    ],
+    "v1_headroom": 0.2,
+    "time_to_reset": null,
+    "resets_at": 1790884800000,
+    "resets_at_agrees": true,
+    "time_to_reset_why": "평가 시각이 unix ms 가 아니다(time_base=monotonic_ms)",
+    "resets_declared": 2
+   }
+  }
+ },
+ "cc_jsonl": {
+  "runs": 1,
+  "with_windows": 0,
+  "window_sets": {
+   "": 1
+  },
+  "headroom_valued": 0,
+  "deciding_window": {
+   "-": 1
+  },
+  "headroom_differs_from_v1": 0,
+  "time_to_reset_valued": 1,
+  "resets_at_valued": 1,
+  "resets_at_agrees_with_window_event": 0,
+  "time_to_reset_none_why": {},
+  "declared_resets_carried": 0,
+  "per_run": {
+   "self_s20": {
+    "window_events": 0,
+    "windows": [],
+    "headroom": null,
+    "deciding": [],
+    "v1_headroom": null,
+    "time_to_reset": 0,
+    "resets_at": 1790893200000,
+    "resets_at_agrees": false,
+    "time_to_reset_why": null,
+    "resets_declared": 0
+   }
+  }
+ }
+}

@@ -33,7 +33,7 @@ L += ["### 종료 선언 표 (`completion-state-v1`) -- 표에 없는 문자열�
 L += [f"| {k} | `{v}` | `{s}` |" for (k, v), s in TERMINATION_MAP.items()]
 L += ["", f"한도에 잘린 생성으로 보는 멈춤 사유(`runtime-reliability-v1`): {', '.join(f'`{x}`' for x in ABNORMAL_STOPS)}", "",
       "## 지표 (층 2)", "", "| 지표 | 실체 | 근거 | 입력 | 정의 |", "|---|---|---|---|---|"]
-L += [f"| `{m.name}` | {m.entity.value} | {m.basis.value} | {', '.join(f'`{i}`' for i in m.inputs)} | {m.doc} |"
+L += [f"| `{m.name}`{f' (v{m.version})' if m.version != 1 else ''} | {m.entity.value} | {m.basis.value} | {', '.join(f'`{i}`' for i in m.inputs)} | {m.doc} |"
       for m in REGISTRY.metrics.values()]
 L += ["", "## 정준 관측 (층 1)", "", "| 정준 이름 | 텔레메트리 칸 | 실체 | 근거 |", "|---|---|---|---|"]
 L += [f"| `{k}` | {kind}.`{fld}` | {et.value} | {b.value} |" for k, (kind, fld, et, b) in CANONICAL.items()]

@@ -238,8 +238,10 @@ v2 + 도구 호출이 **아직 없음**을 따로 낸다(BD-84). 결과를 못 �
 | `api_time_share` | task | OBSERVED | `run.api_duration_ms`, `run.duration_ms` | API 시간 / 전체 시간 |
 | `api_retry_time` | task | OBSERVED | `run.api_duration_ms`, `run.api_duration_without_retries_ms` | API 재시도에 쓴 시간 |
 | `rate_limit_declared` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_status`, `runtime.rate_limit_threshold` | 런타임이 선언한 요금 한도 상태와 그 문턱 |
-| `quota_headroom` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_utilization` | 1 − 선언된 한도 사용률(계정 범위 -- 이 실행의 소모가 아니다) |
-| `quota_time_to_reset_ms` | runtime | RUNTIME_DECLARED | `l0.rate_limit` | 선언된 한도 창이 다시 차기까지(평가 시각이 unix ms 일 때만) |
+| `quota_headroom` (v2) | runtime | RUNTIME_DECLARED | `runtime.rate_limit_utilization`, `l0.rate_limit_windows` | 선언된 창 가운데 가장 작은 여유(창이 없으면 1 − 선언된 한도 사용률). 계정 범위 -- 이 실행의 소모가 아니다 |
+| `quota_time_to_reset_ms` (v2) | runtime | RUNTIME_DECLARED | `l0.rate_limit`, `l0.rate_limit_windows` | 가장 작은 여유를 정한 창이 다시 차기까지(창이 없으면 선언된 한도 창). 평가 시각이 unix ms 일 때만 |
+| `quota_resets_at_ms` | runtime | RUNTIME_DECLARED | `l0.rate_limit`, `l0.rate_limit_windows` | 가장 작은 여유를 정한 창(창이 없으면 선언된 한도 창)의 선언된 재설정 시각(unix ms) 그대로 -- 평가 시각이 필요 없다(BD-90) |
+| `quota_windows` | runtime | RUNTIME_DECLARED | `l0.rate_limit_windows` | 창마다 여유 · 선언된 재설정 시각 · 남은 시간 -- 창을 고르지 않는다 |
 | `call_cost` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 마지막 호출의 비용 성분($) -- 토큰 × 공급자 단가 |
 | `cost_estimate` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 실행 누적 비용 추정($) |
 | `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |

@@ -36,6 +36,7 @@ class MetricDefinition:
     basis: Basis
     doc: str
     fn: Callable = field(compare=False, repr=False)
+    version: int = 1         # 정의를 바꾸면 올린다(같은 이름 · 다른 뜻을 숨기지 않는다)
 
 
 def _m(ctx, name, value, inputs, basis=Basis.OBSERVED, status=None, reason=""):

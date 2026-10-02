@@ -48,14 +48,21 @@ DEPENDENCY_CANON = {DEP_PREFIX + "*": ("l0", "llm.* · dependency.probe", Entity
 TIMEOUTS_CANON = {"l0.timeouts": ("l0", "tool.end", EntityType.TASK, Basis.RUNTIME_DECLARED)}
 RATE_LIMIT_CANON = {"l0.rate_limit": ("l0", "provider.rate_limit", EntityType.TASK, Basis.RUNTIME_DECLARED)}
 RATE_LIMIT_KEYS = ("resets_at_ms", "declared_status", "limit_type", "utilization")
-NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_CANON, **RATE_LIMIT_CANON}
+# S4 창(CMD-S21): provider.rate_limit_window 는 같은 원천 줄의 provider.rate_limit 바로 뒤에 창마다 하나씩 온다(Telemetry CMD-T15).
+#   l0.rate_limit_windows  마지막 provider.rate_limit 뒤에 선언된 창들 {창 이름: {utilization, resets_at_ms, seq, at, 못 본 칸}}.
+#   새 provider.rate_limit 가 오면 앞 묶음을 비운다(창 없는 보고 뒤에 낡은 창이 남지 않게). 창을 고르지 않는다 -- 지표가 정한다
+RATE_LIMIT_WINDOWS_CANON = {"l0.rate_limit_windows": ("l0", "provider.rate_limit_window", EntityType.TASK,
+                                                      Basis.RUNTIME_DECLARED)}
+WINDOW_KEYS = ("utilization", "resets_at_ms")
+NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_CANON, **RATE_LIMIT_CANON,
+             **RATE_LIMIT_WINDOWS_CANON}
 # 차례 끝을 **늘** 내는 것으로 알려진 원천(Telemetry 보고 baseline#1: cc_stream 의 result). cc_jsonl 은 Stop 훅이 있을 때만이라 넣지 않는다
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
 def batches(events) -> "list[Batch]":
     """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts, deps, tos = [], {}, {}, {}, {}
+    out, pending, acts, deps, tos, wins = [], {}, {}, {}, {}, {}
     for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
         ent = entity_id(T, run)
@@ -89,6 +96,20 @@ def batches(events) -> "list[Batch]":
             v["unobserved"] = sorted(k for k in ev.get("unobserved", ()) if k in RATE_LIMIT_KEYS)
             obs.append(Observation(f"{rid}#l0.rate_limit", ent, "l0.rate_limit", dict(v, **val), False, at, tb, src,
                                    Basis.RUNTIME_DECLARED))
+            if wins.get(run):                                # 앞 보고의 창 묶음을 비운다 -- 이 보고의 창은 뒤에 온다
+                wins[run] = {}
+                obs.append(Observation(f"{rid}#l0.rate_limit_windows", ent, "l0.rate_limit_windows",
+                                       dict(val, windows={}, rate_limit_seq=ev["seq"]), False, at, tb, src,
+                                       Basis.RUNTIME_DECLARED))
+        if ev["type"] == "provider.rate_limit_window" and data.get("window_name") is not None:
+            w = {k: data.get(k) for k in WINDOW_KEYS}
+            w.update(seq=ev["seq"], at=at, unobserved=sorted(k for k in ev.get("unobserved", ()) if k in WINDOW_KEYS),
+                     reported_null=sorted(k for k in ev.get("reported_null", ()) if k in WINDOW_KEYS))
+            cur = dict(wins.get(run) or {})
+            cur[str(data["window_name"])] = w
+            wins[run] = cur
+            obs.append(Observation(f"{rid}#l0.rate_limit_windows", ent, "l0.rate_limit_windows", dict(val, windows=cur),
+                                   False, at, tb, src, Basis.RUNTIME_DECLARED))
         d = _dependency(deps.setdefault(run, {}), ev)
         if d is not None:
             name, v = d

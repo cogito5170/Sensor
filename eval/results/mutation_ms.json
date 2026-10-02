@@ -215,6 +215,41 @@
   "result": "RED"
  },
  {
+  "mutation": "S21: 첫 창을 고른다",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 마지막 창을 고른다",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 사용률을 못 본 창을 빼고 최소",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 창 없는 보고 뒤에 낡은 창이 남는다",
+  "file": "llmsensor/sensing/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 같은 여유의 창들 가운데 가장 이른 재설정",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 창을 무시한다(v1 길만)",
+  "file": "llmsensor/sensing/l0.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "S21: 선언된 재설정 시각을 평가 시각이 있을 때만 낸다(BD-90 위반)",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
   "mutation": "S19: 결과를 못 본 도구가 있는데 NO_TOOL_RUN_YET",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"
