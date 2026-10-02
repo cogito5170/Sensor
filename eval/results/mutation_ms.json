@@ -11,7 +11,8 @@
  },
  {
   "mutation": "provider: 모르는 런타임 상태를 WARNING 으로 짐작",
-  "result": "NOT_APPLIED"
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
  },
  {
   "mutation": "provider: 429 를 무시",

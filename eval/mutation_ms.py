@@ -16,7 +16,7 @@ M = [
     ("latency: SLO 없이 NORMAL 을 지어낸다", "llmsensor/sensing/latency/__init__.py",
      'return Result(None, Status.NOT_APPLICABLE, "지연 SLO 가 설정되지 않았다', 'return Result("NORMAL", Status.INFERRED, "지연 SLO 가 설정되지 않았다'),
     ("provider: 모르는 런타임 상태를 WARNING 으로 짐작", "llmsensor/sensing/provider/__init__.py",
-     "        hit = DECLARED_STATUS.get(dec.value[\"status\"])", "        hit = DECLARED_STATUS.get(dec.value[\"status\"], \"WARNING\")"),
+     "        hit = table.get(dec.value[\"status\"])", "        hit = table.get(dec.value[\"status\"], \"WARNING\")"),
     ("provider: 429 를 무시", "llmsensor/sensing/provider/__init__.py",
      'LIMIT_ERRORS = {"429", "RATE_LIMITED"}', 'LIMIT_ERRORS = set()'),
     ("provider 어댑터: 출처 없는 OpenAI 503 대응", "llmsensor/providers/openai.py",
