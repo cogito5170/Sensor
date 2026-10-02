@@ -28,6 +28,7 @@ tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`)
 **MS 센싱 확장 · 결정 문맥: [`docs/MS_SENSING.md`](docs/MS_SENSING.md)** -- 센싱 팩 여섯(`llmsensor/sensing/`: token ·
 execution · latency · provider · cost · quality), 공급자 어댑터(`llmsensor/providers/`), Decision Context(`llmsensor/decision/context/`,
 목적별 투영 · 얼림 · explain), 참조 정책(`llmsensor/policy/`, MS 정책 아님). 결과: [`eval/RESULTS_ms_sensing.md`](eval/RESULTS_ms_sensing.md).
+건강 차원 센서 설계(설계만 · 텔레메트리와 분리된 입력 계약): [`docs/SENSOR_HEALTH_DESIGN.md`](docs/SENSOR_HEALTH_DESIGN.md).
 
 ## 센서 다섯 (진실에 가까운 순)
 
