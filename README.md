@@ -25,6 +25,10 @@ tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`)
 신선도(STALE) · UNKNOWN 을 일급으로. 도출: [`docs/STATE_DERIVATION.md`](docs/STATE_DERIVATION.md) ·
 생애: [`docs/STATE_LIFECYCLE.md`](docs/STATE_LIFECYCLE.md) · 시연: `python3 eval/state_demo.py`.
 
+**MS 센싱 확장 · 결정 문맥: [`docs/MS_SENSING.md`](docs/MS_SENSING.md)** -- 센싱 팩 여섯(`llmsensor/sensing/`: token ·
+execution · latency · provider · cost · quality), 공급자 어댑터(`llmsensor/providers/`), Decision Context(`llmsensor/decision/context/`,
+목적별 투영 · 얼림 · explain), 참조 정책(`llmsensor/policy/`, MS 정책 아님). 결과: [`eval/RESULTS_ms_sensing.md`](eval/RESULTS_ms_sensing.md).
+
 ## 센서 다섯 (진실에 가까운 순)
 
 | 센서 | 무엇을 보나 | FAULT 가 되는 때 | 못 보는 것 |

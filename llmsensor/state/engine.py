@@ -30,6 +30,7 @@ class StateEngine:
         self.relationships: dict = {}
         self.proposals: list = []
         self._pending: dict = {}            # (entity, name) -> (후보 값, 연속 횟수)
+        self.by_run: dict = {}              # run_id -> {(entity, name)} -- 실행 하나의 상태만 빠르게 찾으려고(뜻 없음)
 
     # ---------------- 받아들이기 ----------------
     def ingest(self, batch) -> bool:
@@ -91,13 +92,13 @@ class StateEngine:
         for name, rule in self.reg.rules.items():
             if name == TOOL_RULE:
                 continue
-            self._apply(entity_id(rule.entity, L.run_id), rule, M, at, trigger)
+            self._apply(entity_id(rule.entity, L.run_id), rule, M, at, trigger, L.run_id)
         tools = sorted({t["_tool"] for t in L.tools if t.get("_tool")})
         rule = self.reg.rules[TOOL_RULE]
         for tool in tools:
             ent = entity_id(EntityType.TOOL, L.run_id, tool)
             Mt = self._metrics(L, tool_metric_defs(tool), lambda md, e=ent: e, at)
-            self._apply(ent, rule, Mt, at, trigger)
+            self._apply(ent, rule, Mt, at, trigger, L.run_id)
 
     def _evidence_time(self, M, names):
         ts = []
@@ -114,8 +115,10 @@ class StateEngine:
                         ts.append(o2.observed_at)
         return max(ts) if ts else None
 
-    def _apply(self, ent, rule, M, at, trigger):
+    def _apply(self, ent, rule, M, at, trigger, run_id=None):
         key = (ent, rule.state)
+        if run_id is not None:
+            self.by_run.setdefault(run_id, set()).add(key)
         prev = self.current.get(key)
         if prev is not None and prev.final:
             return                                       # 끝난 일에 대한 사실은 다시 계산하지 않는다
@@ -211,9 +214,15 @@ class StateEngine:
 
     def query(self, ent, names=None, now=None) -> "list[StateView]":
         out = []
-        for (e, n), st in sorted(self.current.items()):
-            if e == ent and (names is None or n in names):
-                out.append(self.view(st, now))
+        if names is None:
+            for (e, n), st in sorted(self.current.items()):
+                if e == ent:
+                    out.append(self.view(st, now))
+        else:           # 이름을 주면 바로 찾는다(예전 판은 저장소 전체를 정렬 -- 순서 · 결과는 같다)
+            for n in sorted(set(names)):
+                st = self.current.get((ent, n))
+                if st is not None:
+                    out.append(self.view(st, now))
         if names:
             have = {v.name for v in out}
             for n in names:

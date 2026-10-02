@@ -100,12 +100,12 @@
 (규칙 본문: llmsensor/state/rules.py)
 ```
 
-### `runtime.rate_limit_state` -- `rate-limit-state-v1` (v1, DEFINITIONAL)
+### `runtime.rate_limit_state` -- `rate-limit-state-v2` (v2, RUNTIME_DECLARED)
 
-- **뜻**: 요금 한도 사용률이 1 에 닿았나
-- **돕는 결정**: 늦출까
-- **값**: `AVAILABLE` · `EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
-- **입력 지표**: `rate_limit_utilization`
+- **뜻**: 요금 한도: 429 로 거절됨(LIMITED) · 사용률 ≥ 1(EXHAUSTED) · 런타임이 경고를 선언(WARNING) · 그 밖(AVAILABLE). v1(AVAILABLE · EXHAUSTED)의 확장 -- 새 관측이 없으면 v1 과 같다
+- **돕는 결정**: 늦출까 · 공급자를 바꿀까
+- **값**: `AVAILABLE` · `WARNING` · `LIMITED` · `EXHAUSTED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `rate_limit_utilization`, `rate_limit_declared`, `api_error`
 - **기본 TTL**: 300000 ms (OPERATOR_ASSUMED)
 
 ```
@@ -119,6 +119,42 @@
 - **값**: `NO_FAILURE_OBSERVED` · `FAILURE_OBSERVED` · `UNKNOWN` · `NOT_APPLICABLE`
 - **입력 지표**: `api_error`, `stop_reasons`
 - **기본 TTL**: 600000 ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `agent.execution_interruption` -- `execution-interruption-v1` (v1, RUNTIME_DECLARED)
+
+- **뜻**: 런타임이 도구의 시간 초과(문구) · 중단(깃발)을 선언했나. 지연 문턱이 아니라 런타임의 선언이다
+- **돕는 결정**: 시간 제한을 늘릴까 · 배경으로 돌릴까
+- **값**: `TIMEOUT_OBSERVED` · `INTERRUPTED_OBSERVED` · `NONE_OBSERVED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `tool_timeouts`, `tool_interruptions`
+- **기본 TTL**: None ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `agent.latency_state` -- `latency-state-v1` (v1, OPERATOR_ASSUMED)
+
+- **뜻**: 설정된 SLO 띠로 본 지연(띠 이름 · 문턱은 설정이 정한다). SLO 가 없으면 NOT_APPLICABLE
+- **돕는 결정**: 더 빠른 경로로 바꿀까
+- **값**: `NORMAL` · `ELEVATED` · `DEGRADED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `call_latency`, `first_chunk_latency`, `tool_latency`
+- **기본 TTL**: None ms (OPERATOR_ASSUMED)
+
+```
+(규칙 본문: llmsensor/state/rules.py)
+```
+
+### `task.quality_state` -- `quality-state-v1` (v1, EXTERNAL_LABEL)
+
+- **뜻**: 외부 평가가 과업을 통과로 판정했나. 라벨이 없으면 UNKNOWN -- 점수를 지어내지 않는다
+- **돕는 결정**: 결과를 받아들일까 · 사람에게 올릴까
+- **값**: `PASSED` · `FAILED` · `UNKNOWN` · `NOT_APPLICABLE`
+- **입력 지표**: `external_outcome`
+- **기본 TTL**: None ms (OPERATOR_ASSUMED)
 
 ```
 (규칙 본문: llmsensor/state/rules.py)
@@ -165,6 +201,21 @@
 | `rate_limit_utilization` | runtime | OBSERVED | `runtime.rate_limit_utilization` | 요금 한도 사용률(런타임 사건) |
 | `termination` | task | RUNTIME_DECLARED | `run.result_subtype`, `run.terminal_reason`, `run.is_error` | 런타임이 선언한 종료(성공 여부가 **아니다**) |
 | `activity` | task | OBSERVED | `call.stop_reason` | 본 호출 · 도구 결과 수 |
+| `tool_timeouts` | agent | RUNTIME_DECLARED | `tool.timed_out` | 런타임이 시간 초과를 선언한 도구 결과 수 / 판정 가능한 결과 수 |
+| `tool_interruptions` | agent | OBSERVED | `tool.interrupted` | 중단 깃발이 선 도구 결과 수 / 깃발을 본 결과 수 |
+| `tool_retries` | agent | OBSERVED | `tool.is_error`, `tool.target`, `tool.name` | 오류 뒤 같은 겨냥 재호출 수 |
+| `turns` | task | OBSERVED | `run.num_turns` | 런타임이 보고한 회전 수 |
+| `call_latency` | agent | OBSERVED | `call.t_start`, `call.t_end` | 모형 호출 구간(첫 ~ 마지막 관측) 분포 {n, p50, p95, p99} -- 표본이 모자란 백분위는 None |
+| `first_chunk_latency` | agent | OBSERVED | `call.first_chunk_ms` | message_start ~ 첫 조각(스트림 수집기에서만) 분포 |
+| `tool_latency` | agent | OBSERVED | `tool.t_issued`, `tool.t_result` | 도구 호출 ~ 결과 분포 |
+| `end_to_end_latency` | task | OBSERVED | `run.duration_ms` | 실행 전체 시간 |
+| `api_time_share` | task | OBSERVED | `run.api_duration_ms`, `run.duration_ms` | API 시간 / 전체 시간 |
+| `api_retry_time` | task | OBSERVED | `run.api_duration_ms`, `run.api_duration_without_retries_ms` | API 재시도에 쓴 시간 |
+| `rate_limit_declared` | runtime | RUNTIME_DECLARED | `runtime.rate_limit_status`, `runtime.rate_limit_threshold` | 런타임이 선언한 요금 한도 상태와 그 문턱 |
+| `call_cost` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 마지막 호출의 비용 성분($) -- 토큰 × 공급자 단가 |
+| `cost_estimate` | agent | PROVIDER_DECLARED | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h` | 실행 누적 비용 추정($) |
+| `cost_estimate_error` | agent | VALIDATED_EXPERIMENT | `call.model`, `tokens.input_uncached`, `tokens.output`, `tokens.cache_read`, `tokens.cache_write_5m`, `tokens.cache_write_1h`, `run.cost_usd` | (추정 − 런타임 보고) / 보고 -- 보고 시각까지의 호출만 |
+| `external_outcome` | task | EXTERNAL_LABEL | `task.external_outcome` | 외부 평가 라벨(그대로) |
 
 ## 정준 관측 (층 1)
 
@@ -261,14 +312,36 @@ state:resource_state  [resource-state-v1, DEFINITIONAL]
 state:resource_pressure  [resource-pressure-v1, OPERATOR_ASSUMED]
   <- metric:cost_fraction  [OPERATOR_ASSUMED]
        <- metric:cost_usd
-state:rate_limit_state  [rate-limit-state-v1, DEFINITIONAL]
+state:rate_limit_state  [rate-limit-state-v2, RUNTIME_DECLARED]
   <- metric:rate_limit_utilization  [OBSERVED]
        <- obs:runtime.rate_limit_utilization
+  <- metric:rate_limit_declared  [RUNTIME_DECLARED]
+       <- obs:runtime.rate_limit_status
+       <- obs:runtime.rate_limit_threshold
+  <- metric:api_error  [OBSERVED]
+       <- obs:runtime.api_error_status
 state:runtime_reliability  [runtime-reliability-v1, DEFINITIONAL]
   <- metric:api_error  [OBSERVED]
        <- obs:runtime.api_error_status
   <- metric:stop_reasons  [OBSERVED]
        <- obs:call.stop_reason
+state:execution_interruption  [execution-interruption-v1, RUNTIME_DECLARED]
+  <- metric:tool_timeouts  [RUNTIME_DECLARED]
+       <- obs:tool.timed_out
+  <- metric:tool_interruptions  [OBSERVED]
+       <- obs:tool.interrupted
+state:latency_state  [latency-state-v1, OPERATOR_ASSUMED]
+  <- metric:call_latency  [OBSERVED]
+       <- obs:call.t_start
+       <- obs:call.t_end
+  <- metric:first_chunk_latency  [OBSERVED]
+       <- obs:call.first_chunk_ms
+  <- metric:tool_latency  [OBSERVED]
+       <- obs:tool.t_issued
+       <- obs:tool.t_result
+state:quality_state  [quality-state-v1, EXTERNAL_LABEL]
+  <- metric:external_outcome  [EXTERNAL_LABEL]
+       <- obs:task.external_outcome
 ```
 
 ## 넣지 않은 후보 상태와 까닭
@@ -284,7 +357,10 @@ state:runtime_reliability  [runtime-reliability-v1, DEFINITIONAL]
 | `tool.availability` | 실패와 '쓸 수 없음' 을 관측으로 가르지 못한다(같은 is_error) |
 | `tool.recent_failure` | tool_execution_health 의 UNRESOLVED_FAILURES 와 거의 같다 -- 중복 |
 | `progress_state = ACTIVE/SLOW` | 활동(호출 수)은 진행이 아니다. 진행을 재는 검증된 근거가 없다 |
-| `timeout_state` | 시간 초과에 전용 관측이 없다(앞 실험: is_error + 지연 + 글). 글을 꼴에 안 담으니 판정 불가 -> 넣지 않음 |
+| `timeout_state` | 꼴 v3 의 timed_out(런타임 문구)으로 관측할 수 있게 되어 execution_interruption 이 맡는다 -- 따로 두지 않는다 |
+| `execution_state(합성 열거)` | completion_state · execution_health · execution_interruption · rate_limit_state 를 한 값으로 접으면 정보가 사라진다(t11: 도구 시간 초과, 실행은 정상 종료) -- docs/MS_SENSING_REVIEW.md C2 |
+| `provider_health` | runtime_reliability 와 같은 개념 -- HEALTHY 는 '관측 없음 ≠ 건강' 원칙에 어긋난다(리뷰 C4) |
+| `quality_score` | 외부 라벨 없이 수를 만들지 않는다 -- quality_state 는 외부 평가 라벨을 옮길 뿐 |
 | `token_budget_state` | 토큰 예산 설정이 없다. 필요하면 resource_state 와 같은 꼴로 더한다 |
 | `interaction_state` | 사람 말 · 턴 관측이 텔레메트리 꼴에 없다 |
 | `uncertainty_state` | 저장하지 않는다 -- 질의 때 상태들의 유효성에서 투영한다(decision_context.uncertain) |

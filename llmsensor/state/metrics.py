@@ -115,8 +115,9 @@ def _tool_rows(L, tool=None):
 
 def _outcomes(rows):
     """(결과를 본 행, 결과를 못 보는 행) -- is_error 가 관측되었나."""
-    seen = [t for t in rows if t.get("tool.is_error") is not None and t["tool.is_error"].value is not None]
-    blind = [t for t in rows if t not in seen]
+    seen, blind = [], []
+    for t in rows:      # 한 번 훑어 가른다(예전 판은 `t not in seen` 으로 O(n²) -- 결과는 같다)
+        (seen if t.get("tool.is_error") is not None and t["tool.is_error"].value is not None else blind).append(t)
     return seen, blind
 
 

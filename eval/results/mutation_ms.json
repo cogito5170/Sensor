@@ -1,0 +1,92 @@
+[
+ {
+  "mutation": "latency: 표본이 모자라도 백분위를 낸다",
+  "file": "llmsensor/sensing/_base.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "latency: SLO 없이 NORMAL 을 지어낸다",
+  "file": "llmsensor/sensing/latency/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "provider: 모르는 런타임 상태를 WARNING 으로 짐작",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "provider: 429 를 무시",
+  "file": "llmsensor/sensing/provider/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "provider 어댑터: 출처 없는 OpenAI 503 대응",
+  "file": "llmsensor/providers/openai.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost: 표에 없는 모형을 haiku 값으로 짐작",
+  "file": "llmsensor/sensing/cost/pricing.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "cost: 계산 못 하는 호출을 건너뛰고 부분 합",
+  "file": "llmsensor/sensing/cost/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "quality: 라벨 없음을 FAILED 로",
+  "file": "llmsensor/sensing/quality/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "execution: 판정 근거 없이 NONE_OBSERVED",
+  "file": "llmsensor/sensing/execution/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: N/A 선택 상태를 거르지 않는다",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: STALE 을 쓸 수 있다고 한다",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: 전제 조건 없이 모든 행동을 가능하다고",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: 목표를 제약으로 받는다",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: 이유 문자열(원 수치)을 넣는다",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "DC: 얼린 뒤 저장소를 따라 바뀐다(상태를 살아 있는 참조로)",
+  "file": "llmsensor/decision/context/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "정책: 모르는 맥락 압력으로 맥락을 줄인다",
+  "file": "llmsensor/policy/context.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "정책: 가능하지 않은 행동을 고른다",
+  "file": "llmsensor/policy/__init__.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "수집기: 스트림의 캐시 쓰기 나눔을 버린다",
+  "file": "llmsensor/telemetry/collect.py",
+  "result": "RED"
+ }
+]

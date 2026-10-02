@@ -33,6 +33,26 @@
   "execution_health/sweagent": {
    "UNKNOWN:None": 288
   },
+  "execution_interruption/cc_jsonl_self": {
+   "INFERRED:NONE_OBSERVED": 1
+  },
+  "execution_interruption/cc_stream": {
+   "INFERRED:NONE_OBSERVED": 6,
+   "INFERRED:TIMEOUT_OBSERVED": 1,
+   "UNKNOWN:None": 5
+  },
+  "execution_interruption/sweagent": {
+   "UNKNOWN:None": 288
+  },
+  "latency_state/cc_jsonl_self": {
+   "NOT_APPLICABLE:None": 1
+  },
+  "latency_state/cc_stream": {
+   "NOT_APPLICABLE:None": 12
+  },
+  "latency_state/sweagent": {
+   "NOT_APPLICABLE:None": 288
+  },
   "progress_state/cc_jsonl_self": {
    "UNKNOWN:None": 1
   },
@@ -42,11 +62,20 @@
   "progress_state/sweagent": {
    "NOT_APPLICABLE:None": 288
   },
+  "quality_state/cc_jsonl_self": {
+   "UNKNOWN:None": 1
+  },
+  "quality_state/cc_stream": {
+   "UNKNOWN:None": 12
+  },
+  "quality_state/sweagent": {
+   "UNKNOWN:None": 288
+  },
   "rate_limit_state/cc_jsonl_self": {
    "UNKNOWN:None": 1
   },
   "rate_limit_state/cc_stream": {
-   "INFERRED:AVAILABLE": 12
+   "INFERRED:WARNING": 12
   },
   "rate_limit_state/sweagent": {
    "UNKNOWN:None": 288
@@ -138,6 +167,36 @@
    "max": 0,
    "n": 288
   },
+  "execution_interruption/cc_jsonl_self": {
+   "median": 1,
+   "max": 1,
+   "n": 1
+  },
+  "execution_interruption/cc_stream": {
+   "median": 1.0,
+   "max": 1,
+   "n": 12
+  },
+  "execution_interruption/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
+  "latency_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "latency_state/cc_stream": {
+   "median": 0.0,
+   "max": 0,
+   "n": 12
+  },
+  "latency_state/sweagent": {
+   "median": 0.0,
+   "max": 0,
+   "n": 288
+  },
   "progress_state/cc_jsonl_self": {
    "median": 0,
    "max": 0,
@@ -151,6 +210,21 @@
   "progress_state/sweagent": {
    "median": 1.0,
    "max": 1,
+   "n": 288
+  },
+  "quality_state/cc_jsonl_self": {
+   "median": 0,
+   "max": 0,
+   "n": 1
+  },
+  "quality_state/cc_stream": {
+   "median": 0.0,
+   "max": 0,
+   "n": 12
+  },
+  "quality_state/sweagent": {
+   "median": 0.0,
+   "max": 0,
    "n": 288
   },
   "rate_limit_state/cc_jsonl_self": {
@@ -230,7 +304,7 @@
   }
  },
  "provenance": {
-  "usable_states": 378,
+  "usable_states": 386,
   "without_observation_chain": 0,
   "examples": []
  }

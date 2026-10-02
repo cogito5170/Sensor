@@ -1,0 +1,499 @@
+{
+ "runs": 301,
+ "deterministic": true,
+ "decision_digest": "d806c73bc600b3bc",
+ "assumptions": {
+  "capabilities": {
+   "compaction": true,
+   "providers": 2
+  },
+  "external_labels": "swe_lite_20240620_sweagent_claude35sonnet_results.json",
+  "policies": "reference-*-v1 (not MS)"
+ },
+ "packs": {
+  "token": {
+   "context_pressure/cc_stream": {
+    "computability": 1.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "context_pressure/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "context_pressure/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   }
+  },
+  "execution": {
+   "execution_health/cc_stream": {
+    "computability": 0.8811881188118812,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "execution_health/cc_jsonl_self": {
+    "computability": 0.9875,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "execution_health/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "tool_execution_health/cc_stream": {
+    "computability": 1.0,
+    "eval_points": 162,
+    "entities": 22,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "tool_execution_health/cc_jsonl_self": {
+    "computability": 0.6902654867256637,
+    "eval_points": 565,
+    "entities": 5,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.8,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "tool_execution_health/sweagent": {
+    "computability": 0.0,
+    "eval_points": 124050,
+    "entities": 2417,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "completion_state/cc_stream": {
+    "computability": 1.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "completion_state/cc_jsonl_self": {
+    "computability": 1.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "completion_state/sweagent": {
+    "computability": 1.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "progress_state/cc_stream": {
+    "computability": 0.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "progress_state/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "progress_state/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "execution_interruption/cc_stream": {
+    "computability": 0.40594059405940597,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.4166666666666667,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.4166666666666667,
+    "provenance_coverage": 1.0
+   },
+   "execution_interruption/cc_jsonl_self": {
+    "computability": 0.99375,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "execution_interruption/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   }
+  },
+  "cost": {
+   "resource_state/cc_stream": {
+    "computability": 0.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "resource_state/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 1.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "resource_state/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "resource_pressure/cc_stream": {
+    "computability": 0.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "resource_pressure/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 1.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "resource_pressure/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   }
+  },
+  "provider": {
+   "rate_limit_state/cc_stream": {
+    "computability": 0.1188118811881188,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "rate_limit_state/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "rate_limit_state/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "runtime_reliability/cc_stream": {
+    "computability": 1.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "runtime_reliability/cc_jsonl_self": {
+    "computability": 1.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 1.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": 1.0
+   },
+   "runtime_reliability/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   }
+  },
+  "latency": {
+   "latency_state/cc_stream": {
+    "computability": 0.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "latency_state/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.0,
+    "provenance_coverage": null
+   },
+   "latency_state/sweagent": {
+    "computability": 0.0,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.0,
+    "not_applicable_rate": 1.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   }
+  },
+  "quality": {
+   "quality_state/cc_stream": {
+    "computability": 0.0,
+    "eval_points": 101,
+    "entities": 12,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "quality_state/cc_jsonl_self": {
+    "computability": 0.0,
+    "eval_points": 160,
+    "entities": 1,
+    "unknown_rate": 1.0,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 1.0,
+    "provenance_coverage": null
+   },
+   "quality_state/sweagent": {
+    "computability": 0.014846619419585122,
+    "eval_points": 19331,
+    "entities": 288,
+    "unknown_rate": 0.003472222222222222,
+    "not_applicable_rate": 0.0,
+    "stale_rate_at_end": 0.0,
+    "stale_rate_after_1h": 0.0,
+    "untimed_rate": 0.003472222222222222,
+    "provenance_coverage": 1.0
+   }
+  }
+ },
+ "policy_usefulness": {
+  "points": 57873,
+  "material_context_changes": 639,
+  "decision_changes": 483,
+  "by_state": {
+   "continue_or_stop/completion_state": {
+    "state_changes": 300,
+    "with_decision_change": 300,
+    "state_impact_rate": 1.0,
+    "used_impact_rate": 1.0,
+    "alone_changes": 0,
+    "alone_impact_rate": null
+   },
+   "continue_or_stop/execution_health": {
+    "state_changes": 17,
+    "with_decision_change": 6,
+    "state_impact_rate": 0.35294117647058826,
+    "used_impact_rate": 0.35294117647058826,
+    "alone_changes": 12,
+    "alone_impact_rate": 0.25
+   },
+   "continue_or_stop/execution_interruption": {
+    "state_changes": 8,
+    "with_decision_change": 3,
+    "state_impact_rate": 0.375,
+    "used_impact_rate": 0.375,
+    "alone_changes": 3,
+    "alone_impact_rate": 0.0
+   },
+   "continue_or_stop/progress_state": {
+    "state_changes": 300,
+    "with_decision_change": 300,
+    "state_impact_rate": 1.0,
+    "used_impact_rate": 0.0,
+    "alone_changes": 0,
+    "alone_impact_rate": null
+   },
+   "continue_or_stop/quality_state": {
+    "state_changes": 287,
+    "with_decision_change": 177,
+    "state_impact_rate": 0.6167247386759582,
+    "used_impact_rate": 0.6167247386759582,
+    "alone_changes": 287,
+    "alone_impact_rate": 0.6167247386759582
+   },
+   "manage_context/context_pressure": {
+    "state_changes": 12,
+    "with_decision_change": 0,
+    "state_impact_rate": 0.0,
+    "used_impact_rate": 0.0,
+    "alone_changes": 12,
+    "alone_impact_rate": 0.0
+   },
+   "manage_context/execution_interruption": {
+    "state_changes": 8,
+    "with_decision_change": 0,
+    "state_impact_rate": 0.0,
+    "used_impact_rate": 0.0,
+    "alone_changes": 8,
+    "alone_impact_rate": 0.0
+   },
+   "select_provider/rate_limit_state": {
+    "state_changes": 12,
+    "with_decision_change": 0,
+    "state_impact_rate": 0.0,
+    "used_impact_rate": 0.0,
+    "alone_changes": 12,
+    "alone_impact_rate": 0.0
+   }
+  },
+  "decision_changes_by_purpose": {
+   "manage_context": 0,
+   "select_provider": 0,
+   "continue_or_stop": 483
+  }
+ }
+}

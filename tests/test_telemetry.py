@@ -112,6 +112,28 @@ class Collect(unittest.TestCase):
         self.assertEqual(t["tool_head"], "Bash:ls")                  # 맨 프로그램 이름은 평문
 
 
+class StreamUsageMerge(unittest.TestCase):
+    def test_cache_split_from_message_start(self):
+        """스트림에서 캐시 쓰기 5m/1h 나눔은 message_start 에만 온다 -- delta 에 없는 칸을 start 로 채워야 한다."""
+        lines = [
+            {"_t": 100, "line": {"type": "stream_event", "event": {"type": "message_start", "message": {
+                "id": "m1", "model": "h", "usage": {"input_tokens": 10, "output_tokens": 1,
+                                                    "cache_creation": {"ephemeral_5m_input_tokens": 0,
+                                                                       "ephemeral_1h_input_tokens": 400}}}}}},
+            {"_t": 200, "line": {"type": "stream_event", "event": {"type": "message_delta", "delta": {
+                "stop_reason": "end_turn"}, "usage": {"input_tokens": 10, "cache_read_input_tokens": 5,
+                                                      "cache_creation_input_tokens": 400, "output_tokens": 30}}}},
+        ]
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "a.stream.jsonl")
+            with open(p, "w") as f:
+                for x in lines:
+                    f.write(json.dumps(x) + "\n")
+            m = [r for r in from_cc_stream(p, "s") if r["kind"] == "model_call"][0]
+        self.assertEqual((m["cache_creation_1h_input_tokens"], m["cache_creation_5m_input_tokens"], m["output_tokens"]),
+                         (400, 0, 30))                                  # 출력은 delta 의 최종값
+
+
 class Privacy(unittest.TestCase):
     def _session(self, d):
         p = os.path.join(d, "s.jsonl")
