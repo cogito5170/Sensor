@@ -19,6 +19,12 @@ NASA 식 analytical redundancy(Chow & Willsky 1984)의 *잔차 생성 → 결정
 레코드 꼴(`schema/telemetry.schema.json`), 수집기(`llmsensor/telemetry/`), 파생, 의존 그래프, 최소 비중복 관측 16 개,
 UNKNOWN 목록. 측정: [`eval/RESULTS_sensor_layer.md`](eval/RESULTS_sensor_layer.md).
 
+**L0 Telemetry 는 따로 섰다(2026-10-02): [cogito5170/Telemetry](https://github.com/cogito5170/Telemetry).** 층은
+L0 Telemetry(무슨 일이 일어났나) → L1 Sensor(그것이 무엇을 뜻하나) → L2 State → L3 DC → L4 Policy → L5 Action(→ L0) 이다.
+이 저장소의 `llmsensor/telemetry/collect.py`(꼴 v3)는 그쪽 수집기가 옮겨 갔고, 그쪽 `compat.to_sensor_records` 가 되지은 v3 가
+여기 수집기의 출력과 같다(그쪽 시험). 아직 이 저장소는 그것에 의존하지 않는다. `llmsensor/telemetry/derive.py` 의 문턱 있는 파생
+(`token_burst` · `token_stagnation` · `token_oscillation`)은 L1 의 일이라 sensing 으로 옮길 자리다 -- 그쪽 `docs/TELEMETRY.md` 7 절.
+
 **상태 층(State): [`docs/STATE_MODEL.md`](docs/STATE_MODEL.md)** -- 텔레메트리를 받아 실체(agent · task · runtime ·
 tool)의 의미 상태 9 개를 결정론적으로 만든다(`llmsensor/state/`). 규칙마다 근거 종류(정의상 · 런타임 선언 · 운영자 가정)가
 붙고, 경험적 근거가 없는 문턱은 기본 설정에 없다. 질의 · 설명(상태 → 규칙 → 지표 → 관측) · 최소 결정 문맥 ·
