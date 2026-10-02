@@ -43,7 +43,16 @@ def main(argv=None) -> int:
     f.add_argument("--min-n", type=int, default=5)
     c = sub.add_parser("check", help="외부 결과 센서 하나를 돌린다")
     c.add_argument("command", nargs=argparse.REMAINDER)
+    k = sub.add_parser("l0-check", help="L0 Telemetry 수집기와 이 저장소의 수집기가 같은 레코드를 내는지 맞댄다")
+    k.add_argument("source", choices=("cc_jsonl", "cc_stream", "sweagent"))
+    k.add_argument("path")
     ns = ap.parse_args(argv)
+
+    if ns.cmd == "l0-check":
+        from .telemetry.l0 import compare
+        r = compare(ns.source, ns.path)
+        print(json.dumps(r, ensure_ascii=False, indent=1))
+        return 2 if not r["available"] else 0 if r["same"] else 1
 
     if ns.cmd == "read":
         model = PerformanceModel.load(ns.model) if ns.model else None

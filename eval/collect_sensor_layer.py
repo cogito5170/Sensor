@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from llmsensor.telemetry.collect import from_cc_jsonl, from_cc_stream, from_sweagent  # noqa: E402
+from llmsensor.telemetry.l0 import collect  # noqa: E402  -- L0 Telemetry 가 있으면 그쪽, 없으면 이 저장소 수집기
 from llmsensor.telemetry.schema import check  # noqa: E402
 
 
@@ -35,24 +35,29 @@ def main():
     ap.add_argument("trajs")
     ap.add_argument("-o", "--out", required=True)
     a = ap.parse_args()
-    recs, missing = [], []
-    recs += from_cc_jsonl(a.self_jsonl, "cc_jsonl_self:" + Path(a.self_jsonl).stem[:8])
+    recs, missing, backends = [], [], set()
+
+    def take(source, path, run_id):
+        rs, backend = collect(source, path, run_id)
+        backends.add(backend)
+        return rs
+    recs += take("cc_jsonl", a.self_jsonl, "cc_jsonl_self:" + Path(a.self_jsonl).stem[:8])
     for s in sorted(Path(a.runs).glob("*.stream.jsonl")):
         name = s.name.split(".")[0]
-        recs += from_cc_stream(s, "cc_stream:" + name)
+        recs += take("cc_stream", s, "cc_stream:" + name)
         cj = child_jsonl(str((Path(a.runs) / "work" / name).resolve()))
         if cj:
-            recs += from_cc_jsonl(cj, "cc_jsonl_child:" + name)
+            recs += take("cc_jsonl", cj, "cc_jsonl_child:" + name)
         else:
             missing.append(name)
     for t in sorted(Path(a.trajs).glob("*.traj.gz")):
-        recs += from_sweagent(t, "sweagent:" + t.name.split(".")[0])
+        recs += take("sweagent", t, "sweagent:" + t.name.split(".")[0])
     bad = [(r["run_id"], e) for r in recs for e in check(r)]
     with open(a.out, "w", encoding="utf-8") as f:
         for r in recs:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
     print(json.dumps({"records": len(recs), "schema_errors": len(bad), "first_errors": bad[:5],
-                      "child_jsonl_missing": missing}, ensure_ascii=False))
+                      "child_jsonl_missing": missing, "collector": sorted(backends)}, ensure_ascii=False))
     return 1 if bad else 0
 
 

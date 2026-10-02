@@ -1,5 +1,8 @@
 """레코드 -> 파생 텔레메트리. 레코드만 본다(원천을 다시 열지 않는다) -- 층을 지킨다.
 
+여기에는 **산술**(차 · 합 · 비율 · 개수)만 둔다. 문턱이 있는 판독(token_burst · token_stagnation · token_oscillation)은
+L1 의 일이라 llmsensor/sensing/token/events.py 로 옮겼다(2026-10-02, 정의 불변).
+
 못 본 값에서 나온 파생은 None 이다. 0 으로 메우지 않는다.
 """
 from __future__ import annotations
@@ -33,7 +36,6 @@ def calls(run) -> "list[dict]":
     for t in run["tool_call"]:
         tools[t["call_index"]].append(t)
     out, prev, cum, ctx_prev = [], None, 0, None
-    med_hist = []
     for m in run["model_call"]:
         ts = tools.get(m["call_index"], [])
         errs = [t["is_error"] for t in ts]
@@ -59,20 +61,8 @@ def calls(run) -> "list[dict]":
             "thinking_ratio": (m["thinking_tokens"] / out_tok if out_tok and m["thinking_tokens"] is not None else None),
             "output_tokens_per_sec": (out_tok / (span / 1000) if out_tok is not None and span and span > 0 else None),
         }
-        # 사건형 파생(분석의 상관에는 안 넣는다)
-        if out_tok is not None:
-            med = sorted(med_hist)[len(med_hist) // 2] if med_hist else None
-            d["token_burst"] = (out_tok > 4 * med) if med and len(med_hist) >= 3 else None
-            med_hist.append(out_tok)
         out.append(d)
         prev, ctx_prev = m, ctx
-    for i, d in enumerate(out):
-        g = [out[j]["context_growth"] for j in range(max(1, i - 2), i + 1)]
-        c = out[i]["context_tokens"]
-        d["token_stagnation"] = (all(x is not None and abs(x) < .01 * c for x in g) if i >= 3 and c else None)
-        w = [out[j]["output_tokens"] for j in range(max(0, i - 5), i + 1)]
-        dif = [b - a for a, b in zip(w, w[1:]) if a is not None and b is not None]
-        d["token_oscillation"] = sum(1 for a, b in zip(dif, dif[1:]) if a * b < 0) if len(dif) >= 2 else None
     return out
 
 

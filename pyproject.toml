@@ -10,8 +10,12 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+# L0 Telemetry(선택). 없으면 llmsensor/telemetry/collect.py 를 쓴다
+l0 = ["l0-telemetry @ git+https://github.com/cogito5170/Telemetry"]
+
 [project.scripts]
 llmsensor = "llmsensor.cli:main"
 
-[tool.setuptools]
-packages = ["llmsensor", "llmsensor.sensors", "llmsensor.adapters"]
+[tool.setuptools.packages.find]
+include = ["llmsensor*"]
