@@ -110,7 +110,8 @@ def from_telemetry(records) -> "list[Batch]":
                 last = max(last, t2) if (t2 is not None and last is not None) else (t2 if t2 is not None else last)
                 out.append(_batch(tc, tc["tool_index"], t2))
         for i, rr in enumerate(r for r in rs if r["kind"] == "run"):
-            out.append(_batch(rr, i, last))
+            # 중간 스냅숏(snapshot_at_ms)이면 그 시각, 아니면 그 실행에서 본 가장 늦은 시각(하한)
+            out.append(_batch(rr, i, rr.get("snapshot_at_ms") if rr.get("snapshot_at_ms") is not None else last))
     return out
 
 

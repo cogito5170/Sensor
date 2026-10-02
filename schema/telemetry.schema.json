@@ -367,6 +367,7 @@
     "rate_limit_utilization",
     "rate_limit_status",
     "rate_limit_threshold",
+    "snapshot_at_ms",
     "tokens_sent",
     "tokens_received",
     "api_calls",
@@ -511,6 +512,12 @@
      ]
     },
     "rate_limit_threshold": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "snapshot_at_ms": {
      "type": [
       "number",
       "null"

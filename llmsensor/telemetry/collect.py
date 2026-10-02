@@ -204,15 +204,19 @@ class _Calls:
 
 def from_cc_jsonl(path, run_id: str, hasher: "Hasher | None" = None) -> "list[dict]":
     L = _Calls(run_id, "cc_jsonl", "unix_ms", hasher)
-    cost = None
+    cost, cost_at, last_ts = None, None, None
     with open(path, encoding="utf-8") as f:
         for line in f:
             try:
                 d = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            if _ts(d.get("timestamp")) is not None:
+                last_ts = _ts(d.get("timestamp"))
             if d.get("type") == "cost-state":
-                cost = d
+                # **세션 끝 합계가 아니다** -- 그 줄까지의 누적 스냅숏이다(2026-10-02 실측: 577 줄 중 212 번째, 앞 27 호출의
+                # 합과 토큰 · 비용이 정확히 같다). 자기 시각이 없어 바로 앞 줄의 시각을 스냅숏 시각으로 남긴다
+                cost, cost_at = d, last_ts
             if d.get("isSidechain"):
                 continue
             m = d.get("message")
@@ -252,7 +256,7 @@ def from_cc_jsonl(path, run_id: str, hasher: "Hasher | None" = None) -> "list[di
     if cost:
         mu = cost.get("modelUsage") or {}
         recs.append(record(
-            "run", run_id, "cc_jsonl", run_duration_ms=cost.get("totalDuration"),
+            "run", run_id, "cc_jsonl", snapshot_at_ms=cost_at, run_duration_ms=cost.get("totalDuration"),
             api_duration_ms=cost.get("totalAPIDuration"),
             api_duration_without_retries_ms=cost.get("totalAPIDurationWithoutRetries"),
             cost_usd=cost.get("totalCostUSD"),

@@ -56,6 +56,7 @@ RUN_FIELDS = {
     "is_error": BOOL, "api_error_status": STR, "permission_denials": INT, "context_window": INT,
     "max_output_tokens": INT, "autocompact_threshold": INT, "rate_limit_utilization": NUM,
     "rate_limit_status": STR, "rate_limit_threshold": NUM,     # v3 -- 런타임 선언(allowed_warning · surpassedThreshold)
+    "snapshot_at_ms": NUM,   # v3 -- 이 요약이 실행 끝이 아니라 중간 스냅숏일 때 그 시각(Claude Code cost-state)
     "tokens_sent": INT, "tokens_received": INT, "api_calls": INT,       # 런타임이 준 실행 합계(있으면)
     "reported_input_tokens": INT, "reported_output_tokens": INT, "reported_cache_read_input_tokens": INT,
     "reported_cache_creation_input_tokens": INT,
