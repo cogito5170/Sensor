@@ -2,13 +2,13 @@
 
     (1) 예산 없음 -> NOT_APPLICABLE(UNKNOWN 아님)
     (2) 실행 중 비용 = 토큰 × 단가표(판본이 근거에 남는다). 실행 끝 보고가 오면 그것이 이긴다
-    (3) 단가 없는 호출이 있으면 합은 모른다. 하지만 부분 합 ≥ 예산이면 BUDGET_EXHAUSTED(영구)
+    (3) 단가 없는 호출이 있으면 합은 모른다. 하지만 부분 합 ≥ 예산이면 BUDGET_EXHAUSTED -- 영구는 보고 비용 ≥ 예산일 때만(BD-64)
     (4) WITHIN_BUDGET 은 합이 완전할 때만
-    (5) 판본 v2
+    (5) 판본 v3(BD-64 로 v2 에서 올림)
 """
 import unittest
 
-from llmsensor.sensing.cost import RESOURCE_V1, RESOURCE_V2, pricing
+from llmsensor.sensing.cost import RESOURCE_V1, RESOURCE_V3, pricing
 from llmsensor.state import DEFAULT_CONFIG, Status
 from llmsensor.state.model import Freshness
 from tests.test_sensing import engine, mc3
@@ -32,9 +32,9 @@ def bounds(E):
 
 class Version(unittest.TestCase):
     def test_v2_is_registered_and_v1_kept(self):
-        self.assertEqual((RESOURCE_V2.id, RESOURCE_V2.version), ("resource-state-v2", 2))
+        self.assertEqual((RESOURCE_V3.id, RESOURCE_V3.version), ("resource-state-v3", 3))
         self.assertEqual(RESOURCE_V1.id, "resource-state-v1")
-        self.assertEqual(rs(engine([mc3(0, 100)], cfg(1.0))).rule, "resource-state-v2")
+        self.assertEqual(rs(engine([mc3(0, 100)], cfg(1.0))).rule, "resource-state-v3")
 
 
 class NoBudget(unittest.TestCase):
@@ -53,14 +53,20 @@ class MidRun(unittest.TestCase):
         self.assertAlmostEqual(b["total"], 2 * CALL, places=12)
         self.assertEqual((b["source"], b["pricing"]), ("estimate", pricing.VERSION))
 
-    def test_exhausted_mid_run_is_permanent(self):
+    def test_estimate_exhaustion_mid_run_is_not_permanent(self):
+        # BD-64: 단가표 추정만으로 선 소진은 영구가 아니다(증명은 단가가 정확하다는 전제 위에 있다)
         budget = 2.5 * CALL
         E = engine([mc3(i, 100 * (i + 1)) for i in range(3)], cfg(budget))
         v = rs(E)
-        self.assertEqual((v.value, v.freshness), ("BUDGET_EXHAUSTED", Freshness.PERMANENT))
+        self.assertEqual(v.value, "BUDGET_EXHAUSTED")
+        self.assertNotEqual(v.freshness, Freshness.PERMANENT)
         t = [x for x in E.transitions if x.name == "resource_state"]
         self.assertEqual([(x.previous, x.new) for x in t], [("WITHIN_BUDGET", "BUDGET_EXHAUSTED")])
 
+    def test_reported_exhaustion_is_permanent(self):
+        E = engine([mc3(0, 100), end(cost_usd=3 * CALL)], cfg(2 * CALL))
+        v = rs(E)
+        self.assertEqual((v.value, v.freshness), ("BUDGET_EXHAUSTED", Freshness.PERMANENT))
 
 class Unpriced(unittest.TestCase):
     def test_synthetic_call_makes_total_unknown(self):
@@ -95,11 +101,14 @@ class ReportWins(unittest.TestCase):
         E = engine([mc3(0, 100), end(cost_usd=3 * CALL)], cfg(2 * CALL))
         self.assertEqual(rs(E).value, "BUDGET_EXHAUSTED")
 
-    def test_estimate_exhaustion_is_not_undone_by_a_lower_report(self):
-        # 조건 3(부분 합 ≥ 예산 -> 영구 소진)과 조건 2(보고가 이긴다)가 만나는 자리 -- 단가표가 **과대**일 때만 생긴다.
-        # 지금 규칙: 먼저 선 영구 소진을 뒤집지 않는다(baseline 에 보고한 긴장. 단가표는 두 모형에서 정확히 맞았다)
+    def test_lower_covering_report_overturns_estimate_exhaustion(self):
+        # BD-64: 보고가 이긴다. 추정 소진(단가표 과대)을 더 낮은 덮는 보고가 뒤집고, 그 어긋남을 이유에 남긴다
         E = engine([mc3(i, 100 * (i + 1)) for i in range(3)] + [end(cost_usd=CALL)], cfg(2.5 * CALL))
-        self.assertEqual(rs(E).value, "BUDGET_EXHAUSTED")
+        v = rs(E)
+        self.assertEqual((v.value, bounds(E)["source"]), ("WITHIN_BUDGET", "reported"))
+        self.assertIn("과대 의심", v.reason)
+        t = [(x.previous, x.new) for x in E.transitions if x.name == "resource_state"]
+        self.assertEqual(t[-1], ("BUDGET_EXHAUSTED", "WITHIN_BUDGET"))
 
     def test_report_alone_counts_when_calls_unpriced(self):
         E = engine([mc3(0, 100, model="gpt-x"), end(cost_usd=0.3)], cfg(1.0))
