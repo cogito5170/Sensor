@@ -97,10 +97,10 @@ class Metric:
 
 @dataclass(frozen=True)
 class Evidence:
+    """근거는 **참조**다(PC-09 · SCHEMA §2.5) -- 값은 싣지 않는다. 값은 ref 로 지표 · 관측을 찾아 본다(explain)."""
     ref: str                   # Metric 또는 Observation id
     level: Level
     name: str
-    value: Any
 
 
 @dataclass
@@ -125,8 +125,7 @@ class State:
         d = asdict(self)
         d["status"] = self.status.value
         d["basis"] = self.basis.value
-        d["evidence"] = [{"ref": e.ref, "level": e.level.value, "name": e.name, "value": e.value}
-                         for e in self.evidence]
+        d["evidence"] = [{"ref": e.ref, "level": e.level.value, "name": e.name} for e in self.evidence]
         return d
 
 
