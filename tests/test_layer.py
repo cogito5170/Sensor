@@ -55,6 +55,44 @@ def _session(d):
     return p
 
 
+class CollectorDefectsFixed(unittest.TestCase):
+    """D1 · D2 (docs/MS_HEALTH_INVENTORY.md §1) -- L0 수집기와 같은 규칙. 고치기 전에는 이 시험이 빨갛다."""
+
+    def _recs(self, rows):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "s.jsonl")
+            with open(p, "w", encoding="utf-8") as f:
+                for x in rows:
+                    f.write(json.dumps(x) + "\n")
+            return from_cc_jsonl(p, "x")
+
+    def test_d1_timeout_structured_first_and_no_quoted_phrase(self):
+        def tool(i, ok, out, tur):
+            return [{"type": "assistant", "timestamp": f"2026-10-02T00:00:{i:02d}Z", "message": {
+                        "id": f"m{i}", "content": [{"type": "tool_use", "id": f"t{i}", "name": "Bash",
+                                                    "input": {"command": "x"}}]}},
+                    {"type": "user", "timestamp": f"2026-10-02T00:00:{i + 1:02d}Z", "toolUseResult": tur, "message": {
+                        "content": [{"type": "tool_result", "tool_use_id": f"t{i}", "is_error": not ok,
+                                     "content": out}]}}]
+        recs = self._recs(tool(0, True, "log: Command timed out after 2m", {}) +
+                          tool(2, True, "moved to the background", {"timedOutAfterMs": 600000, "backgroundTaskId": "b"}) +
+                          tool(4, False, "Exit code 143\nCommand timed out after 2m 0.0s", {}))
+        self.assertEqual([r["timed_out"] for r in recs if r["kind"] == "tool_call"], [False, True, True])
+
+    def test_d2_api_error_line_is_not_a_model_call(self):
+        recs = self._recs([
+            {"type": "assistant", "timestamp": "2026-10-02T00:00:01Z", "message": {
+                "id": "m1", "model": "claude-x", "usage": {"input_tokens": 1, "output_tokens": 1}, "content": []}},
+            {"type": "assistant", "timestamp": "2026-10-02T00:00:02Z", "isApiErrorMessage": True, "apiErrorStatus": 429,
+             "error": "rate_limit", "quotaLimits": {"status": "rejected"},
+             "message": {"id": "e1", "model": "<synthetic>", "usage": {"input_tokens": 0, "output_tokens": 0}}},
+            {"type": "assistant", "timestamp": "2026-10-02T00:00:03Z", "message": {
+                "id": "s1", "model": "<synthetic>", "usage": {}, "content": []}}])
+        self.assertEqual([r["model"] for r in recs if r["kind"] == "model_call"], ["claude-x"])
+        run = [r for r in recs if r["kind"] == "run"][0]
+        self.assertEqual((run["api_error_status"], run["rate_limit_status"]), ("429", "rejected"))
+
+
 class OptionalL0(unittest.TestCase):
 
     def test_falls_back_without_l0(self):

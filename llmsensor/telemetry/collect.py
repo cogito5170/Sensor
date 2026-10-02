@@ -99,14 +99,18 @@ def _text_len(content) -> int:
 TIMEOUT_TEXT = re.compile(r"Command timed out after")    # Claude Code Bash 의 런타임 선언(앞 실험 t11 에서 봄)
 
 
-def _timed_out(tool_name, block) -> "bool | None":
-    """Bash 결과 글에 런타임의 시간 초과 문구가 있나. 다른 도구는 문구를 모르므로 None(못 봄)."""
+def _timed_out(tool_name, block, tur=None) -> "bool | None":
+    """런타임이 시간 초과를 선언했나(D1 고침, docs/MS_HEALTH_INVENTORY.md §1 -- L0 Telemetry 수집기와 같은 규칙).
+    구조화 칸 timedOutAfterMs 가 먼저. 없으면 Bash 만: 오류 결과이고 글이 'Exit code' 로 시작하며 문구가 있을 때만
+    (성공한 출력이 문구를 인용한 것은 아니다). 다른 도구는 None(못 봄)."""
+    if isinstance(tur, dict) and "timedOutAfterMs" in tur:
+        return True
     if tool_name != "Bash":
         return None
     c = block.get("content")
     txt = c if isinstance(c, str) else " ".join(x.get("text", "") for x in c if isinstance(x, dict)) \
         if isinstance(c, list) else ""
-    return bool(TIMEOUT_TEXT.search(txt))
+    return bool(block.get("is_error") is True and txt.lstrip().startswith("Exit code") and TIMEOUT_TEXT.search(txt))
 
 
 def _usage_fields(u: dict) -> "tuple[dict, list]":
@@ -166,12 +170,12 @@ class _Calls:
                            "tool_input_chars": len(json.dumps(inp, ensure_ascii=False)), "t_issued_ms": t}
         self.tool_order.append(tid)
 
-    def tool_result(self, block, t, extra=None, extra_nulls=()):
+    def tool_result(self, block, t, extra=None, extra_nulls=(), tur=None):
         d = self.tools.get(block.get("tool_use_id"))
         if d is None:
             return
         d["is_error"] = bool(block.get("is_error"))
-        d["timed_out"] = _timed_out(d["tool_name"], block)
+        d["timed_out"] = _timed_out(d["tool_name"], block, tur)
         d["tool_output_chars"] = _text_len(block.get("content"))
         d["t_result_ms"] = t
         if extra:
@@ -205,6 +209,7 @@ class _Calls:
 def from_cc_jsonl(path, run_id: str, hasher: "Hasher | None" = None) -> "list[dict]":
     L = _Calls(run_id, "cc_jsonl", "unix_ms", hasher)
     cost, cost_at, last_ts = None, None, None
+    api_status, quota_status, api_seen = None, None, False
     with open(path, encoding="utf-8") as f:
         for line in f:
             try:
@@ -223,6 +228,17 @@ def from_cc_jsonl(path, run_id: str, hasher: "Hasher | None" = None) -> "list[di
             if not isinstance(m, dict):
                 continue
             t = _ts(d.get("timestamp"))
+            if d.get("type") == "assistant" and (d.get("isApiErrorMessage") or d.get("apiErrorStatus") is not None):
+                # D2: API 오류(429 등)를 런타임이 끼운 줄 -- 모형 호출이 아니다. 실행 요약의 api_error_status · rate_limit_status 로
+                api_seen = True
+                if d.get("apiErrorStatus") is not None:
+                    api_status = str(d["apiErrorStatus"])
+                q = d.get("quotaLimits")
+                if isinstance(q, dict):
+                    quota_status = q.get("status")
+                continue
+            if d.get("type") == "assistant" and m.get("model") == "<synthetic>":
+                continue                               # 런타임이 지어 넣은 메시지 -- API 호출이 아니다
             if d.get("type") == "assistant" and m.get("id"):
                 c = L.call(m["id"])
                 L.seen(c, t)
@@ -251,20 +267,25 @@ def from_cc_jsonl(path, run_id: str, hasher: "Hasher | None" = None) -> "list[di
                     tnull.append("reported_duration_ms")
                 for b in m["content"]:
                     if isinstance(b, dict) and b.get("type") == "tool_result":
-                        L.tool_result(b, t, extra, tnull)
+                        L.tool_result(b, t, extra, tnull, tur)
     recs = L.records()
-    if cost:
-        mu = cost.get("modelUsage") or {}
-        recs.append(record(
-            "run", run_id, "cc_jsonl", snapshot_at_ms=cost_at, run_duration_ms=cost.get("totalDuration"),
-            api_duration_ms=cost.get("totalAPIDuration"),
-            api_duration_without_retries_ms=cost.get("totalAPIDurationWithoutRetries"),
-            cost_usd=cost.get("totalCostUSD"),
-            reported_input_tokens=sum(v.get("inputTokens") or 0 for v in mu.values()) if mu else None,
-            reported_output_tokens=sum(v.get("outputTokens") or 0 for v in mu.values()) if mu else None,
-            reported_cache_read_input_tokens=sum(v.get("cacheReadInputTokens") or 0 for v in mu.values()) if mu else None,
-            reported_cache_creation_input_tokens=sum(v.get("cacheCreationInputTokens") or 0 for v in mu.values())
-            if mu else None))
+    if cost or api_seen:
+        run = {}
+        if cost:
+            mu = cost.get("modelUsage") or {}
+            run.update(
+                snapshot_at_ms=cost_at, run_duration_ms=cost.get("totalDuration"),
+                api_duration_ms=cost.get("totalAPIDuration"),
+                api_duration_without_retries_ms=cost.get("totalAPIDurationWithoutRetries"),
+                cost_usd=cost.get("totalCostUSD"),
+                reported_input_tokens=sum(v.get("inputTokens") or 0 for v in mu.values()) if mu else None,
+                reported_output_tokens=sum(v.get("outputTokens") or 0 for v in mu.values()) if mu else None,
+                reported_cache_read_input_tokens=sum(v.get("cacheReadInputTokens") or 0 for v in mu.values())
+                if mu else None,
+                reported_cache_creation_input_tokens=sum(v.get("cacheCreationInputTokens") or 0 for v in mu.values())
+                if mu else None)
+        run.update(api_error_status=api_status, rate_limit_status=quota_status)
+        recs.append(record("run", run_id, "cc_jsonl", **run))
     return recs
 
 
@@ -326,7 +347,7 @@ def from_cc_stream(path, run_id: str, hasher: "Hasher | None" = None) -> "list[d
             for b in m.get("content") or [] if isinstance(m.get("content"), list) else []:
                 if isinstance(b, dict) and b.get("type") == "tool_result":
                     ex, tn = _take(tur, {"interrupted": "interrupted"})
-                    L.tool_result(b, t, ex, tn)
+                    L.tool_result(b, t, ex, tn, tur)
         elif ty == "rate_limit_event":
             info = d.get("rate_limit_info") or {}
             run["rate_limit_utilization"] = info.get("utilization")
