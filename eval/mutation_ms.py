@@ -71,6 +71,20 @@ M = [
      "    now = ctx.get(\"now\")\n", "    now = __import__(\"time\").time() * 1000\n"),
     ("liveness: 평가 순간의 값(ACTIVE)을 뒤 시각에 지금 값으로", "llmsensor/state/engine.py",
      "            fr = Freshness.STALE              # 그 값은", "            pass  # fr = Freshness.STALE              # 그 값은"),
+    ('cost v2: 예산 없음을 UNKNOWN 으로(BD-39 위반)', 'llmsensor/sensing/cost/__init__.py',
+     'return Result(None, Status.NOT_APPLICABLE, "예산이 설정되지 않았다", ("cost_bounds",))', 'return _unk("예산이 설정되지 않았다", ["cost_bounds"])'),
+    ('cost v2: 단가 없는 호출을 빼고 부분 합으로 WITHIN', 'llmsensor/sensing/cost/__init__.py',
+     '    elif L.calls and unpriced == 0:\n', '    elif L.calls:\n'),
+    ('cost v2: 단가 없는 호출이 있으면 소진도 증명하지 않는다', 'llmsensor/sensing/cost/__init__.py',
+     '        lower = max(x for x in (rv, est if priced else None, 0.0) if x is not None)', '        lower = rv if rv is not None else (est if unpriced == 0 else 0.0)'),
+    ('cost v2: 중간 스냅숏 보고가 모든 호출을 덮는다고 짐작', 'llmsensor/sensing/cost/__init__.py',
+     '            covers = all(t is not None and t <= snap.value for t in ts)', '            covers = True'),
+    ('cost v2: 덮는 보고를 두고 추정이 이긴다', 'llmsensor/sensing/cost/__init__.py',
+     '        total, source = rv, "reported"', '        total, source = (est, "estimate") if (L.calls and unpriced == 0) else (rv, "reported")'),
+    ('cost v2: 소진을 영구로 두지 않는다', 'llmsensor/sensing/cost/__init__.py',
+     '["cost_bounds"], final=True)', '["cost_bounds"])'),
+    ('cost v2: 단가표 판본을 근거에서 뺀다', 'llmsensor/sensing/cost/__init__.py',
+     '"pricing": pricing.VERSION}', '"pricing": None}'),
 ]
 
 
