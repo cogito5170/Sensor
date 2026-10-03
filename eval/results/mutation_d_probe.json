@@ -1,0 +1,34 @@
+{
+ "streams": 200,
+ "seeds": [
+  300,
+  499
+ ],
+ "runs_per_stream": 2,
+ "cells": [
+  {
+   "config": "default",
+   "code": "correct",
+   "streams_differing_any": 0,
+   "streams_differing_value_status_time": 0
+  },
+  {
+   "config": "default",
+   "code": "mutation_d",
+   "streams_differing_any": 0,
+   "streams_differing_value_status_time": 0
+  },
+  {
+   "config": "liveness_timeout_ms=60000",
+   "code": "correct",
+   "streams_differing_any": 0,
+   "streams_differing_value_status_time": 0
+  },
+  {
+   "config": "liveness_timeout_ms=60000",
+   "code": "mutation_d",
+   "streams_differing_any": 29,
+   "streams_differing_value_status_time": 19
+  }
+ ]
+}

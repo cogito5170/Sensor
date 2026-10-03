@@ -167,5 +167,82 @@ class SameAsFullRebuild(unittest.TestCase):
         self.assertEqual(snapshot(rs), snapshot(from_l0(evs, cfg)))
 
 
+class BaselineMutationGaps(unittest.TestCase):
+    """CMD-SEN2 (BD-269): baseline 변이 D · E 를 죽이는 시험.
+
+    D -- 실행마다 **제 마지막 묶음 시각**이 아니라 그 차례의 마지막 시각으로 평가한다. 기본 설정에서는 어느 규칙도 평가 시각을
+         읽지 않아 값이 바뀌지 않는다(탐침: eval/mutation_d_probe.py -- 두 실행 무작위 흐름 200 개에서 값 · 이유 차이 0).
+         그래서 평가 시각을 읽는 운영자 설정(liveness_timeout_ms -- 이력에 기대지 않으니 extend 는 이어 받기 그대로)으로 잰다.
+    E -- 본 레코드가 사라질 때 전체를 다시 짓는 길을 끈다.
+    """
+
+    def _runs_a_b(self):
+        """실행 a: 차례가 열린 채 일찍 멈춘다. 실행 b: 10 분 뒤까지 이어진다. 이름 차례로 b 가 차례의 마지막이다."""
+        sink = MemorySink()
+
+        def rec(run, start):
+            t = [start]
+
+            def wall():
+                t[0] += 1_000
+                return t[0]
+            return Recorder(run, sink, source="cc_stream", wall=wall, hasher=Hasher(b"k" * 32))
+        a, b = rec("a", T0), rec("b", T0)
+        a.emit("turn.start")
+        b.emit("turn.start")
+        cut = len(sink.events)
+        a.llm_response(0, "anthropic", usage={"input_tokens": 1, "output_tokens": 1}, stop_reason="tool_use")
+        b._seq, b.wall = b._seq, (lambda: T0 + 600_000)
+        b.llm_response(0, "anthropic", usage={"input_tokens": 1, "output_tokens": 1}, stop_reason="tool_use")
+        return sink.events, cut
+
+    def test_d_each_run_is_evaluated_at_its_own_last_time(self):
+        cfg = DEFAULT_CONFIG.with_(liveness_timeout_ms=60_000)
+        evs, cut = self._runs_a_b()
+        rs = from_l0(evs[:cut], cfg)
+        rs.extend(evs)                                            # 한 번의 extend 가 두 실행을 다 건드린다
+        self.assertEqual(rs.last_extend["mode"], "incremental")
+        self.assertEqual(sorted(rs.last_extend["runs"]), ["a", "b"])
+        full = from_l0(evs, cfg)
+        self.assertEqual(full.engine.current[("task:a", "liveness_state")].value, "ACTIVE")    # 제 시각에서는 조용하지 않다
+        self.assertEqual(snapshot(rs), snapshot(full))
+
+    def test_d_random_two_run_streams_with_a_clock_reading_config(self):
+        cfg = DEFAULT_CONFIG.with_(liveness_timeout_ms=60_000)
+        for seed in range(300, 330):
+            evs = stream(seed, n=random.Random(seed).randint(20, 90), runs=2)
+            rnd = random.Random(seed * 7 + 1)
+            cuts = sorted(rnd.sample(range(1, len(evs)), min(rnd.randint(1, 5), len(evs) - 1)))
+            rs = from_l0(provisional(evs[:cuts[0]]), cfg)
+            for c in cuts[1:] + [len(evs)]:
+                rs.extend(provisional(evs[:c]) if c < len(evs) else evs)
+            self.assertEqual(snapshot(rs), snapshot(from_l0(evs, cfg)), seed)
+
+    def test_e_vanished_record_falls_back_to_a_full_rebuild(self):
+        """끝나지 않은 마지막 사건이 처음엔 llm.error(429)였다가 같은 id 의 llm.response 가 된다 -- compat 의 실행 요약 레코드는
+        llm.error 가 있어야 서므로 사라진다. 낡은 요약이 남으면 rate_limit_state 가 LIMITED 로 남는다."""
+        sink = MemorySink()
+        t = [T0]
+
+        def wall():
+            t[0] += 1_000
+            return t[0]
+        rec = Recorder("r", sink, source="inproc:ms", wall=wall, hasher=Hasher(b"k" * 32))
+        rec.llm_response(0, "anthropic", usage={"input_tokens": 1, "output_tokens": 1}, stop_reason="tool_use")
+        with rec.tool("Bash", {"command": "ls"}, call_index=0) as h:
+            h.result(is_error=False)
+        rec.llm_error(1, "anthropic", http_status=429)
+        prov = list(sink.events)
+        ok = rec.llm_response(1, "anthropic", usage={"input_tokens": 1, "output_tokens": 1}, stop_reason="end_turn")
+        fin = prov[:-1] + [dict(ok, id=prov[-1]["id"], seq=prov[-1]["seq"])]
+        rs = from_l0(prov)
+        self.assertEqual(rs.engine.current[("runtime:r", "rate_limit_state")].value, "LIMITED")
+        rs.extend(fin)
+        self.assertEqual(rs.last_extend["mode"], "rebuild:record_vanished")
+        full = from_l0(fin)
+        self.assertEqual(deep(rs), deep(full))
+        self.assertIsNone(rs.engine.current[("runtime:r", "rate_limit_state")].value)
+
+
 if __name__ == "__main__":
     unittest.main()
