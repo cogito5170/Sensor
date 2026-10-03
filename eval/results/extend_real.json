@@ -1,0 +1,59 @@
+{
+ "lines": 5275,
+ "events": 2410,
+ "states": 32,
+ "incremental_equals_full_each": true,
+ "once_equals_full_each": true,
+ "full_each_s": 61.84,
+ "full_once_s": 0.54,
+ "steps": [
+  {
+   "lines": 2644,
+   "events": 1175,
+   "extend_s": 0.044,
+   "mode": "incremental",
+   "new": 570,
+   "replaced": 1
+  },
+  {
+   "lines": 2935,
+   "events": 1306,
+   "extend_s": 0.0416,
+   "mode": "incremental",
+   "new": 214,
+   "replaced": 0
+  },
+  {
+   "lines": 3984,
+   "events": 1799,
+   "extend_s": 0.0711,
+   "mode": "incremental",
+   "new": 803,
+   "replaced": 1
+  },
+  {
+   "lines": 5200,
+   "events": 2380,
+   "extend_s": 0.1578,
+   "mode": "incremental",
+   "new": 932,
+   "replaced": 1
+  },
+  {
+   "lines": 5272,
+   "events": 2410,
+   "extend_s": 0.0809,
+   "mode": "incremental",
+   "new": 50,
+   "replaced": 1
+  },
+  {
+   "lines": 5275,
+   "events": 2410,
+   "extend_s": 0.0024,
+   "mode": "unchanged",
+   "new": 0,
+   "replaced": 0
+  }
+ ]
+}

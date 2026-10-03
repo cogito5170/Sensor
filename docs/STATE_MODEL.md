@@ -103,6 +103,10 @@ E.snapshot()                                      # 결정성 비교용
 from llmsensor.run_state import from_l0
 rs = from_l0(events_or_ledger_path, clock=None)   # clock: read 에 now 를 안 줄 때 쓸 시계(관측과 같은 시간 기준)
 rs.read("agent:<run>", "execution_health") · rs.subjects("<run>") · rs.as_of("<run>") · rs.catalog()
+rs.extend(events_so_far_or_new)                   # 이어 받기(CMD-SEN1): 새 사건만 엔진에 -- 전체를 다시 짓지 않는다
+from_l0(events, evaluate="once")                  # 묶음마다가 아니라 실행마다 한 번 평가(처음 짓기를 선형으로)
+# 값 · 유효성 · 근거 시각은 전체를 다시 지은 것과 같다(무작위 흐름 시험). 전이 · 생애 사건 · since 는 평가 횟수를 따른다.
+# 운영자가 이력에 기대는 손잡이(min_consecutive · resource_bands · latency_slo)를 주면 extend 는 전체를 다시 짓는다
 ```
 
 `StateView` 는 값만 주지 않는다: `status`(STALE 판정 포함) · `freshness` · `age_ms` · `basis` · `rule` · `reason` ·

@@ -1,0 +1,22 @@
+{
+ "events": 2000,
+ "extended": 10,
+ "same_states": true,
+ "states": 20,
+ "seconds": {
+  "full_each": 8.328,
+  "full_once": 0.078,
+  "extend": 0.024,
+  "extend_new_only": 0.0247
+ },
+ "extend_over_full_each": 0.00288,
+ "extend_over_full_once": 0.3082,
+ "last_extend": {
+  "mode": "incremental",
+  "new": 15,
+  "replaced": 1,
+  "runs": [
+   "r11-0"
+  ]
+ }
+}

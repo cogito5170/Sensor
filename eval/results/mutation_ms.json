@@ -330,6 +330,36 @@
   "result": "RED"
  },
  {
+  "mutation": "SEN1: 자란 레코드를 버린다(받은 id 는 멱등으로 건너뜀)",
+  "file": "llmsensor/run_state.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "SEN1: 레코드 차례의 평가를 건너뛴다(잠금 근거 시각이 틀린다)",
+  "file": "llmsensor/run_state.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "SEN1: 바뀐 마지막 사건 앞으로 L0 묶기를 되감지 않는다",
+  "file": "llmsensor/run_state.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "SEN1: 바뀐 레코드를 알아보지 못한다",
+  "file": "llmsensor/run_state.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "SEN1: 이력에 기대는 설정에서도 이어 받는다",
+  "file": "llmsensor/run_state.py",
+  "result": "RED"
+ },
+ {
+  "mutation": "SEN1: replace 가 실행 요약 칸을 먼저 받은 레코드에 맞춘다",
+  "file": "llmsensor/state/engine.py",
+  "result": "RED"
+ },
+ {
   "mutation": "S19: 결과를 못 본 도구가 있는데 NO_TOOL_RUN_YET",
   "file": "llmsensor/sensing/execution/__init__.py",
   "result": "RED"

@@ -37,12 +37,14 @@ class StateEngine:
         self.by_run: dict = {}              # run_id -> {(entity, name)} -- 실행 하나의 상태만 빠르게 찾으려고(뜻 없음)
 
     # ---------------- 받아들이기 ----------------
-    def ingest(self, batch) -> bool:
-        """멱등이다 -- 같은 레코드(record_id)를 두 번 받으면 두 번째는 버린다(스트림 재전송). 받았으면 True."""
+    def ingest(self, batch, evaluate: bool = True) -> bool:
+        """멱등이다 -- 같은 레코드(record_id)를 두 번 받으면 두 번째는 버린다(스트림 재전송). 받았으면 True.
+        evaluate=False 면 장부에 넣기만 하고 평가하지 않는다 -- 묶음을 다 넣은 뒤 evaluate_run 을 한 번 부른다(CMD-SEN1)."""
         L = self.ledgers.setdefault(batch.run_id, Ledger(batch.run_id))
         if batch.record_id in L.seen:
             return False
         L.seen.add(batch.record_id)
+        L.ordinal[batch.record_id] = len(L.ordinal)
         L.seq += 1
         L.time_base = L.time_base or batch.time_base
         L.source = L.source or batch.source
@@ -51,6 +53,7 @@ class StateEngine:
         for o in batch.observations:
             self.observations[o.id] = o
         row = {o.field: o for o in batch.observations}
+        L.rows[batch.record_id] = (batch.kind, row)
         if batch.kind == "model_call":
             L.calls.append(row)
         elif batch.kind == "tool_call":
@@ -66,8 +69,51 @@ class StateEngine:
                      batch.at, batch.record_id)
         self._relate(entity_id(EntityType.AGENT, L.run_id), "runs_on", entity_id(EntityType.RUNTIME, L.run_id),
                      batch.at, batch.record_id)
-        self._evaluate(L, batch.at, batch.record_id)
+        if evaluate:
+            self._evaluate(L, batch.at, batch.record_id)
         return True
+
+    def replace(self, batch, evaluate: bool = True) -> bool:
+        """**자란 레코드**를 갈아 끼운다(CMD-SEN1) -- 같은 record_id 의 새 판(도구 결과가 뒤에 와서 tool_call 에 is_error 가 붙음,
+        실행 요약에 칸이 늘어남, 끝나지 않은 마지막 응답이 바뀜). 장부의 그 행을 새 관측으로 바꾼다. 처음 보는 레코드면 ingest 와 같다.
+        실행 요약 · 외부 칸(여러 레코드가 같은 칸을 가질 수 있다)은 그 칸을 가진 레코드 가운데 **늦게 받은 것**이 이긴다 --
+        ingest 의 dict.update 와 같은 규칙이다."""
+        L = self.ledgers.get(batch.run_id)
+        if L is None or batch.record_id not in L.seen:
+            return self.ingest(batch, evaluate)
+        kind, old = L.rows[batch.record_id]
+        if kind != batch.kind:
+            raise ValueError(f"{batch.record_id}: 종류가 바뀌었다({kind} -> {batch.kind})")
+        L.seq += 1
+        if batch.at is not None:
+            L.last_at = batch.at if L.last_at is None else max(L.last_at, batch.at)
+        for o in batch.observations:
+            self.observations[o.id] = o
+        new = {o.field: o for o in batch.observations}
+        fields = set(old) | set(new)
+        tool = old.get("_tool")
+        old.clear()                      # 같은 dict 를 calls · tools 가 들고 있다 -- 제자리에서 바꾼다
+        old.update(new)
+        if kind == "tool_call":
+            old["_tool"] = tool
+        elif kind in ("run", "external"):
+            target = L.run if kind == "run" else L.external
+            for f in fields - {"_tool"}:
+                best = max((rid for rid, (k, r) in L.rows.items() if k == kind and f in r),
+                           key=lambda rid: L.ordinal[rid], default=None)
+                if best is None:
+                    target.pop(f, None)
+                else:
+                    target[f] = L.rows[best][1][f]
+        if evaluate:
+            self._evaluate(L, batch.at, batch.record_id)
+        return True
+
+    def evaluate_run(self, run_id: str, at, trigger: str) -> None:
+        """실행 하나를 지금 장부로 한 번 평가한다 -- evaluate=False 로 넣은 묶음들 뒤에 부른다."""
+        L = self.ledgers.get(run_id)
+        if L is not None:
+            self._evaluate(L, at, trigger)
 
     def ingest_all(self, batches) -> "StateEngine":
         for b in batches:

@@ -23,6 +23,8 @@ class Ledger:
         self.external: dict = {}     # 외부 평가(품질 라벨 등) {정준 이름: Observation}
         self.seq = 0
         self.seen: set = set()       # 받은 record_id -- 멱등 받아들이기
+        self.rows: dict = {}         # record_id -> (kind, 행) -- 자란 레코드를 갈아 끼울 때(StateEngine.replace)
+        self.ordinal: dict = {}      # record_id -> 받은 차례(같은 칸을 여러 레코드가 가질 때 늦게 받은 것이 이긴다)
         self.last_at = None
         self.time_base = None
         self.source = None

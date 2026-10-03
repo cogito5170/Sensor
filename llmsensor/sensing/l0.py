@@ -10,6 +10,8 @@ L0 패키지(cogito5170/Telemetry)를 import 하지 않는다. 봉투는 L0 꼴�
 """
 from __future__ import annotations
 
+import copy
+
 from ..state.model import Basis, EntityType, Observation
 from ..state.normalize import Batch, entity_id
 
@@ -74,11 +76,33 @@ NEW_CANON = {**LIVENESS_CANON, **ACTIONS_CANON, **DEPENDENCY_CANON, **TIMEOUTS_C
 ENDS_ALWAYS = frozenset({"cc_stream"})
 
 
-def batches(events) -> "list[Batch]":
-    """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
-    out, pending, acts, deps, tos, wins, ends, runs_acts = [], {}, {}, {}, {}, {}, {}, {}
-    for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"])):
+class Binder:
+    """L0 묶기를 이어서 한다(CMD-SEN1) -- 실행마다 쌓는 것(대기 입력 수 · 런타임 행동 · 의존 대상 · 시간 초과 · 한도 창 · 끝난 도구 ·
+    행동 시도)을 들고 있어, 새 사건만 먹이면 된다. `batches(events)` 는 새 Binder 에 차례대로 먹인 것과 같다.
+    상태는 실행마다 따로라 `snapshot(run)` / `restore(run, s)` 로 실행 하나를 되감을 수 있다(깊은 사본)."""
+
+    def __init__(self):
+        self.state: dict = {}
+
+    def _st(self, run):
+        st = self.state.get(run)
+        if st is None:
+            st = self.state[run] = {"pending": 0, "acts": {}, "deps": {}, "tos": None, "wins": {}, "ends": set(),
+                                    "attempts": []}
+        return st
+
+    def snapshot(self, run):
+        return copy.deepcopy(self.state.get(run))
+
+    def restore(self, run, snap):
+        if snap is None:
+            self.state.pop(run, None)
+        else:
+            self.state[run] = copy.deepcopy(snap)
+
+    def feed(self, ev) -> Batch:
         run, rid, at, tb, src = ev["run_id"], ev["id"], ev.get("at"), ev.get("time_base"), ev["source"]
+        st = self._st(run)
         ent = entity_id(T, run)
         val = {"seq": ev["seq"], "at": at}
         obs = [Observation(f"{rid}#l0.last_event", ent, "l0.last_event", dict(val, type=ev["type"]), False, at, tb, src,
@@ -88,23 +112,25 @@ def batches(events) -> "list[Batch]":
             name, basis = hit
             obs.append(Observation(f"{rid}#{name}", ent, name, dict(val), False, at, tb, src, basis))
         if ev["type"] in ("input.received", "input.removed", "turn.start"):
-            n = pending.get(run, 0)
+            n = st["pending"]
             n = n + 1 if ev["type"] == "input.received" else max(0, n - 1) if ev["type"] == "input.removed" else 0
-            pending[run] = n
+            st["pending"] = n
             obs.append(Observation(f"{rid}#l0.pending_inputs", ent, "l0.pending_inputs", dict(val, n=n), False, at, tb,
                                    src, Basis.OBSERVED))
-        a = _action(acts.setdefault(run, {}), ev)
+        a = _action(st["acts"], ev)
         if a is not None:
             obs.append(Observation(f"{rid}#l0.runtime_actions", ent, "l0.runtime_actions", dict(a, **val), False, at, tb,
                                    src, Basis.RUNTIME_DECLARED))
         data = ev.get("data") or {}
         if ev["type"] == "tool.end" and data.get("tool_index") is not None:
-            e = ends.setdefault(run, set())
+            e = st["ends"]
             e.add(data["tool_index"])
             obs.append(Observation(f"{rid}#l0.tool_ends", ent, "l0.tool_ends", dict(val, indices=sorted(e)), False, at, tb,
                                    src, Basis.OBSERVED))
         if ev["type"] == "tool.end" and data.get("timed_out") is True:
-            c = tos.setdefault(run, {"timeouts": 0, "backgrounded": 0, "killed": 0, "unknown": 0})
+            if st["tos"] is None:
+                st["tos"] = {"timeouts": 0, "backgrounded": 0, "killed": 0, "unknown": 0}
+            c = st["tos"]
             m = data.get("moved_to_background")
             c["timeouts"] += 1
             c["unknown" if m is None else "backgrounded" if m else "killed"] += 1
@@ -115,8 +141,8 @@ def batches(events) -> "list[Batch]":
             v["unobserved"] = sorted(k for k in ev.get("unobserved", ()) if k in RATE_LIMIT_KEYS)
             obs.append(Observation(f"{rid}#l0.rate_limit", ent, "l0.rate_limit", dict(v, **val), False, at, tb, src,
                                    Basis.RUNTIME_DECLARED))
-            if wins.get(run):                                # 앞 보고의 창 묶음을 비운다 -- 이 보고의 창은 뒤에 온다
-                wins[run] = {}
+            if st["wins"]:                                   # 앞 보고의 창 묶음을 비운다 -- 이 보고의 창은 뒤에 온다
+                st["wins"] = {}
                 obs.append(Observation(f"{rid}#l0.rate_limit_windows", ent, "l0.rate_limit_windows",
                                        dict(val, windows={}, rate_limit_seq=ev["seq"]), False, at, tb, src,
                                        Basis.RUNTIME_DECLARED))
@@ -124,20 +150,25 @@ def batches(events) -> "list[Batch]":
             w = {k: data.get(k) for k in WINDOW_KEYS}
             w.update(seq=ev["seq"], at=at, unobserved=sorted(k for k in ev.get("unobserved", ()) if k in WINDOW_KEYS),
                      reported_null=sorted(k for k in ev.get("reported_null", ()) if k in WINDOW_KEYS))
-            cur = dict(wins.get(run) or {})
+            cur = dict(st["wins"] or {})
             cur[str(data["window_name"])] = w
-            wins[run] = cur
+            st["wins"] = cur
             obs.append(Observation(f"{rid}#l0.rate_limit_windows", ent, "l0.rate_limit_windows", dict(val, windows=cur),
                                    False, at, tb, src, Basis.RUNTIME_DECLARED))
         if ev["type"] in ("action.dispatch", "action.result") and data.get("action_ref") is not None:
-            obs += _executor_action(runs_acts.setdefault(run, []), ev, rid, run, ent, val, at, tb, src)
-        d = _dependency(deps.setdefault(run, {}), ev)
+            obs += _executor_action(st["attempts"], ev, rid, run, ent, val, at, tb, src)
+        d = _dependency(st["deps"], ev)
         if d is not None:
             name, v = d
             obs.append(Observation(f"{rid}#{DEP_PREFIX}{name}", entity_id(EntityType.DEPENDENCY, run, name), DEP_PREFIX + name,
                                    dict(v, **val), False, at, tb, src, Basis.RUNTIME_DECLARED))
-        out.append(Batch(f"l0:{rid}", run, "run", at, tb, src, obs))
-    return out
+        return Batch(f"l0:{rid}", run, "run", at, tb, src, obs)
+
+
+def batches(events) -> "list[Batch]":
+    """L0 사건들 -> 실행마다 원천 순서(seq)대로의 묶음. 모르는 종류의 사건도 '마지막 활동' 으로는 센다."""
+    b = Binder()
+    return [b.feed(ev) for ev in sorted(events, key=lambda e: (e["run_id"], e["seq"]))]
 
 
 def _action(c, ev):

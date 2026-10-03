@@ -89,9 +89,11 @@ def _batch(rec, idx, at, canonical=None) -> Batch:
                  rec.get("call_index"), tool)
 
 
-def from_telemetry(records) -> "list[Batch]":
+def from_telemetry(records, keep=None) -> "list[Batch]":
     """텔레메트리 레코드(꼴 v2) -> 인과 순서의 관측 묶음. 실행마다: 호출 i, 그 호출의 도구 결과들, ..., 끝 요약.
-    시각이 없어도(SWE-agent) 순서는 인과로 정해진다. 실행 끝 요약의 시각 = 그 실행에서 본 가장 늦은 시각."""
+    시각이 없어도(SWE-agent) 순서는 인과로 정해진다. 실행 끝 요약의 시각 = 그 실행에서 본 가장 늦은 시각.
+    keep(record_id, 레코드, 시각) -> bool 을 주면 참인 레코드만 묶음으로 짓는다(차례 · 시각 계산은 그대로) -- 이어 받기(CMD-SEN1)가
+    바뀐 레코드만 짓게 한다."""
     from ..sensing import canonical_all          # 센싱 팩들이 더한 정준 관측까지(늦은 가져오기 -- 순환 피함)
     can = canonical_all()
     runs: dict = {}
@@ -103,17 +105,20 @@ def from_telemetry(records) -> "list[Batch]":
         mcs = sorted((r for r in rs if r["kind"] == "model_call"), key=lambda r: r["call_index"])
         tcs = sorted((r for r in rs if r["kind"] == "tool_call"), key=lambda r: r["tool_index"])
         last = None
+        def put(rec, idx, at):
+            if keep is None or keep(f"{run}/{rec['kind']}/{idx}", rec, at):
+                out.append(_batch(rec, idx, at, can))
         for m in mcs:
             t = _time(m)
             last = max(last, t) if (t is not None and last is not None) else (t if t is not None else last)
-            out.append(_batch(m, m["call_index"], t, can))
+            put(m, m["call_index"], t)
             for tc in (x for x in tcs if x["call_index"] == m["call_index"]):
                 t2 = _time(tc)
                 last = max(last, t2) if (t2 is not None and last is not None) else (t2 if t2 is not None else last)
-                out.append(_batch(tc, tc["tool_index"], t2, can))
+                put(tc, tc["tool_index"], t2)
         for i, rr in enumerate(r for r in rs if r["kind"] == "run"):
             # 중간 스냅숏(snapshot_at_ms)이면 그 시각, 아니면 그 실행에서 본 가장 늦은 시각(하한)
-            out.append(_batch(rr, i, rr.get("snapshot_at_ms") if rr.get("snapshot_at_ms") is not None else last, can))
+            put(rr, i, rr.get("snapshot_at_ms") if rr.get("snapshot_at_ms") is not None else last)
     return out
 
 
