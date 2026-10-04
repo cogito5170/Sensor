@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llmsensor"
-version = "0.1.0"
+version = "0.2.0"
 description = "LLM 전용 센서 -- 실행 · 제약 · 일관성 · 행동 · 외부 결과 판독, 성능모형 잔차, 증거 융합, 결정론적 판정기"
 readme = "README.md"
 requires-python = ">=3.10"

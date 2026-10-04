@@ -33,6 +33,8 @@ class StateEngine:
         self.lifecycle: list = []
         self.relationships: dict = {}
         self.proposals: list = []
+        self.uncertain: dict = {}           # (entity, name) -> 모순 근거 id 집합 -- 값은 그대로, 불확실만 표시(CMD-NET2)
+        self.peer_evidence: dict = {}       # (entity, name, 근거 id) -> 전한 세션 집합 -- 근거 id 하나는 한 번만 센다
         self._pending: dict = {}            # (entity, name) -> (후보 값, 연속 횟수)
         self.by_run: dict = {}              # run_id -> {(entity, name)} -- 실행 하나의 상태만 빠르게 찾으려고(뜻 없음)
 

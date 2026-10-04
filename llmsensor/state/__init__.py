@@ -16,8 +16,10 @@ from .model import (Level, Status, Basis, Freshness, Lifecycle, EntityType, Obse
 from .config import StateConfig, DEFAULT_CONFIG
 from .registry import REGISTRY
 from .engine import StateEngine
+from .peer import receive_message, observe_peer, propose_peer, is_uncertain
 from .normalize import from_telemetry, canonical_usage
 
 __all__ = ["Level", "Status", "Basis", "Freshness", "Lifecycle", "EntityType", "Observation", "Metric", "Evidence",
            "State", "Transition", "Relationship", "LifecycleEvent", "Proposal", "StateView", "StateConfig",
-           "DEFAULT_CONFIG", "REGISTRY", "StateEngine", "from_telemetry", "canonical_usage"]
+           "DEFAULT_CONFIG", "REGISTRY", "StateEngine", "from_telemetry", "canonical_usage",
+           "receive_message", "observe_peer", "propose_peer", "is_uncertain"]
